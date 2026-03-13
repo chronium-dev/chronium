@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import InboxScreenshot from '$lib/assets/inbox-screenshot.png';
 	import QRCodeExample from '$lib/assets/qr-code.png';
+	import CircleListItem from '$lib/components/CircleListItem.svelte';
+	import CrossListItem from '$lib/components/CrossListItem.svelte';
 	import { Button } from '$lib/components/ui/button';
 </script>
 
@@ -14,12 +16,21 @@
 	</div> -->
 
 	<h1 class="mb-6 max-w-4xl text-3xl leading-tight font-bold md:text-4xl">
-		Collect 5-Star Feedback.<br />Reply Instantly.
+		Never miss an important business obligation again.
 	</h1>
 
-	<p class="mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-		The simplest way for small businesses to hear from customers and respond - no dashboards, no
-		setup, no jargon.
+	<p class="leading-relaxedmd:text-xl mb-10 max-w-2xl text-lg text-balance">
+		Chronium helps UK limited companies track statutory, operational and governance obligations in
+		one simple system.
+	</p>
+
+	<p class="text-md mb-10 max-w-2xl leading-relaxed text-balance text-muted-foreground md:text-xl">
+		Replace scattered spreadsheets, forgotten reminders and tribal knowledge with a structured
+		recurring obligation ledger.
+	</p>
+
+	<p class="text-md mb-10 max-w-2xl leading-relaxed text-balance text-[#6ea527] md:text-xl">
+		Remove the background stress and risk of missing important company obligations.
 	</p>
 
 	<div class="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -27,19 +38,19 @@
 			class="h-12 px-8 text-base font-semibold shadow-lg transition-transform hover:scale-105"
 			onclick={() => goto('/get-your-rating-link')}
 		>
-			Get Your Rating Link →
+			Start Your 14-Day Trial →
 		</Button>
 		<Button
 			variant="outline"
 			class="h-12 border-2 px-8 text-base font-semibold transition-transform hover:scale-105"
 			onclick={() => goto('/about')}
 		>
-			Learn More
+			Learn How Chronium Works
 		</Button>
 	</div>
 
 	<p class="mt-6 text-sm text-muted-foreground">
-		✨ Free to start • No credit card required • Cancel anytime
+		Built for UK Limited Companies • Simple setup • Cancel anytime
 	</p>
 
 	<!-- Screenshot Showcase -->
@@ -68,10 +79,10 @@
 				>
 					1
 				</div>
-				<h3 class="mb-3 text-xl font-bold">Create Your Rating Link</h3>
+				<h3 class="mb-3 text-xl font-bold">Add Your Company Obligations</h3>
 				<p class="max-w-xs leading-relaxed text-muted-foreground">
-					One question, one thank-you message - editable in seconds. No complicated forms or
-					surveys.
+					Chronium provides ready-made templates for common UK company obligations such as Companies
+					House filings, VAT returns and insurance renewals.
 				</p>
 			</div>
 
@@ -81,10 +92,10 @@
 				>
 					2
 				</div>
-				<h3 class="mb-3 text-xl font-bold">Share Your Link or QR Code</h3>
+				<h3 class="mb-3 text-xl font-bold">Assign Responsibility</h3>
 				<p class="max-w-xs leading-relaxed text-muted-foreground">
-					Place it wherever your customers interact: website, email signatures, table tents,
-					receipts... anywhere you want.
+					Allocate obligations to the appropriate team members so everyone knows what they are
+					responsible for.
 				</p>
 			</div>
 
@@ -94,21 +105,21 @@
 				>
 					3
 				</div>
-				<h3 class="mb-3 text-xl font-bold">See Ratings, Reply - and Showcase the Best</h3>
+				<h3 class="mb-3 text-xl font-bold">Track, Complete and Record</h3>
 				<p class="max-w-xs leading-relaxed text-muted-foreground">
-					See ratings in one inbox, reply instantly, and publish the best ones to your Feedback
-					Wall.
+					Chronium keeps a clear history of what was done, when it was completed, and any notes
+					needed for next time.
 				</p>
 			</div>
 		</div>
 	</div>
 </section>
 
-<!-- Benefits / Why It's Different -->
+<!-- Why Chronium? -->
 <section class="px-6 py-24 md:px-20">
 	<div class="mx-auto max-w-6xl">
 		<div class="mb-16 text-center">
-			<h2 class="mb-4 text-4xl font-bold">Why RatingsRobot?</h2>
+			<h2 class="mb-4 text-4xl font-bold">Why Chronium?</h2>
 			<p class="text-lg text-muted-foreground">Built for small businesses who value simplicity</p>
 		</div>
 
@@ -129,10 +140,10 @@
 						></path>
 					</svg>
 				</div>
-				<h3 class="mb-3 text-xl font-bold">Catch Problems Early</h3>
+				<h3 class="mb-3 text-xl font-bold">Never Forget Important Deadlines</h3>
 				<p class="leading-relaxed text-muted-foreground">
-					See problems before they become bad reviews. No complex analytics - just actionable
-					feedback.
+					Track all recurring company obligations in one structured system instead of scattered
+					spreadsheets and reminders.
 				</p>
 			</div>
 
@@ -152,10 +163,10 @@
 						></path>
 					</svg>
 				</div>
-				<h3 class="mb-3 text-xl font-bold">Personal, Fast Replies</h3>
+				<h3 class="mb-3 text-xl font-bold">Preserve Business Knowledge</h3>
 				<p class="leading-relaxed text-muted-foreground">
-					Keep customers happy with fast, personal responses. Reply directly to anyone who provides
-					an email.
+					Store notes, links, login details and instructions so next year’s task is simple — even if
+					staff have changed.
 				</p>
 			</div>
 
@@ -175,79 +186,154 @@
 						></path>
 					</svg>
 				</div>
-				<h3 class="mb-3 text-xl font-bold">Zero Complexity</h3>
+				<h3 class="mb-3 text-xl font-bold">Peace of Mind</h3>
 				<p class="leading-relaxed text-muted-foreground">
-					One survey, one inbox, one flow - nothing else to set up. Get started in under 2 minutes.
+					Know that nothing important is quietly slipping through the cracks.
 				</p>
 			</div>
 		</div>
 	</div>
 </section>
 
-<!-- Feedback Wall Highlight -->
-<section class="bg-muted/50 px-6 py-20 md:px-20">
-	<div class="mx-auto max-w-6xl grid gap-12 md:grid-cols-2 items-center">
-		<div>
-			<h2 class="mb-4 text-3xl font-bold">
-				Showcase the Best with Your Feedback Wall
-			</h2>
-
-			<p class="mb-6 text-lg leading-relaxed text-muted-foreground">
-				Not all feedback has to stay private. Publish your best ratings to a
-				public Feedback Wall you can proudly share.
-			</p>
-
-			<ul class="space-y-3 text-muted-foreground">
-				<li>⭐ Highlight real 5-star reviews</li>
-				<li>🔗 Share a simple public link</li>
-				<li>🛡️ You control what goes live</li>
-			</ul>
-		</div>
-
-		<div class="relative">
-			<div class="absolute -inset-4 rounded-3xl bg-primary/20 blur-2xl"></div>
-			<div class="relative rounded-2xl border bg-card p-6 shadow-xl">
-				<div class="mb-2 text-2xl">⭐⭐⭐⭐⭐</div>
-				<p class="italic leading-relaxed">
-					“Fantastic service — quick response and very friendly staff.”
-				</p>
-				<p class="mt-4 text-sm text-muted-foreground">
-					— Sarah, verified customer
-				</p>
-			</div>
-		</div>
-	</div>
-</section>
-
-
-<!-- Testimonials -->
-<section class="bg-muted px-6 py-24 md:px-20">
+<!-- The Three Obligation Types -->
+<section class="bg-muted/50 px-6 py-24 md:px-20">
 	<div class="mx-auto max-w-6xl">
 		<div class="mb-16 text-center">
-			<h2 class="mb-4 text-4xl font-bold">What Our Customers Say</h2>
-			<p class="text-lg text-muted-foreground">Real results from real businesses</p>
+			<h2 class="mb-4 text-4xl font-bold">The Three Types of Obligation</h2>
+			<p class="text-lg text-muted-foreground">One system for all types of recurring obligation.</p>
 		</div>
 
-		<div class="flex flex-col justify-center gap-8 md:flex-row">
-			<div
-				class="flex-1 rounded-2xl border-2 bg-card p-8 shadow-lg transition-transform hover:scale-105"
-			>
-				<div class="mb-4 text-4xl">⭐⭐⭐⭐⭐</div>
-				<p class="mb-4 text-lg leading-relaxed italic">
-					"We doubled the number of 5-star reviews in one month! RatingsRobot made it so easy."
-				</p>
-				<span class="font-bold">– Local Café Owner</span>
+		<div class="grid gap-8 md:grid-cols-3">
+			<div class="rounded-2xl border bg-card p-8 shadow-lg transition-transform hover:scale-105">
+				<div class="mb-4 inline-block rounded-xl bg-green-100 p-3 dark:bg-green-900/30">
+					<svg
+						class="h-8 w-8 text-green-600 dark:text-green-400"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+						></path>
+					</svg>
+				</div>
+				<h3 class="mb-3 text-xl font-bold">Statutory</h3>
+				<p class="mb-2 leading-relaxed text-muted-foreground">Legal obligations such as:</p>
+				<ul>
+					<CircleListItem label="Confirmation Statements" />
+					<CircleListItem label="Director Identity Verifications" />
+					<CircleListItem label="Annual Accounts" />
+					<CircleListItem label="VAT Returns" />
+					<CircleListItem label="PAYE Submissions" />
+				</ul>
 			</div>
 
-			<div
-				class="flex-1 rounded-2xl border-2 bg-card p-8 shadow-lg transition-transform hover:scale-105"
-			>
-				<div class="mb-4 text-4xl">⭐⭐⭐⭐⭐</div>
-				<p class="mb-4 text-lg leading-relaxed italic">
-					"Finally, an inbox that doesn't confuse me. Simple, clean, and it just works."
+			<div class="rounded-2xl border bg-card p-8 shadow-lg transition-transform hover:scale-105">
+				<div class="mb-4 inline-block rounded-xl bg-blue-100 p-3 dark:bg-blue-900/30">
+					<svg
+						class="h-8 w-8 text-blue-600 dark:text-blue-400"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+						></path>
+					</svg>
+				</div>
+				<h3 class="mb-3 text-xl font-bold">Operational</h3>
+				<p class="mb-2 leading-relaxed text-muted-foreground">
+					Essential business tasks such as these examples:
 				</p>
-				<span class="font-bold">– Boutique Store Manager</span>
+				<ul>
+					<CircleListItem label="Public liability and employer’s liability insurance renewals" />
+					<CircleListItem label="Professional indemnity insurance" />
+					<CircleListItem label="Software licence renewals" />
+					<CircleListItem label="Fire safety checks" />
+					<CircleListItem label="PAT testing" />
+					<CircleListItem label="Health & Safety reviews" />
+					<CircleListItem label="GDPR / Data Protection reviews" />
+					<CircleListItem label="Certification renewals" />
+					<CircleListItem label="Trade memberships" />
+					<CircleListItem label="Equipment servicing" />
+					<CircleListItem label="...etc" />
+				</ul>
 			</div>
+
+			<div class="rounded-2xl border bg-card p-8 shadow-lg transition-transform hover:scale-105">
+				<div class="mb-4 inline-block rounded-xl bg-orange-100 p-3 dark:bg-orange-900/30">
+					<svg
+						class="h-8 w-8 text-orange-600 dark:text-orange-400"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13 10V3L4 14h7v7l9-11h-7z"
+						></path>
+					</svg>
+				</div>
+				<h3 class="mb-3 text-xl font-bold">Governance - Internal obligations</h3>
+				<p class="mb-2 leading-relaxed text-muted-foreground">
+					Know that nothing important is quietly slipping through the cracks.
+				</p>
+				<ul>
+					<CircleListItem label="Annual staff appraisals" />
+					<CircleListItem label="Salary reviews" />
+					<CircleListItem label="Directors meetings" />
+					<CircleListItem label="Shareholder meetings" />
+					<CircleListItem label="Policy reviews" />
+					<CircleListItem label="Risk assessments" />
+					<CircleListItem label="Cybersecurity reviews" />
+					<CircleListItem label="Business continuity testing" />
+					<CircleListItem label="...etc" />
+				</ul>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- Replace the Spreadsheet Chaos -->
+<section class="flex justify-center px-6 py-20 md:px-20">
+	<div class="mx-auto max-w-6xl gap-12">
+		<h2 class="mb-4 text-3xl font-bold">Replace the Spreadsheet Chaos</h2>
+
+		<p class="mb-6 text-lg leading-relaxed text-muted-foreground">
+			Most companies track obligations like this:
+		</p>
+
+		<ul class="space-y-3 text-muted-foreground">
+			<CrossListItem label="A spreadsheet someone created years ago" />
+			<CrossListItem label="Calendar reminders that get ignored" />
+			<CrossListItem label="Knowledge locked in someone's head that has left the business" />
+			<CrossListItem label="Old documents nobody can find" />
+		</ul>
+	</div>
+</section>
+
+<!-- Testimonials (LATER...), for now some further positive reasons -->
+<section class="bg-muted px-6 py-24 md:px-20">
+	<div class="mx-auto max-w-2xl">
+		<div class="mb-16 text-center">
+			<h2 class="mb-4 text-4xl font-bold">Designed for Real Businesses</h2>
+			<p class="text-lg text-muted-foreground">
+				Chronium was created for the everyday realities of running a company - where dozens of small
+				but important obligations must be remembered throughout the year.
+			</p>
+
+			<p class="my-4 text-xl leading-relaxed text-[#6ea527] italic">
+				"When running a business, there are always things that need doing again next year — and you
+				never remember how you did them last time."
+			</p>
 		</div>
 	</div>
 </section>
@@ -255,20 +341,20 @@
 <!-- CTA Section -->
 <section class="px-6 py-24 text-center md:px-20">
 	<div class="mx-auto max-w-3xl">
-		<h2 class="mb-6 text-4xl font-bold md:text-5xl">Ready to Get Started?</h2>
+		<h2 class="mb-6 text-4xl font-bold md:text-5xl">Stop worrying about forgotten obligations.</h2>
 		<p class="mb-10 text-xl leading-relaxed text-muted-foreground">
-			Join hundreds of small businesses already using RatingsRobot to improve customer satisfaction.
+			Chronium gives your company a calm, reliable system for managing recurring responsibilities.
 		</p>
 
 		<Button
 			class="h-14 px-10 text-lg font-bold shadow-2xl transition-transform hover:scale-110"
 			onclick={() => goto('/get-your-rating-link')}
 		>
-			Get Your Rating Link →
+			Start Your 14-Day Trial →
 		</Button>
 
 		<p class="mt-6 text-lg text-muted-foreground">
-			✨ Free to start • No credit card required • Set up in 2 minutes
+			Simple pricing • No setup fees • Cancel anytime
 		</p>
 	</div>
 </section>

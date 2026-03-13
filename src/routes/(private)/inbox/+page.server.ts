@@ -1,6 +1,6 @@
 import { ratingsConfig } from '$lib/config/ratings';
 import { db } from '$lib/server/db';
-import { member, rating, ratingReply, template, user, workspace } from '$lib/server/db/schema';
+import { member, organisation, rating, ratingReply, template, user } from '$lib/server/db/schema';
 import { apiResponseSchema } from '$lib/types/api';
 import {
 	RatingReplyDirection,
@@ -166,7 +166,7 @@ const ratingSelect = {
 	closedAt: rating.closedAt,
 	unread: rating.unread,
 	templateName: template.templateName,
-	workspaceName: workspace.name,
+	workspaceName: organisation.name,
 	readByUserName: readByUser.name,
 	closedByUserName: closedByUser.name
 	// ownerUserName: ownerUser.name,
@@ -218,10 +218,10 @@ function buildRatingsQuery(args: {
 
 			// Required relationships
 			.innerJoin(template, eq(template.id, rating.templateId))
-			.innerJoin(workspace, eq(workspace.id, template.workspaceId))
+			.innerJoin(organisation, eq(organisation.id, template.workspaceId))
 			.innerJoin(
 				member,
-				and(eq(member.workspaceId, workspace.id), eq(member.userId, args.currentUserId))
+				and(eq(member.organisationId, organisation.id), eq(member.userId, args.currentUserId))
 			)
 
 			// 👇 Same table, different roles
@@ -233,7 +233,7 @@ function buildRatingsQuery(args: {
 			.leftJoin(ratingReply, eq(ratingReply.ratingId, rating.id))
 
 			.where(args.filters.length ? and(...args.filters) : undefined)
-			.groupBy(rating.id, template.id, workspace.id, member.id, readByUser.id, closedByUser.id)
+			.groupBy(rating.id, template.id, organisation.id, member.id, readByUser.id, closedByUser.id)
 			.orderBy(
 				args.queryDir === 'asc' ? asc(SORTS[args.sortField]) : desc(SORTS[args.sortField]),
 				args.queryDir === 'asc' ? asc(rating.id) : desc(rating.id)

@@ -1,0 +1,1 @@
+ALTER TABLE "events" ALTER COLUMN "anchor_date" DROP NOT NULL;

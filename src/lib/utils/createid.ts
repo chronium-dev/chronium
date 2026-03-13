@@ -1,7 +1,5 @@
-import { customAlphabet } from 'nanoid';
-
-const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 12);
+import { ulid } from 'ulid';
 
 export function createId() {
-  return nanoid();
+	return ulid(); // e.g. "01ARZ3NDEKTSV4RRFFQ69G5FAV"
 }

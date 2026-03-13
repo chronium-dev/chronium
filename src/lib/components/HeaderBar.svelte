@@ -1,12 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import InboxIcon from '$lib/components/icons/InboxIcon.svelte';
 	import MenuIcon from '$lib/components/icons/MenuIcon.svelte';
-	import LogoIcon from '$lib/components/LogoIcon.svelte';
 	import LogoName from '$lib/components/LogoName.svelte';
 	import MenuSheet from '$lib/components/MenuSheet.svelte';
-	import ThemeDropdownMainMenu from '$lib/components/ThemeDropdownMainMenu.svelte';
 	import HomeIcon from './icons/HomeIcon.svelte';
 	import TemplateIcon from './icons/TemplateIcon.svelte';
 	import { Button } from './ui/button';
@@ -18,9 +15,9 @@
 		? `/ws/${basicUser.workspaceId}/template/${basicUser.templateId}`
 		: `/templates`;
 
-	const navigateTo = (path: string) => {
-		goto(path);
-	};
+	// const navigateTo = (path: string) => {
+	// 	goto(path);
+	// };
 
 	const isActive = (path: string) =>
 		page.url.pathname === path || page.url.pathname.startsWith(path + '/');
@@ -34,8 +31,7 @@
 	<div class="flex h-16 items-center justify-between px-4">
 		<!-- Logo (Left) -->
 		<a href="/" class="flex items-center space-x-2">
-			<LogoIcon width={38} height={38} />
-			<LogoName height="50" />
+			<LogoName height="30" />
 		</a>
 
 		<!-- Desktop primary nav -->

@@ -1,0 +1,1 @@
+ALTER TABLE "obligation_templates" RENAME COLUMN "notes" TO "default_notes";

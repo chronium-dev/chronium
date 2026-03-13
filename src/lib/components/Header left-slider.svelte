@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { getUser } from '$lib/api/auth.remote';
 	import { authClient } from '$lib/auth-client';
 	import UserIcon from '$lib/components/icons/UserIcon.svelte';
 	import ThemeDropdownMainMenu from '$lib/components/ThemeDropdownMainMenu.svelte';
@@ -10,11 +9,10 @@
 	import MenuIcon from './icons/MenuIcon.svelte';
 	import PricingIcon from './icons/PricingIcon.svelte';
 	import TemplateIcon from './icons/TemplateIcon.svelte';
-	import LogoIcon from './LogoIcon.svelte';
 	import LogoName from './LogoNameText.svelte';
 	import { Button } from './ui/button';
 
-// 1. Get the reactive session
+	// 1. Get the reactive session
 	const session = authClient.useSession();
 
 	const navigateTo = (path: string) => {
@@ -42,8 +40,7 @@
 	<div class="flex h-16 items-center justify-between px-4">
 		<!-- Logo (Left) -->
 		<a href="/" class="flex items-center space-x-2">
-			<LogoIcon width={38} height={38} />
-			<LogoName height="50" />
+			xxx<LogoName height="50" />
 		</a>
 
 		<!-- Right Side Controls -->
