@@ -30,5 +30,5 @@ export function requireAuth(event: RequestEvent, options: RequireAuthOptions = {
 		throw redirect(302, `/signin?redirect=${redirectTo}`);
 	}
 
-	throw error(401, 'Authentication required');
+	error(401, 'Authentication required');
 }

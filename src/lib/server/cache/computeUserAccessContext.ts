@@ -1,29 +1,11 @@
 import type { UserAccessContext } from '$lib/server/cache/cache';
-import { getUserTemplates } from '$lib/server/db/queries';
-import { PlanTypes } from '$lib/types/PlanTypes';
+import { getOrgs } from '$lib/server/db/queries';
 
 export async function computeUserAccessContext(userId: string): Promise<UserAccessContext> {
-	const memberships = await getUserTemplates(userId);
-
-	const workspaceCount = memberships.length;
-
-	const templateCount = memberships.reduce((acc, m) => acc + m.templates.length, 0);
-
-	let basic: UserAccessContext['basic'] = {
-		isBasicUser: false
-	};
-
-	if (workspaceCount === 1 && memberships[0].planType === PlanTypes.Free && templateCount === 1) {
-		basic = {
-			isBasicUser: true,
-			workspaceId: memberships[0].workspaceId,
-			templateId: memberships[0].templates[0].templateId
-		};
-	}
-
+	const { orgs } = await getOrgs(userId);
 	return {
-		workspaceCount,
-		templateCount,
-		basic
+		orgCount: orgs.length,
+		orgIds: orgs.map((o) => o.id),
+		defaultOrgId: orgs.length === 1 ? orgs[0].id : undefined
 	};
 }

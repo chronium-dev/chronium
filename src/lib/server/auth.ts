@@ -1,12 +1,16 @@
-import { BETTER_AUTH_SECRET, BETTER_AUTH_URL } from '$env/static/private';
 import { getRequestEvent } from '$app/server';
+import { env } from '$env/dynamic/public';
+import { BETTER_AUTH_SECRET, BETTER_AUTH_URL } from '$env/static/private';
 import { sendEmailVerificationEmail, sendResetPasswordEmail } from '$lib/server/auth/email';
 import { ensureOnboarded } from '$lib/server/auth/onboarding';
 import { db } from '$lib/server/db';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { createAuthMiddleware } from 'better-auth/api';
+import { customSession } from 'better-auth/plugins';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
+
+// src/lib/auth.ts
 
 export const auth = betterAuth({
 	secret: BETTER_AUTH_SECRET,
@@ -101,7 +105,7 @@ export const auth = betterAuth({
 					console.log('databaseHooks, user, create, user:', user);
 
 					// TODO - DON'T CALL THIS IF THE USER WAS INVITED
-					await ensureOnboarded(user);
+					//await ensureOnboarded(user);
 
 					// // 1. Create a default profile or workspace
 					// await db.insert(profileTable).values({
@@ -125,33 +129,35 @@ export const auth = betterAuth({
 		// customSession(async ({ user, session }) => {
 		// 	console.log('customSession, user:', user);
 
-		// 	/**
-		// 	 * If the user is a single workspace on the free plan then we handle the UI differently
-		// 	 * than if they have multiple workspace, or a single workspace with multiple templates.
-		// 	 *
-		// 	 * In short, we want to hide the complexity of multiple workspaces and templates
-		// 	 * for users with free accounts - i.e. keep it simple.
-		// 	 */
+		// 	// 	/**
+		// 	// 	 * If the user is a single workspace on the free plan then we handle the UI differently
+		// 	// 	 * than if they have multiple workspace, or a single workspace with multiple templates.
+		// 	// 	 *
+		// 	// 	 * In short, we want to hide the complexity of multiple workspaces and templates
+		// 	// 	 * for users with free accounts - i.e. keep it simple.
+		// 	// 	 */
 
-		// 	const workspaceMembership = await getUserTemplates(user.id);
-		// 	const workspaceCount = workspaceMembership.length;
-		// 	// const templateCount = workspaceMembership.reduce((acc, membership) => {
-		// 	// 	return acc + membership.templates.length;
-		// 	// }, 0);
+		// 	console.log({ session });
 
-		// 	const isBasicUser =
-		// 		workspaceCount === 1 &&
-		// 		// templateCount === 1 &&
-		// 		workspaceMembership[0].planType === PlanTypes.Free;
+		// 	// 	const workspaceMembership = await getUserTemplates(user.id);
+		// 	// 	const workspaceCount = workspaceMembership.length;
+		// 	// 	// const templateCount = workspaceMembership.reduce((acc, membership) => {
+		// 	// 	// 	return acc + membership.templates.length;
+		// 	// 	// }, 0);
 
-		// 	return {
-		// 		user: {
-		// 			...user,
-		// 			planType: PlanTypes.Free,
-		// 			isBasicUser
-		// 		},
-		// 		session
-		// 	};
+		// 	// 	const isBasicUser =
+		// 	// 		workspaceCount === 1 &&
+		// 	// 		// templateCount === 1 &&
+		// 	// 		workspaceMembership[0].planType === PlanTypes.Free;
+
+		// 	// 	return {
+		// 	// 		user: {
+		// 	// 			...user,
+		// 	// 			planType: PlanTypes.Free,
+		// 	// 			isBasicUser
+		// 	// 		},
+		// 	// 		session
+		// 	// 	};
 		// }),
 		sveltekitCookies(getRequestEvent)
 	]

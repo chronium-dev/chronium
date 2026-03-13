@@ -250,7 +250,7 @@ export const load = (async ({ locals, url }) => {
 
 	// 1. Validate Input
 	const result = querySchema.safeParse(Object.fromEntries(url.searchParams));
-	if (!result.success) throw error(400, 'Invalid query parameters');
+	if (!result.success) error(400, 'Invalid query parameters');
 
 	// result.data.sort is now "createdAt-desc", etc.
 	const { status, sort: combinedSort, after, before } = result.data;
@@ -356,7 +356,7 @@ export const actions = {
 				});
 
 				if (!ratingItem) {
-					throw error(404, 'Rating does not exist');
+					error(404, 'Rating does not exist');
 				}
 
 				// If the rating is unread and the direction is 'out' then
@@ -390,14 +390,14 @@ export const actions = {
 					.returning();
 
 				if (newReply.length !== 1) {
-					throw error(500, 'Error whilst saving reply');
+					error(500, 'Error whilst saving reply');
 				}
 
 				return { success: true };
 			});
 
 			if (!newReply) {
-				throw error(500, 'Failed to create reply');
+				error(500, 'Failed to create reply');
 			}
 
 			const newRatingsReply = newReply[0] as RatingReply;
@@ -413,12 +413,12 @@ export const actions = {
 			});
 
 			if (!response.ok) {
-				throw error(503, 'Email service failed');
+				error(503, 'Email service failed');
 			}
 
 			const emailResult = apiResponseSchema.parse(await response.json());
 			if (!emailResult.success) {
-				throw error(500, emailResult.message ?? 'Unable to send ratings reply email');
+				error(500, emailResult.message ?? 'Unable to send ratings reply email');
 			}
 
 			return { ratingReplyId: newRatingsReply.id };

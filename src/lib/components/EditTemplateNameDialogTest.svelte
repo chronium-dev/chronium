@@ -1,9 +1,9 @@
 <script lang="ts">
 	import CompactHeader from '$lib/components/CompactHeader.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import * as Dialog from "$lib/components/ui/dialog/index.js";
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Input } from '$lib/components/ui/input';
-	import { X } from 'lucide-svelte';
+	import { X } from '@lucide/svelte';
 
 	let open = false;
 </script>
@@ -20,14 +20,12 @@
 			</Button>
 		</CompactHeader>
 
-		<div class="px-4 py-4 space-y-4">
+		<div class="space-y-4 px-4 py-4">
 			<!-- modal content -->
 			<Input value="Template name...." />
 
 			<div class="flex justify-end gap-2">
-				<Button variant="ghost" onclick={() => (open = false)}>
-					Cancel
-				</Button>
+				<Button variant="ghost" onclick={() => (open = false)}>Cancel</Button>
 				<Button>Save</Button>
 			</div>
 		</div>

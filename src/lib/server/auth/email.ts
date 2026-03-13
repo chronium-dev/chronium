@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private';
+import { error } from '@sveltejs/kit';
 
 const { EMAIL_ENGINE_API_KEY, EMAIL_ENGINE_API_URL } = env;
 
@@ -29,7 +30,7 @@ export async function sendOrganizationJoinEmail(payload: OrganizationJoinInvitat
 	});
 
 	if (!response.ok) {
-		throw new Error('Failed to send email');
+		error(500, 'Failed to send email');
 	}
 
 	return await response.json();

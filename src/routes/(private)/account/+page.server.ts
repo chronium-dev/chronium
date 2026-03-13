@@ -15,7 +15,7 @@ export const load = (async ({ locals }) => {
 		.from(user)
 		.where(eq(user.id, currentUser.id));
 
-	if (!account) throw error(404, 'User not found');
+	if (!account) error(404, 'User not found');
 
 	return { account };
 }) satisfies PageServerLoad;

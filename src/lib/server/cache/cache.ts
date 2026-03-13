@@ -1,20 +1,7 @@
-// src/lib/server/cache/cache.ts
-
-
 export type UserAccessContext = {
-	workspaceCount: number;
-	templateCount: number;
-
-	basic: {
-		isBasicUser: boolean;
-		workspaceId?: string;
-		templateId?: string;
-	};
-
-	// future-proof
-	// planType
-	// permissions
-	// limits
+	orgCount: number;
+	orgIds: string[];
+	defaultOrgId?: string;
 };
 
 export type CacheEntry = {
@@ -26,4 +13,4 @@ export type Cache = {
 	get<T>(key: string): Promise<T | null>;
 	set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>;
 	del(key: string): Promise<void>;
-}
+};

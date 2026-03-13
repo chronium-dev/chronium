@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Pencil, X } from 'lucide-svelte';
+	import { Check, Pencil, X } from '@lucide/svelte';
 	import { tick } from 'svelte';
 
 	// 1. Props (replaces export let)
@@ -24,7 +24,7 @@
 	// 2. Reactive State (replaces let)
 	let editing = $state(false);
 	// svelte-ignore state_referenced_locally
-		let draft = $state(value);
+	let draft = $state(value);
 	let fieldEl = $state<HTMLInputElement | HTMLTextAreaElement>();
 
 	// 3. Derived State (replaces manual onInputChange)
@@ -62,7 +62,7 @@
 </script>
 
 <!-- <script lang="ts">
-	import { Check, Pencil, X } from 'lucide-svelte';
+	import { Check, Pencil, X } from '@lucide/svelte';
 	import { tick } from 'svelte';
 
 	export let value: string;

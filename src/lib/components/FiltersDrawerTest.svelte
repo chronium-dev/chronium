@@ -3,7 +3,7 @@
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { X } from 'lucide-svelte';
+	import { X } from '@lucide/svelte';
 
 	let open = false;
 </script>

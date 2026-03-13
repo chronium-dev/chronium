@@ -8,7 +8,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { theme, type ThemeMode } from '$lib/stores/theme';
 
-	import { Check, Monitor, Moon, Sun } from 'lucide-svelte';
+	import { Check, Monitor, Moon, Sun } from '@lucide/svelte';
 	import { onDestroy } from 'svelte';
 
 	let mode: ThemeMode = 'system';

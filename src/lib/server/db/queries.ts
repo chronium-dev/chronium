@@ -2,9 +2,35 @@
 // QUERY FUNCTIONS
 // ============================================================================
 
-import { and, eq } from 'drizzle-orm';
+import { and, count, eq } from 'drizzle-orm';
 import { db } from './index';
-import { member, user } from './schema';
+import { member, organisation, user } from './schema';
+
+// ============================================================================
+// ORGANISATION QUERIES
+// ============================================================================
+export async function getOrgs(userId: string) {
+	const orgs = await db
+		.select({
+			id: organisation.id,
+			name: organisation.name,
+			logo: organisation.logo,
+			role: member.role 
+		})
+		.from(organisation)
+		.innerJoin(member, eq(member.organisationId, organisation.id))
+		.where(eq(member.userId, userId));
+
+	return { orgs };
+}
+
+export async function getOrgCount(userId: string) {
+	const [result] = await db
+		.select({ value: count() })
+		.from(member)
+		.where(eq(member.userId, userId));
+	return result;
+}
 
 // ============================================================================
 // WORKSPACE QUERIES

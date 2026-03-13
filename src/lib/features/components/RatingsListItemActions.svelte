@@ -133,7 +133,7 @@
 			clip += `Email: ${ratingItem.email}\n`;
 		}
 		clip += `Submitted: ${format(new Date(ratingItem.createdAt), 'd MMM yyyy HH:mm')} (${when})\n`;
-		if (context.workspaceCount > 1) {
+		if (context.orgCount > 1) {
 			clip += `Organization: ${ratingItem.workspaceName}\n`;
 		}
 		if (context.templateCount > 1) {

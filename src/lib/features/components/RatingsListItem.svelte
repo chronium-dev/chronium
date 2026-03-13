@@ -118,7 +118,7 @@
 									</dd>
 								</div>
 
-								{#if (context?.workspaceCount ?? 0) > 1}
+								{#if (context?.orgCount ?? 0) > 1}
 									<div class="grid grid-cols-3 gap-4 p-0">
 										<dt class="text-xs font-medium text-muted-foreground">Workspace</dt>
 										<dd class="col-span-2 mt-0 text-xs text-muted-foreground">

@@ -11,6 +11,7 @@ import type { PageServerLoad } from './$types';
 // clicked by the user (or something failed during that process)
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const redirectUrl = url.searchParams.get('redirect');
+	debugger;
 
 	if (!locals.user) {
 		// Not logged-in guard
@@ -32,6 +33,17 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	// Is logged-in and verified. If url includes redirect then
 	// go there, otherwise redirect to dashboard.
-	const redirectTo = redirectUrl ? redirectUrl : '/dashboard';
-	throw redirect(303, redirectTo);
+	//const redirectTo = redirectUrl ? redirectUrl : '/dashboard';
+	//throw redirect(303, redirectTo);
+	const { orgCount, defaultOrgId } = locals.user.context;
+
+	if (orgCount === 0) {
+		throw redirect(302, '/orgs/new');
+	}
+
+	if (orgCount === 1) {
+		throw redirect(302, `/orgs/${defaultOrgId}/timeline`);
+	}
+
+	throw redirect(302, '/orgs');
 };

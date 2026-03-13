@@ -6,7 +6,7 @@
 		DropdownMenuSubTrigger
 	} from '$lib/components/ui/dropdown-menu';
 	import { theme } from '$lib/stores/theme';
-	import { Check, Monitor, Moon, Sun } from 'lucide-svelte';
+	import { Check, Monitor, Moon, Sun } from '@lucide/svelte';
 
 	const items = [
 		{ label: 'Light', value: 'light', icon: Sun },
