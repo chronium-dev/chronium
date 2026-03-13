@@ -1,6 +1,9 @@
+import type { OrgListContextType } from '$lib/server/db/queries';
+
 export type UserAccessContext = {
 	orgCount: number;
-	orgIds: string[];
+	// orgIds: string[];
+	orgs: OrgListContextType[];
 	defaultOrgId?: string;
 };
 

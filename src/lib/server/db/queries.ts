@@ -4,24 +4,30 @@
 
 import { and, count, eq } from 'drizzle-orm';
 import { db } from './index';
-import { member, organisation, user } from './schema';
+import { member, type MemberRoleType, organisation, user } from './schema';
 
 // ============================================================================
 // ORGANISATION QUERIES
 // ============================================================================
-export async function getOrgs(userId: string) {
+export type OrgListContextType = {
+	id: string;
+	name: string | null;
+	logo: string | null;
+	role: MemberRoleType;
+};
+export async function getOrgs(userId: string): Promise<OrgListContextType[]> {
 	const orgs = await db
 		.select({
 			id: organisation.id,
 			name: organisation.name,
 			logo: organisation.logo,
-			role: member.role 
+			role: member.role
 		})
 		.from(organisation)
 		.innerJoin(member, eq(member.organisationId, organisation.id))
 		.where(eq(member.userId, userId));
 
-	return { orgs };
+	return orgs;
 }
 
 export async function getOrgCount(userId: string) {

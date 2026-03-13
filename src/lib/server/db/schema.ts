@@ -99,11 +99,11 @@ export const verification = pgTable(
 export const memberRoleEnum = pgEnum('member_role', ['owner', 'admin', 'member']);
 export type MemberRoleType = (typeof memberRoleEnum.enumValues)[number];
 // Create an object for convenient access
-export const MemberRoleType = {
-	Owner: 'owner',
-	Admin: 'admin',
-	Member: 'member'
-} as const satisfies Record<string, MemberRoleType>;
+// export const MemberRoleType = {
+// 	Owner: 'owner',
+// 	Admin: 'admin',
+// 	Member: 'member'
+// } as const satisfies Record<string, MemberRoleType>;
 
 export const organisation = pgTable('organisation', {
 	id: text('id').primaryKey(),
