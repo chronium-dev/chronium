@@ -6,6 +6,7 @@ export async function computeUserAccessContext(userId: string): Promise<UserAcce
 	return {
 		orgCount: orgs.length,
 		orgs,
+		orgIds: orgs.map((o) => o.id),
 		defaultOrgId: orgs.length === 1 ? orgs[0].id : undefined
 	};
 }

@@ -11,7 +11,7 @@
 	import { Check, Monitor, Moon, Sun } from '@lucide/svelte';
 	import { onDestroy } from 'svelte';
 
-	let mode: ThemeMode = 'system';
+	let mode: ThemeMode = $state('system');
 	// theme.subscribe((v) => (mode = v));
 	const unsubscribe = theme.subscribe((v) => (mode = v));
 	onDestroy(unsubscribe);
@@ -62,7 +62,7 @@
 		<DropdownMenuContent align="end" class="w-36">
 			{#each items as item}
 				<DropdownMenuItem onclick={() => setMode(item.value)} class="flex items-center gap-2">
-					<svelte:component this={item.icon} class="h-4 w-4" />
+					<item.icon class="h-4 w-4" />
 					<span>{item.label}</span>
 
 					{#if mode === item.value}

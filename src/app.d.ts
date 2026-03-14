@@ -8,7 +8,8 @@ declare global {
 		interface Locals {
 			user: (User & { context: UserAccessContext }) | null;
 			session: Session | null;
-			requireUser: () => User;
+			// requireUser: () => User;
+			requireUser: () => User & { context: UserAccessContext };
 		}
 
 		interface PageData {

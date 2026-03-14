@@ -1,6 +1,4 @@
 <script lang="ts">
-	import LogoIcon from '$lib/components/LogoIcon.svelte';
-
 	export let data;
 
 	// Determine the message to show based on the reason
@@ -33,9 +31,9 @@
 <div class="rounded-lg bg-background p-8 shadow-lg">
 	<!-- Header -->
 	<div class="mb-8 text-center">
-		<div class="mx-auto w-fit">
+		<!-- <div class="mx-auto w-fit">
 			<LogoIcon width={48} height={48} />
-		</div>
+		</div> -->
 		<h2 class="text-2xl font-bold">{message.title}</h2>
 	</div>
 

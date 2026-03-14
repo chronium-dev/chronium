@@ -8,7 +8,6 @@
 	import TrashIcon from '$lib/components/icons/TrashIcon.svelte';
 	import UrlIcon from '$lib/components/icons/UrlIcon.svelte';
 	import XIcon from '$lib/components/icons/XIcon.svelte';
-	import LogoIcon from '$lib/components/LogoIcon.svelte';
 	import LogoName from '$lib/components/LogoName.svelte';
 	import PageHeader from '$lib/components/PageHeader.svelte';
 	import QrCode from '$lib/components/QrCode.svelte';
@@ -425,7 +424,7 @@
 								<div class="mx-auto mt-8 flex gap-x-2">
 									<p class="mt-1 text-[8px] text-muted-foreground">Powered by</p>
 									<a href="/" class="flex items-center space-x-1">
-										<LogoIcon width={17} height={17} />
+										<!-- <LogoIcon width={17} height={17} /> -->
 										<LogoName height="20" />
 									</a>
 								</div>
@@ -531,7 +530,7 @@
 								<div class="mx-auto mt-8 flex gap-x-2">
 									<p class="mt-1 text-[8px] text-muted-foreground">Powered by</p>
 									<a href="/" class="flex items-center space-x-1">
-										<LogoIcon width={17} height={17} />
+										<!-- <LogoIcon width={17} height={17} /> -->
 										<LogoName height="20" />
 									</a>
 								</div>

@@ -168,6 +168,7 @@ export const events = pgTable(
 			.notNull(),
 		anchorDate: date('anchor_date'),
 		eventDate: date('event_date').notNull(),
+		generated: boolean('generated').default(true),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()
@@ -240,6 +241,7 @@ export const obligations = pgTable(
 		dueDate: date('due_date').notNull(),
 		status: obligationStatusEnum('status').default('pending').notNull(),
 		userNotes: text('user_notes'),
+		generated: boolean('generated').default(true),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()

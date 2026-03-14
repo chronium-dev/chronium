@@ -2,7 +2,6 @@
 	import { register } from '$lib/api/auth.remote';
 	import EyeIcon from '$lib/components/icons/EyeIcon.svelte';
 	import EyeOffIcon from '$lib/components/icons/EyeOffIcon.svelte';
-	import LogoIcon from '$lib/components/LogoIcon.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -21,9 +20,9 @@
 
 <div class="rounded-lg bg-background p-8 shadow-lg">
 	<div class="mb-8 text-center">
-		<div class="mx-auto w-fit">
+		<!-- <div class="mx-auto w-fit">
 			<LogoIcon width={48} height={48} />
-		</div>
+		</div> -->
 		<h2 class="text-2xl font-bold">Create a RatingsRobot Account</h2>
 		<p class="mt-6 text-center text-sm text-muted-foreground">
 			Already have an account?
