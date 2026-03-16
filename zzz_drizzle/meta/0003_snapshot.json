@@ -1,6 +1,6 @@
 {
-  "id": "df87883b-fdef-499f-949d-6f5861e11b45",
-  "prevId": "73eb2671-3070-44f3-ad65-ea04d4810f0a",
+  "id": "0f565684-6d0b-42fb-93cf-b2dfc5908d91",
+  "prevId": "6c74c631-6045-4966-9479-aeba78ac21af",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -104,27 +104,6 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "provider_account_unique": {
-          "name": "provider_account_unique",
-          "columns": [
-            {
-              "expression": "provider_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "account_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
@@ -169,20 +148,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -228,73 +193,10 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "domain": {
-          "name": "domain",
-          "type": "obligation_domain",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "organisation_id": {
-          "name": "organisation_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
-      "indexes": {
-        "event_type_key_org_id_unique": {
-          "name": "event_type_key_org_id_unique",
-          "columns": [
-            {
-              "expression": "key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "organisation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "event_types_organisation_id_organisation_id_fk": {
-          "name": "event_types_organisation_id_organisation_id_fk",
-          "tableFrom": "event_types",
-          "tableTo": "organisation",
-          "columnsFrom": [
-            "organisation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "event_types_key_unique": {
@@ -331,24 +233,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "anchor_date": {
-          "name": "anchor_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
         "event_date": {
           "name": "event_date",
           "type": "date",
           "primaryKey": false,
           "notNull": true
-        },
-        "generated": {
-          "name": "generated",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
         },
         "created_at": {
           "name": "created_at",
@@ -377,33 +266,6 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "events_unique": {
-          "name": "events_unique",
-          "columns": [
-            {
-              "expression": "organisation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_type_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -464,20 +326,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -674,12 +522,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "default_notes": {
-          "name": "default_notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -707,39 +549,6 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "obligation_template_rule_unique": {
-          "name": "obligation_template_rule_unique",
-          "columns": [
-            {
-              "expression": "trigger_event_type_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "obligation_type_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "jurisdiction_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "entity_type_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -832,27 +641,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "domain": {
-          "name": "domain",
-          "type": "obligation_domain",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -919,19 +707,6 @@
           "notNull": true,
           "default": "'pending'"
         },
-        "user_notes": {
-          "name": "user_notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "generated": {
-          "name": "generated",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -959,48 +734,6 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "obligation_generation_event_Id_unique": {
-          "name": "obligation_generation_event_Id_unique",
-          "columns": [
-            {
-              "expression": "generated_from_event_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "template_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "obligation_generation_event_obligation_unique": {
-          "name": "obligation_generation_event_obligation_unique",
-          "columns": [
-            {
-              "expression": "generated_from_event_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "obligation_type_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -1162,144 +895,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.recurrence_rules": {
-      "name": "recurrence_rules",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "organisation_id": {
-          "name": "organisation_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event_type_id": {
-          "name": "event_type_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "start_date": {
-          "name": "start_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "end_date": {
-          "name": "end_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "frequency": {
-          "name": "frequency",
-          "type": "recurrence_frequency",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "interval": {
-          "name": "interval",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "weekday": {
-          "name": "weekday",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "month_day": {
-          "name": "month_day",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "recurrence_rule_unique": {
-          "name": "recurrence_rule_unique",
-          "columns": [
-            {
-              "expression": "organisation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "event_type_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "recurrence_rules_organisation_id_organisation_id_fk": {
-          "name": "recurrence_rules_organisation_id_organisation_id_fk",
-          "tableFrom": "recurrence_rules",
-          "tableTo": "organisation",
-          "columnsFrom": [
-            "organisation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "recurrence_rules_event_type_id_event_types_id_fk": {
-          "name": "recurrence_rules_event_type_id_event_types_id_fk",
-          "tableFrom": "recurrence_rules",
-          "tableTo": "event_types",
-          "columnsFrom": [
-            "event_type_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.session": {
       "name": "session",
       "schema": "",
@@ -1322,6 +917,20 @@
           "primaryKey": false,
           "notNull": true
         },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
         "ip_address": {
           "name": "ip_address",
           "type": "text",
@@ -1339,20 +948,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {
@@ -1436,12 +1031,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "onboarded": {
-          "name": "onboarded",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -1455,6 +1044,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "onboarded": {
+          "name": "onboarded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -1542,15 +1137,6 @@
     }
   },
   "enums": {
-    "public.obligation_domain": {
-      "name": "obligation_domain",
-      "schema": "public",
-      "values": [
-        "statutory",
-        "operational",
-        "governance"
-      ]
-    },
     "public.member_role": {
       "name": "member_role",
       "schema": "public",
@@ -1568,16 +1154,6 @@
         "completed",
         "skipped",
         "cancelled"
-      ]
-    },
-    "public.recurrence_frequency": {
-      "name": "recurrence_frequency",
-      "schema": "public",
-      "values": [
-        "daily",
-        "weekly",
-        "monthly",
-        "yearly"
       ]
     }
   },

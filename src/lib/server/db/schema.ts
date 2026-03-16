@@ -17,6 +17,33 @@ export const obligationStatusEnum = pgEnum('obligation_status', [
 	'skipped',
 	'cancelled'
 ]);
+export type ObligationStatusType = (typeof obligationStatusEnum.enumValues)[number];
+export const ObligationStatusType = {
+	Pending: 'pending',
+	Complated: 'completed',
+	Skipped: 'skipped',
+	Cancelled: 'cancelled'
+} as const satisfies Record<string, ObligationStatusType>;
+
+export const recurrenceFrequencyEnum = pgEnum('recurrence_frequency', [
+	'daily',
+	'weekly',
+	'monthly',
+	'yearly'
+]);
+export type RecurrenceFrequencyType = (typeof recurrenceFrequencyEnum.enumValues)[number];
+export const RecurrenceFrequencyType = {
+	Monthly: 'monthly',
+	Yearly: 'yearly'
+} as const satisfies Record<string, RecurrenceFrequencyType>;
+
+export const domainEnum = pgEnum('obligation_domain', ['statutory', 'operational', 'governance']);
+export type DomainType = (typeof domainEnum.enumValues)[number];
+export const DomainType = {
+	Statutory: 'statutory',
+	Operational: 'operational',
+	Governance: 'governance'
+} as const satisfies Record<string, DomainType>;
 
 export const user = pgTable('user', {
 	id: text('id').primaryKey(),
@@ -24,12 +51,12 @@ export const user = pgTable('user', {
 	email: text('email').notNull().unique(),
 	emailVerified: boolean('email_verified').default(false).notNull(),
 	image: text('image'),
+	onboarded: boolean('onboarded'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()
 		.$onUpdate(() => new Date())
-		.notNull(),
-	onboarded: boolean('onboarded')
+		.notNull()
 });
 
 export const session = pgTable(
@@ -38,16 +65,16 @@ export const session = pgTable(
 		id: text('id').primaryKey(),
 		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 		token: text('token').notNull().unique(),
-		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true })
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull(),
 		ipAddress: text('ip_address'),
 		userAgent: text('user_agent'),
 		userId: text('user_id')
 			.notNull()
-			.references(() => user.id, { onDelete: 'cascade' })
+			.references(() => user.id, { onDelete: 'cascade' }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull()
 	},
 	(table) => [index('session_userId_idx').on(table.userId)]
 );
@@ -98,12 +125,6 @@ export const verification = pgTable(
 
 export const memberRoleEnum = pgEnum('member_role', ['owner', 'admin', 'member']);
 export type MemberRoleType = (typeof memberRoleEnum.enumValues)[number];
-// Create an object for convenient access
-// export const MemberRoleType = {
-// 	Owner: 'owner',
-// 	Admin: 'admin',
-// 	Member: 'member'
-// } as const satisfies Record<string, MemberRoleType>;
 
 export const organisation = pgTable('organisation', {
 	id: text('id').primaryKey(),
@@ -235,9 +256,6 @@ export const obligations = pgTable(
 			.notNull(),
 		templateId: text('template_id').references(() => obligationTemplates.id),
 		generatedFromEventId: text('generated_from_event_id').references(() => events.id),
-		generatedFromRecurrenceRuleId: text('generated_from_recurrence_rule_id').references(
-			() => recurrenceRules.id
-		),
 		dueDate: date('due_date').notNull(),
 		status: obligationStatusEnum('status').default('pending').notNull(),
 		userNotes: text('user_notes'),
@@ -257,36 +275,29 @@ export const obligations = pgTable(
 		uniqueIndex('obligation_generation_event_obligation_unique').on(
 			table.generatedFromEventId,
 			table.obligationTypeId
-		),
-		uniqueIndex('obligation_generation_recurring_rule_id_unique').on(
-			table.generatedFromRecurrenceRuleId,
-			table.dueDate
 		)
 	]
 );
 
-export const eventTypes = pgTable('event_types', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => createId()),
-	key: text('key').notNull().unique(),
-	name: text('name').notNull(),
-	description: text('description')
-});
-
-export const obligationDomainEnum = pgEnum('obligation_domain', [
-	'statutory',
-	'operational',
-	'governance'
-]);
-
-export type ObligationDomainType = (typeof obligationDomainEnum.enumValues)[number];
-
-export const ObligationDomainType = {
-	Statutory: 'statutory',
-	Operational: 'operational',
-	Governance: 'governance'
-} as const satisfies Record<string, ObligationDomainType>;
+export const eventTypes = pgTable(
+	'event_types',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		key: text('key').notNull().unique(),
+		name: text('name').notNull(),
+		description: text('description'),
+		domain: domainEnum('domain').notNull(),
+		organisationId: text('organisation_id').references(() => organisation.id),
+		createdAt: timestamp('created_at').defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull()
+	},
+	(table) => [uniqueIndex('event_type_key_org_id_unique').on(table.key, table.organisationId)]
+);
 
 export const obligationTypes = pgTable('obligation_types', {
 	id: text('id')
@@ -295,7 +306,12 @@ export const obligationTypes = pgTable('obligation_types', {
 	key: text('key').unique().notNull(),
 	name: text('name').notNull(),
 	description: text('description'),
-	domain: obligationDomainEnum('domain').notNull()
+	domain: domainEnum('domain').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull()
 });
 
 export const jurisdictions = pgTable('jurisdictions', {
@@ -303,7 +319,12 @@ export const jurisdictions = pgTable('jurisdictions', {
 		.primaryKey()
 		.$defaultFn(() => createId()),
 	key: text('key').unique().notNull(),
-	name: text('name').notNull()
+	name: text('name').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull()
 });
 
 export const entityTypes = pgTable('entity_types', {
@@ -311,15 +332,13 @@ export const entityTypes = pgTable('entity_types', {
 		.primaryKey()
 		.$defaultFn(() => createId()),
 	key: text('key').unique().notNull(),
-	name: text('name').notNull()
+	name: text('name').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull()
 });
-
-export const recurrenceFrequencyEnum = pgEnum('recurrence_frequency', [
-	'daily',
-	'weekly',
-	'monthly',
-	'yearly'
-]);
 
 // {
 // 		eventTypeKey: 'board_meeting_held',

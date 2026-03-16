@@ -8,7 +8,9 @@ import z from 'zod';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ locals }) => {
-	const currentUser = locals.requireUser();
+	// const currentUser = locals.requireUser();
+	// The user must already be authenticated
+	const currentUser = locals.user!;
 
 	const [account] = await db
 		.select({ id: user.id, name: user.name, email: user.email })

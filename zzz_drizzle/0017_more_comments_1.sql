@@ -1,0 +1,2 @@
+comment on table obligation_templates is 'Obligation templates define how obligations should be generated when an event occurs. 
+e.g. If event X occurs then Create obligation Y which is Due Z days later.';

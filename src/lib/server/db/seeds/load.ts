@@ -98,29 +98,30 @@ const load = async () => {
 
 				await tx.insert(schema.obligationTemplates).values({
 					name: item.name,
-					triggerEventTypeId: triggerId,
 					obligationTypeId: obligationId,
-					entityTypeId: entityTypeUkLtd.id,
+					triggerEventTypeId: triggerId,
 					jurisdictionId: jurisdictionUK.id,
+					entityTypeId: entityTypeUkLtd.id,
 					dueOffsetDays: item.dueOffsetDays
 				});
 			}
 
-			// for (const item of defaultRecurrenceRules) {
-			// 	const eventTypeId = eventTypeMap.get(item.eventTypeKey);
-			// 	// Guard: Drizzle will complain if these are undefined but marked .notNull()
-			// 	if (!eventTypeId) {
-			// 		throw new Error(`Missing lookup for ${item.eventTypeKey}`);
-			// 	}
+			for (const item of defaultRecurrenceRules) {
+				const eventTypeId = eventTypeMap.get(item.eventTypeKey);
+				// Guard: Drizzle will complain if these are undefined but marked .notNull()
+				if (!eventTypeId) {
+					throw new Error(`Missing lookup for ${item.eventTypeKey}`);
+				}
 
-			// 	await tx.insert(schema.recurrenceRules).values({
-			// 		eventTypeId: eventTypeId,
-			// 		organisationId: organisationUkLtd.id,
-			// 		name: item.name,
-			// 		frequency: item.frequency,
-			// 		interval: item.interval
-			// 	});
-			// }
+				await tx.insert(schema.recurrenceRules).values({
+					organisationId: organisationUkLtd.id,
+					eventTypeId: eventTypeId,
+					name: item.name,
+					startDate: item.startDate.toISOString(),
+					frequency: item.frequency,
+					interval: item.interval
+				});
+			}
 		});
 
 		console.log('✅ Seed completed successfully.');

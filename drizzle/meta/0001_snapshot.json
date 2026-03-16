@@ -1,6 +1,6 @@
 {
-  "id": "c88fc01b-9e46-431e-8ecc-2ee96fa0e29a",
-  "prevId": "0a3503ca-f7a9-4868-b39b-d542a6b0b5a8",
+  "id": "fb4d85af-6e9c-4333-9dac-d9148991cb1b",
+  "prevId": "b5fa3b1c-8143-476d-9e31-63064ad52b62",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -101,28 +101,102 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
+        },
+        "provider_account_unique": {
+          "name": "provider_account_unique",
+          "columns": [
+            {
+              "expression": "provider_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.entity_types": {
+      "name": "entity_types",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "entity_types_key_unique": {
+          "name": "entity_types_key_unique",
+          "columns": [
+            "key"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -154,18 +228,59 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "domain": {
+          "name": "domain",
+          "type": "obligation_domain",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organisation_id": {
+          "name": "organisation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "event_types_organisation_id_organisation_id_fk": {
+          "name": "event_types_organisation_id_organisation_id_fk",
+          "tableFrom": "event_types",
+          "columnsFrom": [
+            "organisation_id"
+          ],
+          "tableTo": "organisation",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "event_types_key_unique": {
           "name": "event_types_key_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "key"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -194,9 +309,137 @@
           "primaryKey": false,
           "notNull": true
         },
+        "anchor_date": {
+          "name": "anchor_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
         "event_date": {
           "name": "event_date",
           "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "generated": {
+          "name": "generated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "events_event_type_idx": {
+          "name": "events_event_type_idx",
+          "columns": [
+            {
+              "expression": "event_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "events_unique": {
+          "name": "events_unique",
+          "columns": [
+            {
+              "expression": "organisation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "event_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "event_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "events_organisation_id_organisation_id_fk": {
+          "name": "events_organisation_id_organisation_id_fk",
+          "tableFrom": "events",
+          "columnsFrom": [
+            "organisation_id"
+          ],
+          "tableTo": "organisation",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "events_event_type_id_event_types_id_fk": {
+          "name": "events_event_type_id_event_types_id_fk",
+          "tableFrom": "events",
+          "columnsFrom": [
+            "event_type_id"
+          ],
+          "tableTo": "event_types",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.jurisdictions": {
+      "name": "jurisdictions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -216,36 +459,17 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "events_organisation_id_organization_id_fk": {
-          "name": "events_organisation_id_organization_id_fk",
-          "tableFrom": "events",
-          "tableTo": "organization",
-          "columnsFrom": [
-            "organisation_id"
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "jurisdictions_key_unique": {
+          "name": "jurisdictions_key_unique",
+          "columns": [
+            "key"
           ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "events_event_type_id_event_types_id_fk": {
-          "name": "events_event_type_id_event_types_id_fk",
-          "tableFrom": "events",
-          "tableTo": "event_types",
-          "columnsFrom": [
-            "event_type_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "nullsNotDistinct": false
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -313,9 +537,9 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "member_user_id_idx": {
           "name": "member_user_id_idx",
@@ -328,9 +552,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "member_organisation_id_idx": {
           "name": "member_organisation_id_idx",
@@ -343,37 +567,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
-        "member_organisation_id_organization_id_fk": {
-          "name": "member_organisation_id_organization_id_fk",
+        "member_organisation_id_organisation_id_fk": {
+          "name": "member_organisation_id_organisation_id_fk",
           "tableFrom": "member",
-          "tableTo": "organization",
           "columnsFrom": [
             "organisation_id"
           ],
+          "tableTo": "organisation",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "member_user_id_user_id_fk": {
           "name": "member_user_id_user_id_fk",
           "tableFrom": "member",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -410,11 +634,29 @@
           "primaryKey": false,
           "notNull": true
         },
+        "jurisdiction_id": {
+          "name": "jurisdiction_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entity_type_id": {
+          "name": "entity_type_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "due_offset_days": {
           "name": "due_offset_days",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "default_notes": {
+          "name": "default_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -431,33 +673,108 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "obligation_templates_trigger_event_idx": {
+          "name": "obligation_templates_trigger_event_idx",
+          "columns": [
+            {
+              "expression": "trigger_event_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "obligation_template_rule_unique": {
+          "name": "obligation_template_rule_unique",
+          "columns": [
+            {
+              "expression": "trigger_event_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "obligation_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "jurisdiction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entity_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
       "foreignKeys": {
         "obligation_templates_obligation_type_id_obligation_types_id_fk": {
           "name": "obligation_templates_obligation_type_id_obligation_types_id_fk",
           "tableFrom": "obligation_templates",
-          "tableTo": "obligation_types",
           "columnsFrom": [
             "obligation_type_id"
           ],
+          "tableTo": "obligation_types",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "obligation_templates_trigger_event_type_id_event_types_id_fk": {
           "name": "obligation_templates_trigger_event_type_id_event_types_id_fk",
           "tableFrom": "obligation_templates",
-          "tableTo": "event_types",
           "columnsFrom": [
             "trigger_event_type_id"
           ],
+          "tableTo": "event_types",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "obligation_templates_jurisdiction_id_jurisdictions_id_fk": {
+          "name": "obligation_templates_jurisdiction_id_jurisdictions_id_fk",
+          "tableFrom": "obligation_templates",
+          "columnsFrom": [
+            "jurisdiction_id"
+          ],
+          "tableTo": "jurisdictions",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "obligation_templates_entity_type_id_entity_types_id_fk": {
+          "name": "obligation_templates_entity_type_id_entity_types_id_fk",
+          "tableFrom": "obligation_templates",
+          "columnsFrom": [
+            "entity_type_id"
+          ],
+          "tableTo": "entity_types",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -493,6 +810,27 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "domain": {
+          "name": "domain",
+          "type": "obligation_domain",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -501,10 +839,10 @@
       "uniqueConstraints": {
         "obligation_types_key_unique": {
           "name": "obligation_types_key_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "key"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -537,10 +875,16 @@
           "name": "template_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "generated_from_event_id": {
           "name": "generated_from_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "generated_from_recurrence_rule_id": {
+          "name": "generated_from_recurrence_rule_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -553,10 +897,24 @@
         },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "obligation_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'pending'"
+        },
+        "user_notes": {
+          "name": "user_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "generated": {
+          "name": "generated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
         },
         "created_at": {
           "name": "created_at",
@@ -573,59 +931,151 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "obligations_organisation_idx": {
+          "name": "obligations_organisation_idx",
+          "columns": [
+            {
+              "expression": "organisation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "obligation_generation_event_Id_unique": {
+          "name": "obligation_generation_event_Id_unique",
+          "columns": [
+            {
+              "expression": "generated_from_event_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "template_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "obligation_generation_event_obligation_unique": {
+          "name": "obligation_generation_event_obligation_unique",
+          "columns": [
+            {
+              "expression": "generated_from_event_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "obligation_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "obligation_generation_recurring_rule_id_unique": {
+          "name": "obligation_generation_recurring_rule_id_unique",
+          "columns": [
+            {
+              "expression": "generated_from_recurrence_rule_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "due_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
       "foreignKeys": {
-        "obligations_organisation_id_organization_id_fk": {
-          "name": "obligations_organisation_id_organization_id_fk",
+        "obligations_organisation_id_organisation_id_fk": {
+          "name": "obligations_organisation_id_organisation_id_fk",
           "tableFrom": "obligations",
-          "tableTo": "organization",
           "columnsFrom": [
             "organisation_id"
           ],
+          "tableTo": "organisation",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "obligations_obligation_type_id_obligation_types_id_fk": {
           "name": "obligations_obligation_type_id_obligation_types_id_fk",
           "tableFrom": "obligations",
-          "tableTo": "obligation_types",
           "columnsFrom": [
             "obligation_type_id"
           ],
+          "tableTo": "obligation_types",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "obligations_template_id_obligation_templates_id_fk": {
           "name": "obligations_template_id_obligation_templates_id_fk",
           "tableFrom": "obligations",
-          "tableTo": "obligation_templates",
           "columnsFrom": [
             "template_id"
           ],
+          "tableTo": "obligation_templates",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "obligations_generated_from_event_id_events_id_fk": {
           "name": "obligations_generated_from_event_id_events_id_fk",
           "tableFrom": "obligations",
-          "tableTo": "events",
           "columnsFrom": [
             "generated_from_event_id"
           ],
+          "tableTo": "events",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "obligations_generated_from_recurrence_rule_id_recurrence_rules_id_fk": {
+          "name": "obligations_generated_from_recurrence_rule_id_recurrence_rules_id_fk",
+          "tableFrom": "obligations",
+          "columnsFrom": [
+            "generated_from_recurrence_rule_id"
+          ],
+          "tableTo": "recurrence_rules",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -634,8 +1084,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.organization": {
-      "name": "organization",
+    "public.organisation": {
+      "name": "organisation",
       "schema": "",
       "columns": {
         "id": {
@@ -668,6 +1118,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "jurisdiction_id": {
+          "name": "jurisdiction_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity_type_id": {
+          "name": "entity_type_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -684,7 +1146,172 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "organisation_jurisdiction_id_jurisdictions_id_fk": {
+          "name": "organisation_jurisdiction_id_jurisdictions_id_fk",
+          "tableFrom": "organisation",
+          "columnsFrom": [
+            "jurisdiction_id"
+          ],
+          "tableTo": "jurisdictions",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "organisation_entity_type_id_entity_types_id_fk": {
+          "name": "organisation_entity_type_id_entity_types_id_fk",
+          "tableFrom": "organisation",
+          "columnsFrom": [
+            "entity_type_id"
+          ],
+          "tableTo": "entity_types",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.recurrence_rules": {
+      "name": "recurrence_rules",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "organisation_id": {
+          "name": "organisation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_type_id": {
+          "name": "event_type_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "frequency": {
+          "name": "frequency",
+          "type": "recurrence_frequency",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "interval": {
+          "name": "interval",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "weekday": {
+          "name": "weekday",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "month_day": {
+          "name": "month_day",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "recurrence_rule_unique": {
+          "name": "recurrence_rule_unique",
+          "columns": [
+            {
+              "expression": "organisation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "event_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "recurrence_rules_organisation_id_organisation_id_fk": {
+          "name": "recurrence_rules_organisation_id_organisation_id_fk",
+          "tableFrom": "recurrence_rules",
+          "columnsFrom": [
+            "organisation_id"
+          ],
+          "tableTo": "organisation",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "recurrence_rules_event_type_id_event_types_id_fk": {
+          "name": "recurrence_rules_event_type_id_event_types_id_fk",
+          "tableFrom": "recurrence_rules",
+          "columnsFrom": [
+            "event_type_id"
+          ],
+          "tableTo": "event_types",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -713,20 +1340,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
         "ip_address": {
           "name": "ip_address",
           "type": "text",
@@ -744,6 +1357,20 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {
@@ -758,34 +1385,34 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -827,6 +1454,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "onboarded": {
+          "name": "onboarded",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -840,12 +1473,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "onboarded": {
-          "name": "onboarded",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -854,10 +1481,10 @@
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -919,9 +1546,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -933,6 +1560,15 @@
     }
   },
   "enums": {
+    "public.obligation_domain": {
+      "name": "obligation_domain",
+      "schema": "public",
+      "values": [
+        "statutory",
+        "operational",
+        "governance"
+      ]
+    },
     "public.member_role": {
       "name": "member_role",
       "schema": "public",
@@ -941,13 +1577,33 @@
         "admin",
         "member"
       ]
+    },
+    "public.obligation_status": {
+      "name": "obligation_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "completed",
+        "skipped",
+        "cancelled"
+      ]
+    },
+    "public.recurrence_frequency": {
+      "name": "recurrence_frequency",
+      "schema": "public",
+      "values": [
+        "daily",
+        "weekly",
+        "monthly",
+        "yearly"
+      ]
     }
   },
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},
