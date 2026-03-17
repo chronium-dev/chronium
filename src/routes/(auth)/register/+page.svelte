@@ -23,7 +23,7 @@
 		<!-- <div class="mx-auto w-fit">
 			<LogoIcon width={48} height={48} />
 		</div> -->
-		<h2 class="text-2xl font-bold">Create a RatingsRobot Account</h2>
+		<h2 class="text-2xl font-bold">Create a Chronium Account</h2>
 		<p class="mt-6 text-center text-sm text-muted-foreground">
 			Already have an account?
 			<a href="/signin" class="font-medium text-primary hover:underline"> Sign In </a>

@@ -16,6 +16,6 @@
 	</div>
 
 	<p class="mt-6 mb-4 text-center text-sm text-muted-foreground">
-		<a href="/" class="font-medium text-primary hover:underline"> RatingsRobot Home Page</a>
+		<a href="/" class="font-medium text-primary hover:underline"> Chronium Home Page</a>
 	</p>
 </div>

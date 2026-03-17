@@ -25,7 +25,7 @@ export const sessionHandle: Handle = async ({ event, resolve }) => {
 
 	event.locals.requireUser = () => {
 		if (!event.locals.user) {
-			throw redirect(303, '/login');
+			throw redirect(303, '/signin');
 		}
 		return event.locals.user;
 	};

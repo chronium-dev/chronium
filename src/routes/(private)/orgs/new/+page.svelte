@@ -1,75 +1,101 @@
 <script lang="ts">
-	import PageHeader from '$lib/components/PageHeader.svelte';
-	import type { PageProps } from './$types';
-	import { goto } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { toast } from 'svelte-sonner';
-	import { enhance } from '$app/forms';
+  import * as Form from "$lib/components/ui/form";
+  import { Input } from "$lib/components/ui/input";
+  import * as RadioGroup from "$lib/components/ui/radio-group";
+  
+  let { data } = $props();
 
-	let { data, form }: PageProps = $props();
-	let pending = $state(false);
+  const form = superForm(data.form, {
+    validators: zodClient(companySchema),
+    delayMs: 500
+  });
+
+  const { form: formData, enhance, delayed, errors } = form;
 </script>
 
-<div class="rounded-lg bg-background p-8 shadow-lg">
-	<div class="mb-8 text-center">
-		<!-- <div class="mx-auto w-fit">
-			<LogoIcon width={48} height={48} />
-		</div> -->
-		<h2 class="text-2xl font-bold">Setup Your Company</h2>
-	</div>
+<form method="POST" use:enhance class="max-w-2xl space-y-8 p-6 border rounded-xl bg-card">
+  <input type="hidden" name="id" bind:value={$formData.id} />
 
-	{#if form?.formError}
-		<p class="mb-4 text-sm text-destructive">
-			{form.formError}
-		</p>
-	{/if}
+  <Form.Field {form} name="name">
+    <Form.Control>
+      {#snippet children({ props })}
+        <Form.Label>Company Name</Form.Label>
+        <Input {...props} bind:value={$formData.name} placeholder="Acme Corp Ltd" />
+      {/snippet}
+    </Form.Control>
+    <Form.FieldErrors />
+  </Form.Field>
 
-	<form
-		method="POST"
-		action="?/update"
-		use:enhance={() => {
-			// BEFORE submit
-			pending = true;
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <Form.Field {form} name="incorpDate">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Incorporation Date</Form.Label>
+          <Input {...props} type="date" bind:value={$formData.incorpDate} />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
 
-			// 1. Destructure 'result' and 'update' from the final callback
-			return async ({ result, update }) => {
-				// 2. This updates the 'form' prop with the server response
-				await update();
+    <Form.Field {form} name="financialYearEnd">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Financial Year End</Form.Label>
+          <Input {...props} type="date" bind:value={$formData.financialYearEnd} />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+  </div>
 
-				pending = false;
+  {#snippet horizontalRadio(name: any, label: string)}
+    <Form.Field {form} {name}>
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>{label}</Form.Label>
+          <RadioGroup.Root bind:value={$formData[name]} class="flex items-center space-x-4 pt-2">
+            <div class="flex items-center space-x-2">
+              <RadioGroup.Item value="Yes" />
+              <RadioGroup.Label>Yes</RadioGroup.Label>
+            </div>
+            <div class="flex items-center space-x-2">
+              <RadioGroup.Item value="No" />
+              <RadioGroup.Label>No</RadioGroup.Label>
+            </div>
+          </RadioGroup.Root>
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+  {/snippet}
 
-				// 3. Only toast if the result was actually a success
-				if (result.type === 'success') {
-					toast.success('Account has been updated');
-				}
-				// else if (result.type === 'failure') {
-				// 	toast.error('Please fix the errors below');
-				// }
-			};
-		}}
-	>
-		<div class="space-y-4">
-			<div class="space-y-1">
-				<Label for="name">Display Name</Label>
-				<Input id="name" name="name" value={data.account.name} required disabled={pending} />
-				{#if form?.errors?.name}
-					<p class="text-sm text-destructive">
-						{form.errors.name[0]}
-					</p>
-				{/if}
-			</div>
+  {@render horizontalRadio("isVatRegistered", "VAT Registered?")}
+  {@render horizontalRadio("isPayrollActive", "Payroll / PAYE active?")}
 
-			<div class="space-y-1">
-				<Label>Email</Label>
-				<Input value={data.account.email} readonly disabled />
-			</div>
+  <Form.Field {form} name="employeeCount">
+    <Form.Control>
+      {#snippet children({ props })}
+        <Form.Label>Number of employees?</Form.Label>
+        <RadioGroup.Root bind:value={$formData.employeeCount} class="flex flex-col space-y-2 pt-2">
+          {#each ["0", "1-5", "6-20", "20+"] as val}
+            <div class="flex items-center space-x-2">
+              <RadioGroup.Item value={val} />
+              <RadioGroup.Label>{val}</RadioGroup.Label>
+            </div>
+          {/each}
+        </RadioGroup.Root>
+      {/snippet}
+    </Form.Control>
+    <Form.FieldErrors />
+  </Form.Field>
 
-			<Button disabled={pending} aria-busy={pending} type="submit" class="w-full">
-				{pending ? 'Updating…' : 'Update'}
-			</Button>
-			<Button onclick={() => goto('/')} class="w-full" variant="ghost">Home Page</Button>
-		</div>
-	</form>
-</div>
+  {@render horizontalRadio("hasPremises", "Do you operate from business premises?")}
+
+  <Form.Button class="w-full" disabled={$delayed}>
+    {#if $delayed}
+      <span class="mr-2 h-4 w-4 animate-spin">⏳</span> Saving...
+    {:else}
+      Continue...
+    {/if}
+  </Form.Button>
+</form>

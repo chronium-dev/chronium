@@ -2,6 +2,7 @@
 // QUERY FUNCTIONS
 // ============================================================================
 
+import { type Organisation } from '$lib/types/organisations';
 import { and, count, eq } from 'drizzle-orm';
 import { db } from './index';
 import { member, type MemberRoleType, organisation, user } from './schema';
@@ -15,6 +16,21 @@ export type OrgListContextType = {
 	logo: string | null;
 	role: MemberRoleType;
 };
+
+export async function createOrg(data: Organisation) {
+	const [company] = await db.insert(organisation).values(data).returning();
+	return company;
+}
+
+export async function updateOrg(id: string, data: Organisation) {
+	const [company] = await db
+		.update(organisation)
+		.set(data)
+		.where(eq(organisation.id, id))
+		.returning();
+	return company;
+}
+
 export async function getOrgs(userId: string): Promise<OrgListContextType[]> {
 	const orgs = await db
 		.select({
@@ -28,6 +44,11 @@ export async function getOrgs(userId: string): Promise<OrgListContextType[]> {
 		.where(eq(member.userId, userId));
 
 	return orgs;
+}
+
+export async function getOrg(orgId: string) {
+	const [org] = await db.select().from(organisation).where(eq(organisation.id, orgId));
+	return org;
 }
 
 export async function getOrgCount(userId: string) {

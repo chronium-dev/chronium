@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { signin } from '$lib/api/auth.remote';
 	import { authClient } from '$lib/auth-client';
+	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
 	import EyeIcon from '$lib/components/icons/EyeIcon.svelte';
 	import EyeOffIcon from '$lib/components/icons/EyeOffIcon.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -43,14 +44,16 @@
 		<!-- <div class="mx-auto w-fit">
 			<LogoIcon width={48} height={48} />
 		</div> -->
-		<h2 class="text-2xl font-bold">Sign In to RatingsRobot</h2>
+		<h2 class="text-2xl font-bold">Sign In to Chronium</h2>
 		{#if showVerifiedMessage}
 			<p class="text-md my-4 border bg-muted p-2">
+				<CheckIcon class="h-4 w-4 text-brand" />
 				✅ Email verified successfully. You can now sign in to your account.
 			</p>
 		{/if}
 		{#if showResetPasswordMessage}
 			<p class="text-md my-4 border bg-muted p-2">
+				<CheckIcon class="h-4 w-4 text-brand" />
 				✅ You password has been reset. You can now sign in to your account.
 			</p>
 		{/if}

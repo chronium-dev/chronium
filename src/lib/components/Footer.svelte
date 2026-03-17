@@ -10,7 +10,7 @@
 		<div class="mb-8 flex flex-col items-center justify-between gap-8 md:flex-row md:items-start">
 			<!-- Brand Section -->
 			<div class="text-center md:text-left">
-				<h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">RatingsRobot</h3>
+				<h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Chronium</h3>
 				<p class="max-w-xs text-sm text-gray-600 dark:text-gray-400">
 					The simplest way for small businesses to collect and respond to customer feedback.
 				</p>
@@ -55,7 +55,7 @@
 		<!-- Bottom Bar -->
 		<div class="border-t border-gray-200 pt-8 text-center dark:border-gray-800">
 			<p class="text-sm text-gray-600 dark:text-gray-400">
-				© {currentYear} RatingsRobot. All rights reserved.
+				© {currentYear} Chronium. All rights reserved.
 			</p>
 		</div>
 	</div>
