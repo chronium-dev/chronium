@@ -4,15 +4,15 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Footer from '$lib/components/Footer.svelte';
 	import HeaderBar from '$lib/components/HeaderBar.svelte';
-	import { theme } from '$lib/stores/theme';
+	// import { theme } from '$lib/stores/theme';
 	import { onMount } from 'svelte';
 	import '../../routes/layout.css';
 
 	let { children } = $props();
 
-	onMount(() => {
-		theme.init();
-	});
+	// onMount(() => {
+	// 	theme.init();
+	// });
 
 	const navigateTo = (path: string) => {
 		goto(path);

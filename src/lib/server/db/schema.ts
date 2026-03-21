@@ -138,6 +138,12 @@ export const organisation = pgTable('organisation', {
 	entityTypeId: text('entity_type_id')
 		.references(() => entityTypes.id)
 		.notNull(),
+	incorporationDate: date('incorporation_date').notNull(),
+	financialYearEnd: date('financial_year_end').notNull(),
+	vatRegistered: text('vat_registered').notNull(),
+	payrollActive: text('payroll_active').notNull(),
+	employeeCount: text('employee_count'),
+	businessPremises: text('business_premises').notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()

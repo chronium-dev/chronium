@@ -1,24 +1,53 @@
-import { superValidate } from 'sveltekit-superforms/server';
-import { zod } from 'sveltekit-superforms/adapters';
+// +page.server.ts
 import { companySchema } from '$lib/validations/company';
-import { createOrg } from '$lib/server/db/queries.js';
+import { zod4 } from 'sveltekit-superforms/adapters';
+// import { message, superValidate } from 'sveltekit-superforms/server';
+import type { Actions, PageServerLoad } from './$types';
+import { fail } from '@sveltejs/kit';
+import { message, superValidate } from 'sveltekit-superforms';
+import { createOrg } from '$lib/server/db/queries';
 
-export const load = async () => {
-	const form = await superValidate(zod(companySchema));
-
+export const load: PageServerLoad = async () => {
+	// Pass no data → superValidate uses schema defaults → blank form
+	const form = await superValidate(zod4(companySchema));
 	return { form };
 };
 
-export const actions = {
-	default: async ({ request }) => {
-		const form = await superValidate(request, zod(companySchema));
+export const actions: Actions = {
+	default: async (event) => {
+		const form = await superValidate(event, zod4(companySchema));
 
 		if (!form.valid) {
-			return { form };
+			return fail(400, { form });
 		}
 
-		await createOrg(form.data);
+		try {
+			// --- YOUR CRUD HERE ---
+			// await db.company.create({ data: form.data });
+			await createOrg(form.data);
 
-		return { form };
+			return message(form, 'Company created successfully!');
+		} catch (err) {
+			// General (non-field) form error
+			return message(form, 'Something went wrong. Please try again.', {
+				status: 500
+			});
+		}
 	}
 };
+
+// export const actions = {
+// 	default: async ({ request }) => {
+// 		debugger;
+// 		const form = await superValidate(request, zod4(companySchema));
+
+// 		if (!form.valid) {
+// 			return { form };
+// 		}
+
+// 		// save (create or update)
+// 		// await createOrg(form.data);
+
+// 		return { form };
+// 	}
+// };

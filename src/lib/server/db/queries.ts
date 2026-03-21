@@ -2,10 +2,13 @@
 // QUERY FUNCTIONS
 // ============================================================================
 
+import { entityTypeUkLtd, jurisdictionUK } from '$lib/config/ukdata';
 import { type Organisation } from '$lib/types/organisations';
+import { createId } from '$lib/utils/createid';
 import { and, count, eq } from 'drizzle-orm';
 import { db } from './index';
 import { member, type MemberRoleType, organisation, user } from './schema';
+import type { CompanyFormData } from '$lib/validations/company';
 
 // ============================================================================
 // ORGANISATION QUERIES
@@ -17,16 +20,31 @@ export type OrgListContextType = {
 	role: MemberRoleType;
 };
 
-export async function createOrg(data: Organisation) {
-	const [company] = await db.insert(organisation).values(data).returning();
+export async function createOrg(data: CompanyFormData) {
+	const [company] = await db
+		.insert(organisation)
+		.values({
+			...data,
+			id: createId(),
+			name: data.name,
+			jurisdictionId: jurisdictionUK.id,
+			entityTypeId: entityTypeUkLtd.id,
+			// incorporationDate: data.incorporationDate,
+			// financialYearEnd: data.financialYearEnd,
+			// vatRegistered: data.vatRegistered,
+			// payrollActive: data.payrollActive,
+			// employeeCount: data.employeeCount,
+			// businessPremises: data.businessPremises
+		})
+		.returning();
 	return company;
 }
 
-export async function updateOrg(id: string, data: Organisation) {
+export async function updateOrg(data: CompanyFormData) {
 	const [company] = await db
 		.update(organisation)
 		.set(data)
-		.where(eq(organisation.id, id))
+		.where(eq(organisation.id, data.id!))
 		.returning();
 	return company;
 }

@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { Toaster } from 'svelte-sonner';
 	import './layout.css';
+	import { ModeWatcher } from "mode-watcher";
 
 	let { children } = $props();
 
@@ -16,5 +17,6 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
+<ModeWatcher />
 <Toaster />
 {@render children()}
