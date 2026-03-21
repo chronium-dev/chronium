@@ -5,7 +5,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import HeaderBar from '$lib/components/HeaderBar.svelte';
 	// import { theme } from '$lib/stores/theme';
-	import { onMount } from 'svelte';
+	// import { onMount } from 'svelte';
 	import '../../routes/layout.css';
 
 	let { children } = $props();

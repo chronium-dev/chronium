@@ -18,7 +18,7 @@
 		<!-- <div class="mx-auto w-fit">
 			<LogoIcon width={48} height={48} />
 		</div> -->
-		<h2 class="text-2xl font-bold">Your Account</h2>
+		<h2 class="font-brand text-2xl">Your Account</h2>
 	</div>
 
 	{#if form?.formError}

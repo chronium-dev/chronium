@@ -5,7 +5,7 @@ export const companySchema = z
 		id: z.string().optional(),
 		name: z
 			.string({ error: 'Company name is required' })
-			.min(2, 'Must be at least 2 characters')
+			.min(2, 'Must be at least 2 characters long')
 			.max(100, 'Must be 100 characters or fewer'),
 		incorporationDate: z
 			.string({ error: 'Incorporation date is required' })
@@ -28,9 +28,9 @@ export const companySchema = z
 	.superRefine((data, ctx) => {
 		if (data.payrollActive === 'yes' && !data.employeeCount) {
 			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
+				code: 'custom',
 				message: 'Please select the number of employees',
-				path: ['numberOfEmployees']
+				path: ['employeeCount']
 			});
 		}
 	});

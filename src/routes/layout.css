@@ -47,13 +47,20 @@
 	--sidebar-ring: oklch(0.623 0.188 259.796);
 	--radius: 0.5rem;
 	--space-page: 1.5rem;
-	--space-section: 1rem;
+	--space-section: 1.5rem;
 	--space-item: 0.75rem;
 	[data-density='compact'] {
 		--space-page: 1rem;
 		--space-section: 0.75rem;
 		--space-item: 0.5rem;
 	}
+
+	--success: oklch(0.62 0.14 140);
+	--success-foreground: oklch(1 0 0);
+	--warning: oklch(0.7 0.16 75);
+	--warning-foreground: oklch(0.2 0.02 75);
+	--info: oklch(0.64 0.14 240);
+	--info-foreground: oklch(1 0 0);
 
 	--black-50: #525252;
 	--black-100: #424242;
@@ -65,7 +72,7 @@
 	--black-700: #000;
 
 	/* === Badge background colors === */
-	--badge-bg-unread-rating: #ff6666;
+	/* --badge-bg-unread-rating: #ff6666;
 	--badge-bg-unread-customer-reply: #ffbd55;
 	--badge-bg-unread-rating-and-customer-reply: #ff6666;
 	--badge-bg-pending-action: #9de24f;
@@ -75,10 +82,10 @@
 	--badge-bg-unread-replies-received: #ffbd55;
 	--badge-bg-replies-received: #76cc4f;
 	--badge-bg-accordion-trigger: #fafafa;
-	--badge-bg-accordion-open: #fafafa;
+	--badge-bg-accordion-open: #fafafa; */
 
 	/* === Badge foreground colors === */
-	--badge-fg-unread-rating: #ffffff;
+	/* --badge-fg-unread-rating: #ffffff;
 	--badge-fg-unread-customer-reply: #000000;
 	--badge-fg-unread-rating-and-customer-reply: #000000;
 	--badge-fg-pending-action: #212121;
@@ -86,10 +93,7 @@
 	--badge-fg-closed: #282828;
 	--badge-fg-replies-sent: #000000;
 	--badge-fg-unread-replies-received: #000000;
-	--badge-fg-replies-received: #000000;
-
-	/* === Ratings === */
-	--reply-textarea: #ffffff;
+	--badge-fg-replies-received: #000000; */
 }
 
 .dark {
@@ -126,18 +130,24 @@
 	--sidebar-border: oklch(0.274 0.005 286.033);
 	--sidebar-ring: oklch(0.623 0.188 259.796);
 
+	--success: oklch(0.55 0.13 140);
+	--success-foreground: oklch(0.98 0 0);
+
+	--warning: oklch(0.6 0.14 75);
+	--warning-foreground: oklch(0.98 0 0);
+
+	--info: oklch(0.58 0.13 240);
+	--info-foreground: oklch(0.98 0 0);
+
 	/* === Badge background colors === */
-	--badge-bg-replies-sent: #1b2832;
+	/* --badge-bg-replies-sent: #1b2832;
 	--badge-bg-replies-received: #142534;
 	--badge-bg-accordion-trigger: #0d1518;
-	--badge-bg-accordion-open: #0d1518;
+	--badge-bg-accordion-open: #0d1518; */
 
 	/* === Badge foreground colors === */
-	--badge-fg-replies-sent: #ffffff;
-	--badge-fg-replies-received: #d1d5d8;
-
-	/* === Ratings === */
-	--reply-textarea: #21363e;
+	/* --badge-fg-replies-sent: #ffffff;
+	--badge-fg-replies-received: #d1d5d8; */
 }
 
 @theme inline {
@@ -187,11 +197,20 @@
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground);
+
+	--color-info: var(--info);
+	--color-info-foreground: var(--info-foreground);
+
 	/* Register the font so we can use 'font-brand' in Tailwind classes */
 	--font-brand: 'Cal Sans', ui-sans-serif, system-ui;
 
 	/* === Badge backgrounds === */
-	--color-badge-bg-unread-rating: var(--badge-bg-unread-rating);
+	/* --color-badge-bg-unread-rating: var(--badge-bg-unread-rating);
 	--color-badge-bg-unread-customer-reply: var(--badge-bg-unread-customer-reply);
 	--color-badge-bg-unread-rating-and-customer-reply: var(
 		--badge-bg-unread-rating-and-customer-reply
@@ -203,10 +222,10 @@
 	--color-badge-bg-unread-replies-received: var(--badge-bg-unread-replies-received);
 	--color-badge-bg-replies-received: var(--badge-bg-replies-received);
 	--color-badge-bg-accordion-trigger: var(--badge-bg-accordion-trigger);
-	--color-badge-bg-accordion-open: var(--badge-bg-accordion-open);
+	--color-badge-bg-accordion-open: var(--badge-bg-accordion-open); */
 
 	/* === Badge foregrounds === */
-	--color-badge-fg-unread-rating: var(--badge-fg-unread-rating);
+	/* --color-badge-fg-unread-rating: var(--badge-fg-unread-rating);
 	--color-badge-fg-unread-customer-reply: var(--badge-fg-unread-customer-reply);
 	--color-badge-fg-unread-rating-and-customer-reply: var(
 		--badge-fg-unread-rating-and-customer-reply
@@ -218,7 +237,7 @@
 	--color-badge-fg-unread-replies-received: var(--badge-fg-unread-replies-received);
 	--color-badge-fg-replies-received: var(--badge-fg-replies-received);
 
-	--color-reply-textarea: var(--reply-textarea);
+	--color-reply-textarea: var(--reply-textarea); */
 
 	--color-brand: #6ea527;
 }
@@ -245,9 +264,9 @@
 		@apply rounded bg-muted p-2 font-medium text-foreground;
 	}
 
-	.replies-received-bubble-tip {
+	/* .replies-received-bubble-tip {
 		@apply inline-flex h-4 items-center rounded-full border-none bg-lime-600 px-2 py-2.5 text-xs tracking-tight text-stone-200 dark:bg-lime-400 dark:text-black-700;
-	}
+	} */
 
 	.bubble {
 		@apply inline-flex h-4 items-center rounded-full px-2 py-1 text-xs tracking-tight;
@@ -258,31 +277,31 @@
 	}
 
 	/* Replies sent */
-	.replies-sent-bubble {
+	/* .replies-sent-bubble {
 		@apply inline-flex h-4 items-center rounded-full bg-fuchsia-500 px-2 py-1 text-xs tracking-tight text-white dark:bg-fuchsia-500 dark:text-white;
 	}
 
 	.replies-sent-bubble-tip {
 		@apply inline-flex h-4 items-center rounded-full border-none bg-fuchsia-500 px-2 py-2.5 text-xs tracking-tight text-white dark:bg-fuchsia-500 dark:text-white;
-	}
+	} */
 
 	/* Replies received */
-	.replies-received-bubble {
+	/* .replies-received-bubble {
 		@apply inline-flex h-4 items-center rounded-full bg-lime-600 px-2 py-1 text-xs tracking-tight text-stone-200 dark:bg-lime-400 dark:text-black-700;
-	}
+	} */
 
-	.replies-received-bubble-tip {
+	/* .replies-received-bubble-tip {
 		@apply inline-flex h-4 items-center rounded-full border-none bg-lime-600 px-2 py-2.5 text-xs tracking-tight text-stone-200 dark:bg-lime-400 dark:text-black-700;
-	}
+	} */
 
 	/* Unread customer replies */
-	.unread-customer-replies-bubble {
+	/* .unread-customer-replies-bubble {
 		@apply inline-flex h-4 items-center rounded-full bg-badge-bg-unread-replies-received px-2 py-1 text-xs tracking-tight text-badge-fg-unread-replies-received;
 	}
 
 	.unread-customer-replies-bubble-tip {
 		@apply inline-flex h-4 items-center rounded-full bg-badge-bg-unread-replies-received px-2 py-3 text-xs tracking-tight text-badge-fg-unread-replies-received;
-	}
+	} */
 
 	/* Email bubble */
 	.email-bubble-tip {

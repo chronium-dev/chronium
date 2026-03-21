@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import * as Form from '$lib/components/ui/form';
+	import { theme } from '$lib/stores/theme';
 	import { cn } from '$lib/utils';
 	import { companySchema, type CompanySchema } from '$lib/validations/company';
-	import { mode as themeMode } from 'mode-watcher';
-	import { untrack } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
@@ -41,11 +41,16 @@
 		}
 	}
 
-	const colorScheme = $derived(themeMode.current === 'dark' ? 'dark' : 'light');
-	$inspect(colorScheme);
+	// const colorScheme = $derived(themeMode.current === 'dark' ? 'dark' : 'light');
+	// $inspect(colorScheme);
+
+	let isDark = $state(false);
+
+	const unsub = theme.resolved.subscribe((v) => (isDark = v === 'dark'));
+	onDestroy(unsub);
 </script>
 
-<form method="POST" use:enhance class="max-w-xl space-y-7">
+<form method="POST" use:enhance class="max-w-xl space-y-(--space-section)">
 	<!-- General form message (success / server error) -->
 	{#if $message}
 		<div
@@ -82,8 +87,6 @@
 		<Form.FieldErrors />
 	</Form.Field>
 
-	<p>{colorScheme}</p>
-
 	<!-- 2. Incorporation Date -->
 	<Form.Field form={sf} name="incorporationDate">
 		<Form.Control>
@@ -94,12 +97,12 @@
 					type="date"
 					bind:value={$formData.incorporationDate}
 					class={cn(
-						'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm',
+						'flex h-10 w-fit rounded-md border border-input bg-background px-3 py-2 text-sm',
 						'ring-offset-background',
 						'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
 						$errors.incorporationDate && 'border-destructive'
 					)}
-					style="color-scheme: {colorScheme}"
+					style="color-scheme: {isDark ? 'dark' : 'light'}"
 				/>
 			{/snippet}
 		</Form.Control>
@@ -116,12 +119,12 @@
 					type="date"
 					bind:value={$formData.financialYearEnd}
 					class={cn(
-						'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm',
+						'flex h-10 w-fit rounded-md border border-input bg-background px-3 py-2 text-sm',
 						'ring-offset-background',
 						'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
 						$errors.financialYearEnd && 'border-destructive'
 					)}
-					style="color-scheme: {colorScheme};"
+					style="color-scheme: {isDark ? 'dark' : 'light'}"
 				/>
 			{/snippet}
 		</Form.Control>
