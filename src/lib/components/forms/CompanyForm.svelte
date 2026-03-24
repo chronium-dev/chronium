@@ -3,7 +3,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { theme } from '$lib/stores/theme';
 	import { cn } from '$lib/utils';
-	import { companySchema, type CompanySchema } from '$lib/validations/company';
+	import { organisationFormSchema, type OrganisationSchema } from '$lib/validations/organisation';
 	import { onDestroy, untrack } from 'svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
@@ -13,13 +13,13 @@
 		data,
 		mode = 'create'
 	}: {
-		data: SuperValidated<Infer<CompanySchema>>;
+		data: SuperValidated<Infer<OrganisationSchema>>;
 		mode?: 'create' | 'edit';
 	} = $props();
 
 	const sf = untrack(() =>
 		superForm(data, {
-			validators: zod4Client(companySchema),
+			validators: zod4Client(organisationFormSchema),
 			validationMethod: 'oninput'
 		})
 	);
@@ -30,7 +30,7 @@
 	const showEmployeeCount = $derived($formData.payrollActive === 'yes');
 
 	const submitLabel = $derived(
-		$submitting ? 'Saving...' : mode === 'create' ? 'Continue...' : 'Save Changes'
+		$submitting ? 'Saving...' : mode === 'create' ? 'Create company...' : 'Save Changes'
 	);
 
 	// Clear employeeCount when payroll is toggled off
@@ -58,7 +58,7 @@
 				'rounded-md border px-4 py-3 text-sm',
 				$message.status === 200
 					? 'border-green-200 bg-green-50 text-green-800'
-					: 'border-destructive/20 bg-destructive/10 text-destructive'
+					: 'border-destructive/20 text-white dark:text-red-500'
 			)}
 		>
 			{$message.text}
@@ -113,7 +113,7 @@
 	<Form.Field form={sf} name="financialYearEnd">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Form.Label>Financial Year End Date</Form.Label>
+				<Form.Label>Next Financial Year End</Form.Label>
 				<input
 					{...props}
 					type="date"
@@ -126,6 +126,7 @@
 					)}
 					style="color-scheme: {isDark ? 'dark' : 'light'}"
 				/>
+				<p class='text-xs italic text-muted-foreground'>We'll use this to determine your ongoing reporting deadlines</p>
 			{/snippet}
 		</Form.Control>
 		<Form.FieldErrors />

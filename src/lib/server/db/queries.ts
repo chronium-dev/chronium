@@ -3,12 +3,12 @@
 // ============================================================================
 
 import { entityTypeUkLtd, jurisdictionUK } from '$lib/config/ukdata';
-import { type Organisation } from '$lib/types/organisations';
 import { createId } from '$lib/utils/createid';
+import type { OrganisationFormData } from '$lib/validations/organisation';
 import { and, count, eq } from 'drizzle-orm';
+import { mapOrgFormDataToDbValues } from '../../mappers/organisation';
 import { db } from './index';
 import { member, type MemberRoleType, organisation, user } from './schema';
-import type { CompanyFormData } from '$lib/validations/company';
 
 // ============================================================================
 // ORGANISATION QUERIES
@@ -20,30 +20,23 @@ export type OrgListContextType = {
 	role: MemberRoleType;
 };
 
-export async function createOrg(data: CompanyFormData) {
-	const [company] = await db
+export async function createOrg(data: OrganisationFormData) {
+	const [org] = await db
 		.insert(organisation)
 		.values({
-			...data,
+			...mapOrgFormDataToDbValues(data),
 			id: createId(),
-			name: data.name,
 			jurisdictionId: jurisdictionUK.id,
-			entityTypeId: entityTypeUkLtd.id,
-			// incorporationDate: data.incorporationDate,
-			// financialYearEnd: data.financialYearEnd,
-			// vatRegistered: data.vatRegistered,
-			// payrollActive: data.payrollActive,
-			// employeeCount: data.employeeCount,
-			// businessPremises: data.businessPremises
+			entityTypeId: entityTypeUkLtd.id
 		})
 		.returning();
-	return company;
+	return org;
 }
 
-export async function updateOrg(data: CompanyFormData) {
+export async function updateOrg(data: OrganisationFormData) {
 	const [company] = await db
 		.update(organisation)
-		.set(data)
+		.set(mapOrgFormDataToDbValues(data))
 		.where(eq(organisation.id, data.id!))
 		.returning();
 	return company;

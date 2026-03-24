@@ -1,3 +1,4 @@
+import { employeeCountEnum } from '$lib/validations/organisation';
 import {
 	boolean,
 	date,
@@ -128,22 +129,34 @@ export type MemberRoleType = (typeof memberRoleEnum.enumValues)[number];
 
 export const organisation = pgTable('organisation', {
 	id: text('id').primaryKey(),
-	name: text('name'),
+	name: text('name').notNull(),
 	logo: text('logo'),
 	logoHeight: integer('logo_height'),
 	logoWidth: integer('logo_width'),
 	jurisdictionId: text('jurisdiction_id')
-		.references(() => jurisdictions.id)
+		.references(() => jurisdictions.id, { onDelete: 'cascade' })
 		.notNull(),
 	entityTypeId: text('entity_type_id')
-		.references(() => entityTypes.id)
+		.references(() => entityTypes.id, { onDelete: 'cascade' })
 		.notNull(),
 	incorporationDate: date('incorporation_date').notNull(),
-	financialYearEnd: date('financial_year_end').notNull(),
-	vatRegistered: text('vat_registered').notNull(),
-	payrollActive: text('payroll_active').notNull(),
-	employeeCount: text('employee_count'),
-	businessPremises: text('business_premises').notNull(),
+	financialYearEndMonth: integer('financial_year_end_month').notNull(), // 1–12
+	financialYearEndDay: integer('financial_year_end_day').notNull(),
+	vatRegistered: boolean('vat_registered').notNull(),
+	vatScheme: text('vat_scheme'), // 'standard' | 'flat_rate' | etc (optional later)
+
+	vatFrequency: text('vat_frequency'),
+	// 'quarterly' | 'monthly' | 'annual'
+
+	vatQuarterGroup: text('vat_quarter_group'),
+	// 'mar' | 'jan' | 'feb' (NULL if not quarterly)
+
+	vatStartDate: date('vat_start_date'),
+	// optional but VERY useful for alignment
+
+	payrollActive: boolean('payroll_active').notNull(),
+	employeeCount: employeeCountEnum('employee_count'),
+	businessPremises: boolean('business_premises').notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()
@@ -188,13 +201,13 @@ export const events = pgTable(
 			.primaryKey()
 			.$defaultFn(() => createId()),
 		organisationId: text('organisation_id')
-			.references(() => organisation.id)
+			.references(() => organisation.id, { onDelete: 'cascade' })
 			.notNull(),
 		eventTypeId: text('event_type_id')
-			.references(() => eventTypes.id)
+			.references(() => eventTypes.id, { onDelete: 'cascade' })
 			.notNull(),
-		anchorDate: date('anchor_date'),
-		eventDate: date('event_date').notNull(),
+		anchorDate: date('anchor_date', { mode: 'date' }),
+		eventDate: date('event_date', { mode: 'date' }).notNull(),
 		generated: boolean('generated').default(true),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -219,10 +232,10 @@ export const obligationTemplates = pgTable(
 			.$defaultFn(() => createId()),
 		name: text('name').notNull(),
 		obligationTypeId: text('obligation_type_id')
-			.references(() => obligationTypes.id)
+			.references(() => obligationTypes.id, { onDelete: 'cascade' })
 			.notNull(),
 		triggerEventTypeId: text('trigger_event_type_id')
-			.references(() => eventTypes.id)
+			.references(() => eventTypes.id, { onDelete: 'cascade' })
 			.notNull(),
 		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),
 		entityTypeId: text('entity_type_id').references(() => entityTypes.id),
@@ -255,14 +268,14 @@ export const obligations = pgTable(
 			.primaryKey()
 			.$defaultFn(() => createId()),
 		organisationId: text('organisation_id')
-			.references(() => organisation.id)
+			.references(() => organisation.id, { onDelete: 'cascade' })
 			.notNull(),
 		obligationTypeId: text('obligation_type_id')
-			.references(() => obligationTypes.id)
+			.references(() => obligationTypes.id, { onDelete: 'cascade' })
 			.notNull(),
 		templateId: text('template_id').references(() => obligationTemplates.id),
 		generatedFromEventId: text('generated_from_event_id').references(() => events.id),
-		dueDate: date('due_date').notNull(),
+		dueDate: date('due_date', { mode: 'date' }).notNull(),
 		status: obligationStatusEnum('status').default('pending').notNull(),
 		userNotes: text('user_notes'),
 		generated: boolean('generated').default(true),
@@ -361,19 +374,20 @@ export const recurrenceRules = pgTable(
 			.primaryKey()
 			.$defaultFn(() => createId()),
 		organisationId: text('organisation_id')
-			.references(() => organisation.id)
-			.notNull(),
+			.notNull()
+			.references(() => organisation.id, { onDelete: 'cascade' }),
 		eventTypeId: text('event_type_id')
-			.references(() => eventTypes.id)
+			.references(() => eventTypes.id, { onDelete: 'cascade' })
 			.notNull(),
 		name: text('name').notNull(),
-		startDate: date('start_date').notNull(),
-		endDate: date('end_date'),
+		startDate: date('start_date', { mode: 'date' }).notNull(),
+		endDate: date('end_date', { mode: 'date' }),
 		frequency: recurrenceFrequencyEnum('frequency').notNull(),
 		interval: integer('interval').default(1).notNull(),
-		weekday: integer('weekday'),
+		weekDay: integer('weekday'),
 		// optional (0-6)
 		monthDay: integer('month_day'),
+		month: integer('month'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()

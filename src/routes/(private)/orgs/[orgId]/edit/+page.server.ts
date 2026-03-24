@@ -1,10 +1,9 @@
 import { updateOrg } from '$lib/server/db/queries';
-import { companySchema } from '$lib/validations/company';
-import type { PageServerLoad, Actions } from './$types';
-import { fail, error } from '@sveltejs/kit';
-import { superValidate, message } from 'sveltekit-superforms';
+import { organisationFormSchema, type OrganisationFormData } from '$lib/validations/organisation';
+import { fail } from '@sveltejs/kit';
+import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { type CompanyFormData } from '$lib/validations/company';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
 	// --- FETCH YOUR RECORD HERE ---
@@ -12,7 +11,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	// if (!company) throw error(404, 'Company not found');
 
 	// Mock — replace with real data:
-	const company: CompanyFormData = {
+	const company: OrganisationFormData = {
 		name: 'Acme Ltd',
 		incorporationDate: '2020-01-15',
 		financialYearEnd: '2024-12-31',
@@ -23,13 +22,13 @@ export const load: PageServerLoad = async ({ params }) => {
 	};
 
 	// Passing existing data pre-populates the form
-	const form = await superValidate(company, zod4(companySchema));
+	const form = await superValidate(company, zod4(organisationFormSchema));
 	return { form };
 };
 
 export const actions: Actions = {
 	default: async (event) => {
-		const form = await superValidate(event, zod4(companySchema));
+		const form = await superValidate(event, zod4(organisationFormSchema));
 		const theData = form.data;
 
 		if (!form.valid) {
@@ -39,7 +38,7 @@ export const actions: Actions = {
 		try {
 			// --- YOUR UPDATE CRUD HERE ---
 			// await db.company.update({ where: { id: event.params.id }, data: form.data });
-			await updateOrg(form.data)
+			await updateOrg(form.data);
 
 			return message(form, 'Company updated successfully!');
 		} catch (err) {

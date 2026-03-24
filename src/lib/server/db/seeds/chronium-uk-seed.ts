@@ -1,3 +1,4 @@
+import type { NewOrganisation } from '$lib/types/organisations';
 import { DomainType, RecurrenceFrequencyType } from '../schema';
 
 export const jurisdictionUK = {
@@ -12,169 +13,69 @@ export const entityTypeUkLtd = {
 	name: 'UK Limited Company'
 };
 
-export const organisationUkLtd = {
+export const organisationUkLtd: NewOrganisation = {
 	id: 'org_acme',
 	name: 'Acme Widgets Ltd',
 	jurisdictionId: jurisdictionUK.id,
-	entityTypeId: entityTypeUkLtd.id
+	entityTypeId: entityTypeUkLtd.id,
+	incorporationDate: '2025-02-12',
+	financialYearEndMonth: 2,
+	financialYearEndDay: 28,
+	vatRegistered: true,
+	payrollActive: true,
+	businessPremises: true
 };
 
 export const eventTypeSeeds = [
+	// ✅ Anchors (unchanged)
 	{
 		key: 'company_incorporated',
 		name: 'Company Incorporated',
 		description: 'The company was formally incorporated at Companies House.',
 		domain: DomainType.Statutory
 	},
-
-	{
-		key: 'accounting_period_end',
-		name: 'Accounting Period End',
-		description:
-			'End of the company accounting period used for statutory accounts and corporation tax.',
-		domain: DomainType.Statutory
-	},
-
-	{
-		key: 'confirmation_statement_date',
-		name: 'Confirmation Statement Date',
-		description: 'Anniversary of company incorporation used for filing confirmation statements.',
-		domain: DomainType.Statutory
-	},
-
-	{
-		key: 'vat_quarter_end',
-		name: 'VAT Quarter End',
-		description: 'End of a VAT reporting period.',
-		domain: DomainType.Statutory
-	},
-
-	{
-		key: 'payroll_month_end',
-		name: 'Payroll Month End',
-		description: 'End of payroll reporting period.',
-		domain: DomainType.Statutory
-	},
-
-	{
-		key: 'payroll_year_end',
-		name: 'Payroll Year End',
-		description: 'End of PAYE tax year reporting.',
-		domain: DomainType.Statutory
-	},
-
 	{
 		key: 'insurance_policy_started',
 		name: 'Insurance Policy Started',
 		description: 'Start date of an insurance policy.',
 		domain: DomainType.Operational
 	},
-
-	{
-		key: 'pat_test_completed',
-		name: 'PAT Test Completed',
-		description: 'Portable appliance testing completed.',
-		domain: DomainType.Operational
-	},
-
-	{
-		key: 'fire_safety_check_completed',
-		name: 'Fire Safety Check Completed',
-		description: 'Fire safety inspection or assessment completed.',
-		domain: DomainType.Operational
-	},
-
-	{
-		key: 'equipment_service_completed',
-		name: 'Equipment Service Completed',
-		description: 'Routine servicing of company equipment completed.',
-		domain: DomainType.Operational
-	},
-
-	{
-		key: 'vehicle_mot_completed',
-		name: 'Vehicle MOT Completed',
-		description: 'Company vehicle MOT completed.',
-		domain: DomainType.Operational
-	},
-
 	{
 		key: 'domain_registered',
 		name: 'Domain Registered',
 		description: 'Internet domain name registered.',
 		domain: DomainType.Operational
 	},
-
 	{
 		key: 'ssl_certificate_issued',
 		name: 'SSL Certificate Issued',
 		description: 'SSL certificate issued for website security.',
 		domain: DomainType.Operational
 	},
-
 	{
 		key: 'software_subscription_started',
 		name: 'Software Subscription Started',
 		description: 'Start of SaaS or software subscription.',
 		domain: DomainType.Operational
 	},
-
 	{
 		key: 'employee_hired',
 		name: 'Employee Hired',
 		description: 'A new employee joined the company.',
 		domain: DomainType.Operational
 	},
-
-	{
-		key: 'staff_appraisal_completed',
-		name: 'Staff Appraisal Completed',
-		description: 'Employee performance appraisal completed.',
-		domain: DomainType.Operational
-	},
-
-	{
-		key: 'risk_assessment_created',
-		name: 'Risk Assessment Created',
-		description: 'Formal business risk assessment created.',
-		domain: DomainType.Governance
-	},
-
-	{
-		key: 'policy_created',
-		name: 'Policy Created',
-		description: 'Company policy created or updated.',
-		domain: DomainType.Governance
-	},
-
-	{
-		key: 'board_meeting_held',
-		name: 'Board Meeting Held',
-		description: 'Directors held a formal board meeting.',
-		domain: DomainType.Governance
-	},
-
-	{
-		key: 'shareholder_meeting_held',
-		name: 'Shareholder Meeting Held',
-		description: 'Formal shareholder meeting held.',
-		domain: DomainType.Governance
-	},
-
 	{
 		key: 'supplier_contract_signed',
 		name: 'Supplier Contract Signed',
 		description: 'New supplier contract signed.',
 		domain: DomainType.Operational
 	},
-
 	{
 		key: 'office_lease_signed',
 		name: 'Office Lease Signed',
 		description: 'Company office lease agreement signed.',
 		domain: DomainType.Operational
 	},
-
 	{
 		key: 'professional_membership_started',
 		name: 'Professional Membership Started',
@@ -182,60 +83,148 @@ export const eventTypeSeeds = [
 		domain: DomainType.Operational
 	},
 
+	// ✅ System-generated period ends (unchanged)
 	{
-		key: 'backup_test_completed',
-		name: 'Backup Restore Test Completed',
-		description: 'IT backup restore test completed.',
+		key: 'accounting_period_end',
+		name: 'Accounting Period End',
+		description: 'End of the company accounting period.',
+		domain: DomainType.Statutory
+	},
+	{
+		key: 'confirmation_statement_date',
+		name: 'Confirmation Statement Date',
+		description: 'Anniversary of company incorporation.',
+		domain: DomainType.Statutory
+	},
+	{
+		key: 'corporation_tax_period_end',
+		name: 'Corporation Tax Period End',
+		description: 'End of a corporation tax accounting period.',
+		domain: DomainType.Statutory
+	},
+	{
+		key: 'vat_period_end',
+		name: 'VAT Return Period End',
+		description: 'End of a VAT reporting period.',
+		domain: DomainType.Statutory
+	},
+	{
+		key: 'payroll_month_end',
+		name: 'Payroll Month End',
+		description: 'End of payroll reporting period.',
+		domain: DomainType.Statutory
+	},
+	{
+		key: 'payroll_year_end',
+		name: 'Payroll Year End',
+		description: 'End of PAYE tax year.',
+		domain: DomainType.Statutory
+	},
+
+	// ✅ Future “due” events (fixed)
+	{
+		key: 'pat_test_due',
+		name: 'PAT Testing Due',
+		description: 'Portable appliance testing is due.',
 		domain: DomainType.Operational
 	},
-
 	{
-		key: 'health_safety_audit_completed',
-		name: 'Health & Safety Audit Completed',
-		description: 'Workplace health and safety audit completed.',
-		domain: DomainType.Governance
-	},
-
-	{
-		key: 'fire_risk_assessment_completed',
-		name: 'Fire Risk Assessment Completed',
-		description: 'Formal fire risk assessment completed.',
-		domain: DomainType.Governance
-	},
-
-	{
-		key: 'cyber_security_review_completed',
-		name: 'Cyber Security Review Completed',
-		description: 'Cyber security policies and controls reviewed.',
-		domain: DomainType.Governance
-	},
-
-	{
-		key: 'disaster_recovery_test_completed',
-		name: 'Disaster Recovery Test Completed',
-		description: 'Business disaster recovery procedures tested.',
+		key: 'fire_safety_inspection_due',
+		name: 'Fire Safety Inspection Due',
+		description: 'Fire safety inspection is due.',
 		domain: DomainType.Operational
 	},
-
 	{
-		key: 'business_continuity_review_completed',
-		name: 'Business Continuity Review Completed',
-		description: 'Business continuity plan reviewed.',
-		domain: DomainType.Governance
-	},
-
-	{
-		key: 'director_review_completed',
-		name: 'Director Performance Review Completed',
-		description: 'Director performance review completed.',
-		domain: DomainType.Governance
-	},
-
-	{
-		key: 'salary_review_completed',
-		name: 'Salary Review Completed',
-		description: 'Salary review cycle completed.',
+		key: 'equipment_service_due',
+		name: 'Equipment Service Due',
+		description: 'Routine servicing is due.',
 		domain: DomainType.Operational
+	},
+	{
+		key: 'vehicle_mot_due',
+		name: 'Vehicle MOT Due',
+		description: 'Vehicle MOT test is due.',
+		domain: DomainType.Operational
+	},
+	{
+		key: 'backup_test_due',
+		name: 'Backup Restore Test Due',
+		description: 'Backup restore test is due.',
+		domain: DomainType.Operational
+	},
+	{
+		key: 'health_safety_audit_due',
+		name: 'Health & Safety Audit Due',
+		description: 'Workplace health and safety audit is due.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'fire_risk_assessment_due',
+		name: 'Fire Risk Assessment Due',
+		description: 'Fire risk assessment is due.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'cyber_security_review_due',
+		name: 'Cyber Security Review Due',
+		description: 'Cyber security review is due.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'disaster_recovery_test_due',
+		name: 'Disaster Recovery Test Due',
+		description: 'Disaster recovery test is due.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'business_continuity_review_due',
+		name: 'Business Continuity Review Due',
+		description: 'Business continuity review is due.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'director_review_due',
+		name: 'Director Performance Review Due',
+		description: 'Director review is due.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'salary_review_due',
+		name: 'Salary Review Due',
+		description: 'Salary review is due.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'staff_appraisal_due',
+		name: 'Staff Appraisal Due',
+		description: 'Staff appraisal is due.',
+		domain: DomainType.Governance
+	},
+
+	// ⚠️ Governance recurring (kept as “occurring events”)
+	{
+		key: 'board_meeting',
+		name: 'Board Meeting',
+		description: 'Directors meet to review company affairs.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'shareholder_meeting',
+		name: 'Shareholder Meeting',
+		description: 'Shareholders meet.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'risk_assessment_review',
+		name: 'Risk Assessment Review',
+		description: 'Risk assessment review is due.',
+		domain: DomainType.Governance
+	},
+	{
+		key: 'policy_review',
+		name: 'Policy Review',
+		description: 'Company policies should be reviewed.',
+		domain: DomainType.Governance
 	}
 ];
 
@@ -447,12 +436,58 @@ export const obligationTemplateSeeds = [
 	},
 
 	{
+		name: 'File Confirmation Statement',
+		triggerEventTypeKey: 'confirmation_statement_date',
+		obligationTypeKey: 'file_confirmation_statement',
+		dueOffsetDays: 14,
+		defaultNotes: 'Must be filed within 14 days of the confirmation date.'
+	},
+
+	{
 		name: 'Pay Corporation Tax',
-		triggerEventTypeKey: 'accounting_period_end',
+		triggerEventTypeKey: 'corporation_tax_period_end',
 		obligationTypeKey: 'pay_corporation_tax',
-		dueOffsetDays: 274,
+		dueOffsetDays: 274, // 9 months + 1 day
 		defaultNotes:
 			'Corporation tax must normally be paid nine months and one day after the accounting period ends.'
+	},
+	{
+		name: 'File CT600',
+		triggerEventTypeKey: 'corporation_tax_period_end',
+		obligationTypeKey: 'file_ct600',
+		dueOffsetDays: 365,
+		defaultNotes:
+			'For most UK limited companies, a Company Tax Return (form CT600) must be filed with HM Revenue & Customs (HMRC) 12 months after the end of the accounting period it covers'
+	},
+	{
+		name: 'Submit VAT Return',
+		triggerEventTypeKey: 'vat_period_end',
+		obligationTypeKey: 'submit_vat_return',
+		dueOffsetDays: 37,
+		defaultNotes: 'VAT Return must be submitted quarterly, monthly or annually'
+	},
+	{
+		name: 'Pay VAT',
+		triggerEventTypeKey: 'vat_period_end',
+		obligationTypeKey: 'pay_vat',
+		dueOffsetDays: 37,
+		defaultNotes: 'VAT due must be paid quarterly, monthly or annually'
+	},
+
+	{
+		name: 'Pay PAYE',
+		triggerEventTypeKey: 'payroll_month_end',
+		obligationTypeKey: 'pay_paye',
+		dueOffsetDays: 22,
+		defaultNotes: 'PAYE must be paid by the 22nd of the following month (electronic payment).'
+	},
+
+	{
+		name: 'Submit Final FPS',
+		triggerEventTypeKey: 'payroll_year_end',
+		obligationTypeKey: 'pay_paye',
+		dueOffsetDays: 19,
+		defaultNotes: 'Final Full Payment Submission must be sent by 19 April.'
 	},
 
 	{
@@ -473,9 +508,9 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Backup Restore Test',
-		triggerEventTypeKey: 'backup_test_completed',
+		triggerEventTypeKey: 'backup_test_due', // ✅ FIXED
 		obligationTypeKey: 'backup_restore_test',
-		dueOffsetDays: 365,
+		dueOffsetDays: 0,
 		defaultNotes: 'Regularly test backup restoration to ensure data recovery is possible.'
 	},
 
@@ -513,23 +548,23 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Cyber Security Review',
-		triggerEventTypeKey: 'cyber_security_review_completed',
+		triggerEventTypeKey: 'cyber_security_review_due', // ✅ FIXED
 		obligationTypeKey: 'cyber_security_review',
-		dueOffsetDays: 365,
+		dueOffsetDays: 0,
 		defaultNotes: 'Review MFA usage, password policies, and system access controls.'
 	},
 
 	{
 		name: 'Disaster Recovery Test',
-		triggerEventTypeKey: 'disaster_recovery_test_completed',
+		triggerEventTypeKey: 'disaster_recovery_test_due', // ✅ FIXED
 		obligationTypeKey: 'disaster_recovery_test',
-		dueOffsetDays: 365,
+		dueOffsetDays: 0,
 		defaultNotes: 'Test restoring systems from backup and verify recovery procedures.'
 	},
 
 	{
 		name: 'Website Terms Review',
-		triggerEventTypeKey: 'policy_created',
+		triggerEventTypeKey: 'policy_review',
 		obligationTypeKey: 'website_terms_review',
 		dueOffsetDays: 365,
 		defaultNotes: 'Ensure privacy policy, cookie policy and terms comply with current regulations.'
@@ -538,25 +573,23 @@ export const obligationTemplateSeeds = [
 
 export const defaultRecurrenceRules = [
 	{
-		eventTypeKey: 'board_meeting_held',
+		eventTypeKey: 'board_meeting',
 		organisationId: organisationUkLtd.id,
 		name: 'Quarterly Board Meeting',
 		frequency: RecurrenceFrequencyType.Monthly,
 		interval: 3,
 		startDate: new Date()
 	},
-
 	{
-		eventTypeKey: 'shareholder_meeting_held',
+		eventTypeKey: 'shareholder_meeting',
 		organisationId: organisationUkLtd.id,
 		name: 'Annual Shareholder Meeting',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
 		startDate: new Date()
 	},
-
 	{
-		eventTypeKey: 'risk_assessment_created',
+		eventTypeKey: 'risk_assessment_review',
 		organisationId: organisationUkLtd.id,
 		name: 'Annual Risk Review',
 		frequency: RecurrenceFrequencyType.Yearly,
@@ -564,25 +597,23 @@ export const defaultRecurrenceRules = [
 		startDate: new Date()
 	},
 	{
-		eventTypeKey: 'policy_created',
+		eventTypeKey: 'policy_review',
 		organisationId: organisationUkLtd.id,
 		name: 'Annual Policy Review',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
 		startDate: new Date()
 	},
-
 	{
-		eventTypeKey: 'backup_test_completed',
+		eventTypeKey: 'backup_test_due', // ✅ FIXED
 		organisationId: organisationUkLtd.id,
-		name: 'Annual Backup Restore Test',
+		name: 'Annual Backup Test',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
 		startDate: new Date()
 	},
-
 	{
-		eventTypeKey: 'cyber_security_review_completed',
+		eventTypeKey: 'cyber_security_review_due', // ✅ FIXED
 		organisationId: organisationUkLtd.id,
 		name: 'Annual Cyber Security Review',
 		frequency: RecurrenceFrequencyType.Yearly,

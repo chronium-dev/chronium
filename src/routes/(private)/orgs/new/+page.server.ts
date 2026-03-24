@@ -1,30 +1,31 @@
 // +page.server.ts
-import { companySchema } from '$lib/validations/company';
+import { organisationFormSchema } from '$lib/validations/organisation';
 import { zod4 } from 'sveltekit-superforms/adapters';
 // import { message, superValidate } from 'sveltekit-superforms/server';
-import type { Actions, PageServerLoad } from './$types';
+import { createOrg } from '$lib/server/db/queries';
+import { generateCompliancePack } from '$lib/server/setup/generateCompliancePack';
 import { fail } from '@sveltejs/kit';
 import { message, superValidate } from 'sveltekit-superforms';
-import { createOrg } from '$lib/server/db/queries';
+import type { Actions, PageServerLoad } from './$types';
+import type { NewOrganisation, Organisation } from '$lib/types/organisations';
 
 export const load: PageServerLoad = async () => {
 	// Pass no data → superValidate uses schema defaults → blank form
-	const form = await superValidate(zod4(companySchema));
+	const form = await superValidate(zod4(organisationFormSchema));
 	return { form };
 };
 
 export const actions: Actions = {
 	default: async (event) => {
-		const form = await superValidate(event, zod4(companySchema));
+		const form = await superValidate(event, zod4(organisationFormSchema));
 
 		if (!form.valid) {
 			return fail(400, { form });
 		}
 
 		try {
-			// --- YOUR CRUD HERE ---
-			// await db.company.create({ data: form.data });
-			await createOrg(form.data);
+			const newOrg: Organisation = await createOrg(form.data);
+			await generateCompliancePack(newOrg);
 
 			return message(form, 'Company created successfully!');
 		} catch (err) {
@@ -35,19 +36,3 @@ export const actions: Actions = {
 		}
 	}
 };
-
-// export const actions = {
-// 	default: async ({ request }) => {
-// 		debugger;
-// 		const form = await superValidate(request, zod4(companySchema));
-
-// 		if (!form.valid) {
-// 			return { form };
-// 		}
-
-// 		// save (create or update)
-// 		// await createOrg(form.data);
-
-// 		return { form };
-// 	}
-// };

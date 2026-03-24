@@ -1,6 +1,9 @@
+import { pgEnum } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 
-export const companySchema = z
+export const employeeCountEnum = pgEnum('employee_count_enum', ['0', '1-5', '6-20', '20+']);
+
+export const organisationFormSchema = z
 	.object({
 		id: z.string().optional(),
 		name: z
@@ -20,7 +23,9 @@ export const companySchema = z
 			error: 'Please select an option'
 		}),
 		// Only required when payrollActive === 'yes' — enforced with superRefine
-		employeeCount: z.enum(['0', '1-5', '6-20', '20+']).optional(),
+		//employeeCount: z.enum(['0', '1-5', '6-20', '20+']).nullish(),
+		// This automatically pulls ['0', '1-5', '6-20', '20+']
+		employeeCount: z.enum(employeeCountEnum.enumValues).nullish(),
 		businessPremises: z.enum(['yes', 'no'], {
 			error: 'Please select an option'
 		})
@@ -35,30 +40,5 @@ export const companySchema = z
 		}
 	});
 
-export type CompanySchema = typeof companySchema;
-export type CompanyFormData = z.infer<typeof companySchema>;
-
-// export const companySchema = z
-// 	.object({
-// 		companyName: z.string().min(1, 'Company name required'),
-// 		incorporationDate: z.string().min(1, 'Required'),
-// 		financialYearEnd: z.string().min(1, 'Required'),
-// 		vatRegistered: z.enum(['yes', 'no']),
-// 		payrollActive: z.enum(['yes', 'no']),
-// 		businessPremises: z.enum(['yes', 'no']),
-// 		employeeCount: z.enum(['0', '1-5', '6-20', '20+']).optional()
-// 	})
-// 	.refine(
-// 		(data) => {
-// 			if (data.payrollActive === 'yes') {
-// 				return !!data.employeeCount;
-// 			}
-// 			return true;
-// 		},
-// 		{
-// 			message: 'Employee count required when payroll is active',
-// 			path: ['employeeCount']
-// 		}
-// 	);
-
-// export type CompanySchema = typeof companySchema;
+export type OrganisationSchema = typeof organisationFormSchema;
+export type OrganisationFormData = z.infer<typeof organisationFormSchema>;

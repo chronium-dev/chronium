@@ -117,7 +117,7 @@ const load = async () => {
 					organisationId: organisationUkLtd.id,
 					eventTypeId: eventTypeId,
 					name: item.name,
-					startDate: item.startDate.toISOString(),
+					startDate: item.startDate,
 					frequency: item.frequency,
 					interval: item.interval
 				});
