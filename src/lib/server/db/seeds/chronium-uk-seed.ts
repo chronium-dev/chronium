@@ -431,7 +431,8 @@ export const obligationTemplateSeeds = [
 		name: 'File Annual Accounts',
 		triggerEventTypeKey: 'accounting_period_end',
 		obligationTypeKey: 'file_annual_accounts',
-		dueOffsetDays: 273,
+		dueOffsetMonths: 9,
+		dueOffsetDays: 0,
 		defaultNotes: 'Your accountant normally prepares and files these with Companies House.'
 	},
 
@@ -447,7 +448,8 @@ export const obligationTemplateSeeds = [
 		name: 'Pay Corporation Tax',
 		triggerEventTypeKey: 'corporation_tax_period_end',
 		obligationTypeKey: 'pay_corporation_tax',
-		dueOffsetDays: 274, // 9 months + 1 day
+		dueOffsetMonths: 9, // 9 months
+		dueOffsetDays: 1, // ... + 1 day
 		defaultNotes:
 			'Corporation tax must normally be paid nine months and one day after the accounting period ends.'
 	},
@@ -463,14 +465,16 @@ export const obligationTemplateSeeds = [
 		name: 'Submit VAT Return',
 		triggerEventTypeKey: 'vat_period_end',
 		obligationTypeKey: 'submit_vat_return',
-		dueOffsetDays: 37,
+		dueOffsetMonths: 1,
+		dueOffsetDays: 7,
 		defaultNotes: 'VAT Return must be submitted quarterly, monthly or annually'
 	},
 	{
 		name: 'Pay VAT',
 		triggerEventTypeKey: 'vat_period_end',
 		obligationTypeKey: 'pay_vat',
-		dueOffsetDays: 37,
+		dueOffsetMonths: 1,
+		dueOffsetDays: 7,
 		defaultNotes: 'VAT due must be paid quarterly, monthly or annually'
 	},
 

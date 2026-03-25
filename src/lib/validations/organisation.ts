@@ -2,6 +2,8 @@ import { pgEnum } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 
 export const employeeCountEnum = pgEnum('employee_count_enum', ['0', '1-5', '6-20', '20+']);
+export const vatFrequencyEnum = pgEnum('vat_frequency_enum', ['quarterly', 'monthly', 'annual']);
+export const vatQuarterGroupEnum = pgEnum('vat_quarter_group_enum', ['jan', 'feb', 'mar']);
 
 export const organisationFormSchema = z
 	.object({
@@ -19,6 +21,14 @@ export const organisationFormSchema = z
 		vatRegistered: z.enum(['yes', 'no'], {
 			error: 'Please select an option'
 		}),
+		vatFrequency: z.enum(vatFrequencyEnum.enumValues).nullish(),
+		// How often do they submit returns? 'quarterly' | 'monthly' | 'annual'
+
+		vatQuarterGroup: z.enum(vatQuarterGroupEnum.enumValues).nullish(),
+		// If quarterly → which stagger? 'jan' | 'feb' | 'mar' (NULL if not quarterly)
+
+		vatStartDate: z.string().nullish(),
+
 		payrollActive: z.enum(['yes', 'no'], {
 			error: 'Please select an option'
 		}),
@@ -38,7 +48,35 @@ export const organisationFormSchema = z
 				path: ['employeeCount']
 			});
 		}
+
+		if (data.vatRegistered === 'yes' && !data.vatFrequency) {
+			ctx.addIssue({
+				code: 'custom',
+				message: 'Please select VAT submission frequency',
+				path: ['vatFrequency']
+			});
+		}
+
+		if (data.vatRegistered === 'yes' && !data.vatStartDate) {
+			ctx.addIssue({
+				code: 'custom',
+				message: 'Please enter your next VAT period end',
+				path: ['vatStartDate']
+			});
+		}
 	});
+
+// Transformed schema — used only on the server when processing the submission
+// export const organisationFormSchemaTransformed = organisationFormSchema.transform((data) => {
+// 	if (data.vatRegistered === 'yes' && data.vatFrequency === 'quarterly' && data.vatStartDate) {
+// 		const startDate = endOfMonth(new Date(data.vatStartDate + '-01'));
+// 		const vatQuarterGroup = inferVatQuarterGroup(startDate);
+// 		// const vatQuarterGroup = {};
+// 		return { ...data, vatQuarterGroup };
+// 	}
+// 	return data;
+// });
 
 export type OrganisationSchema = typeof organisationFormSchema;
 export type OrganisationFormData = z.infer<typeof organisationFormSchema>;
+// export type OrganisationFormDataTransformed = z.infer<typeof organisationFormSchemaTransformed>;

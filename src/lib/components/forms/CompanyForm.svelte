@@ -3,6 +3,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { theme } from '$lib/stores/theme';
 	import { cn } from '$lib/utils';
+	import { toProperCase } from '$lib/utils/misc';
 	import { organisationFormSchema, type OrganisationSchema } from '$lib/validations/organisation';
 	import { onDestroy, untrack } from 'svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
@@ -29,6 +30,9 @@
 	// Conditional: only show employee count when payroll is active
 	const showEmployeeCount = $derived($formData.payrollActive === 'yes');
 
+	// Conditional: only show VAT selections when VAT registered is true
+	const showVatInputs = $derived($formData.vatRegistered === 'yes');
+
 	const submitLabel = $derived(
 		$submitting ? 'Saving...' : mode === 'create' ? 'Create company...' : 'Save Changes'
 	);
@@ -38,6 +42,22 @@
 		$formData.payrollActive = value;
 		if (value === 'no') {
 			$formData.employeeCount = undefined;
+		}
+	}
+
+	function handleVatRegisteredChange(value: 'yes' | 'no') {
+		$formData.vatRegistered = value;
+		if (value === 'no') {
+			$formData.vatFrequency = undefined;
+			$formData.vatQuarterGroup = undefined;
+			$formData.vatStartDate = undefined;
+		}
+	}
+
+	function handleVatFrequencyChange(value: 'monthly' | 'quarterly' | 'annual') {
+		$formData.vatFrequency = value;
+		if (value !== 'monthly') {
+			$formData.vatStartDate = undefined;
 		}
 	}
 
@@ -126,7 +146,9 @@
 					)}
 					style="color-scheme: {isDark ? 'dark' : 'light'}"
 				/>
-				<p class='text-xs italic text-muted-foreground'>We'll use this to determine your ongoing reporting deadlines</p>
+				<p class="text-xs text-muted-foreground italic">
+					We'll use this to determine your ongoing reporting deadlines
+				</p>
 			{/snippet}
 		</Form.Control>
 		<Form.FieldErrors />
@@ -136,7 +158,7 @@
 	<Form.Field form={sf} name="vatRegistered">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Form.Label>VAT Registered?</Form.Label>
+				<Form.Label>Are you VAT Registered?</Form.Label>
 				<div class="mt-1 flex gap-6">
 					{#each ['yes', 'no'] as option}
 						<label class="flex cursor-pointer items-center gap-2">
@@ -144,7 +166,8 @@
 								type="radio"
 								name={props.name}
 								value={option}
-								bind:group={$formData.vatRegistered}
+								checked={$formData.vatRegistered === option}
+								onchange={() => handleVatRegisteredChange(option as 'yes' | 'no')}
 								class="h-4 w-4 border-input text-primary focus:ring-ring"
 							/>
 							<span class="text-sm">{option === 'yes' ? 'Yes' : 'No'}</span>
@@ -155,6 +178,57 @@
 		</Form.Control>
 		<Form.FieldErrors />
 	</Form.Field>
+
+	{#if showVatInputs}
+		<Form.Field form={sf} name="vatFrequency">
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>How often do you submit VAT returns?</Form.Label>
+					<div class="mt-1 flex flex-col gap-3">
+						{#each ['quarterly', 'monthly', 'annual'] as option}
+							<label class="flex cursor-pointer items-center gap-2">
+								<input
+									type="radio"
+									name={props.name}
+									value={option}
+									checked={$formData.vatFrequency === option}
+									onchange={() =>
+										handleVatFrequencyChange(option as 'monthly' | 'quarterly' | 'annual')}
+									class="h-4 w-4 border-input text-primary focus:ring-ring"
+								/>
+								<span class="text-sm">{toProperCase(option)}</span>
+							</label>
+						{/each}
+					</div>
+				{/snippet}
+			</Form.Control>
+			<Form.FieldErrors />
+		</Form.Field>
+
+		<Form.Field form={sf} name="vatStartDate">
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>When is your next VAT period end?</Form.Label>
+					<input
+						{...props}
+						type="month"
+						bind:value={$formData.vatStartDate}
+						class={cn(
+							'flex h-10 w-fit rounded-md border border-input bg-background px-3 py-2 text-sm',
+							'ring-offset-background',
+							'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
+							$errors.vatStartDate && 'border-destructive'
+						)}
+						style="color-scheme: {isDark ? 'dark' : 'light'}"
+					/>
+					<p class="text-xs text-muted-foreground italic">
+						Select the month in which your VAT period ends
+					</p>
+				{/snippet}
+			</Form.Control>
+			<Form.FieldErrors />
+		</Form.Field>
+	{/if}
 
 	<!-- 5. Payroll / PAYE Active (horizontal radio) -->
 	<Form.Field form={sf} name="payrollActive">

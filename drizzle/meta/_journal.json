@@ -57,6 +57,20 @@
       "when": 1774368532490,
       "tag": "0007_certain_ted_forrester",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1774431626751,
+      "tag": "0008_daily_proemial_gods",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774432494879,
+      "tag": "0009_odd_veda",
+      "breakpoints": true
     }
   ]
 }

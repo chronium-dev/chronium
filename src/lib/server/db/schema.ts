@@ -1,4 +1,8 @@
-import { employeeCountEnum } from '$lib/validations/organisation';
+import {
+	employeeCountEnum,
+	vatFrequencyEnum,
+	vatQuarterGroupEnum
+} from '$lib/validations/organisation';
 import {
 	boolean,
 	date,
@@ -11,6 +15,8 @@ import {
 	uniqueIndex
 } from 'drizzle-orm/pg-core';
 import { createId } from '../../../lib/utils/createid';
+
+export { employeeCountEnum, vatFrequencyEnum, vatQuarterGroupEnum };
 
 export const obligationStatusEnum = pgEnum('obligation_status', [
 	'pending',
@@ -45,6 +51,8 @@ export const DomainType = {
 	Operational: 'operational',
 	Governance: 'governance'
 } as const satisfies Record<string, DomainType>;
+
+//export vatFrequencyEnum as vatFrequencyEnum from '../../../lib/validations/organisation';
 
 export const user = pgTable('user', {
 	id: text('id').primaryKey(),
@@ -125,7 +133,12 @@ export const verification = pgTable(
 );
 
 export const memberRoleEnum = pgEnum('member_role', ['owner', 'admin', 'member']);
-export type MemberRoleType = (typeof memberRoleEnum.enumValues)[number];
+export type MemberRole = (typeof memberRoleEnum.enumValues)[number];
+export const MemberRole = {
+	Owner: 'owner',
+	Admin: 'admin',
+	Member: 'member'
+} as const satisfies Record<string, MemberRole>;
 
 export const organisation = pgTable('organisation', {
 	id: text('id').primaryKey(),
@@ -143,16 +156,14 @@ export const organisation = pgTable('organisation', {
 	financialYearEndMonth: integer('financial_year_end_month').notNull(), // 1–12
 	financialYearEndDay: integer('financial_year_end_day').notNull(),
 	vatRegistered: boolean('vat_registered').notNull(),
-	vatScheme: text('vat_scheme'), // 'standard' | 'flat_rate' | etc (optional later)
+	vatFrequency: vatFrequencyEnum('vat_frequency'),
+	// How often do they submit returns? 'quarterly' | 'monthly' | 'annual'
 
-	vatFrequency: text('vat_frequency'),
-	// 'quarterly' | 'monthly' | 'annual'
-
-	vatQuarterGroup: text('vat_quarter_group'),
-	// 'mar' | 'jan' | 'feb' (NULL if not quarterly)
+	vatQuarterGroup: vatQuarterGroupEnum('vat_quarter_group'),
+	// If quarterly → which stagger? 'mar' | 'jan' | 'feb' (NULL if not quarterly)
 
 	vatStartDate: date('vat_start_date'),
-	// optional but VERY useful for alignment
+	// Set initially to the next VAT period end date? Optional but VERY useful for alignment
 
 	payrollActive: boolean('payroll_active').notNull(),
 	employeeCount: employeeCountEnum('employee_count'),
@@ -239,7 +250,8 @@ export const obligationTemplates = pgTable(
 			.notNull(),
 		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),
 		entityTypeId: text('entity_type_id').references(() => entityTypes.id),
-		dueOffsetDays: integer('due_offset_days').notNull(),
+		dueOffsetMonths: integer('due_offset_months').notNull().default(0),
+		dueOffsetDays: integer('due_offset_days').notNull().default(0),
 		defaultNotes: text('default_notes'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })

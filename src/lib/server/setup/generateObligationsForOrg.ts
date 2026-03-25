@@ -2,7 +2,7 @@
 
 import { db } from '$lib/server/db';
 import { obligations } from '$lib/server/db/schema';
-import { addDays } from 'date-fns';
+import { addDays, addMonths } from 'date-fns';
 
 export async function generateObligationsForOrg(orgId: string) {
 	const orgEvents = await db.query.events.findMany({
@@ -15,7 +15,7 @@ export async function generateObligationsForOrg(orgId: string) {
 		});
 
 		for (const template of templates) {
-			const dueDate = addDays(new Date(event.eventDate), template.dueOffsetDays);
+			const dueDate = addDays(addMonths(new Date(event.eventDate), template.dueOffsetMonths), template.dueOffsetDays);
 
 			await db
 				.insert(obligations)

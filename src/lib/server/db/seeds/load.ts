@@ -102,7 +102,8 @@ const load = async () => {
 					triggerEventTypeId: triggerId,
 					jurisdictionId: jurisdictionUK.id,
 					entityTypeId: entityTypeUkLtd.id,
-					dueOffsetDays: item.dueOffsetDays
+					dueOffsetDays: item.dueOffsetDays,
+					dueOffsetMonths: item.dueOffsetMonths
 				});
 			}
 

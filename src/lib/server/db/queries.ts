@@ -3,12 +3,13 @@
 // ============================================================================
 
 import { entityTypeUkLtd, jurisdictionUK } from '$lib/config/ukdata';
+import type { Organisation } from '$lib/types/organisations';
 import { createId } from '$lib/utils/createid';
 import type { OrganisationFormData } from '$lib/validations/organisation';
 import { and, count, eq } from 'drizzle-orm';
 import { mapOrgFormDataToDbValues } from '../../mappers/organisation';
 import { db } from './index';
-import { member, type MemberRoleType, organisation, user } from './schema';
+import { member, MemberRole, organisation, user } from './schema';
 
 // ============================================================================
 // ORGANISATION QUERIES
@@ -17,20 +18,42 @@ export type OrgListContextType = {
 	id: string;
 	name: string | null;
 	logo: string | null;
-	role: MemberRoleType;
+	role: MemberRole;
 };
 
-export async function createOrg(data: OrganisationFormData) {
-	const [org] = await db
-		.insert(organisation)
-		.values({
-			...mapOrgFormDataToDbValues(data),
-			id: createId(),
-			jurisdictionId: jurisdictionUK.id,
-			entityTypeId: entityTypeUkLtd.id
-		})
-		.returning();
-	return org;
+export type CreateOrgResult = { ok: true; org: Organisation } | { ok: false; message: string };
+
+export async function createOrg(
+	data: OrganisationFormData,
+	userId: string
+): Promise<CreateOrgResult> {
+	return await db.transaction(async (tx) => {
+		// 1. Check for existing organization (e.g., by Name)
+		const existing = await tx.query.organisation.findFirst({
+			where: (org, { eq }) => eq(org.name, data.name)
+		});
+
+		if (existing) {
+			return {
+				ok: false,
+				message: 'An organisation with this name already exists.'
+			};
+		}
+
+		const [org] = await tx
+			.insert(organisation)
+			.values({
+				...mapOrgFormDataToDbValues(data),
+				id: createId(),
+				jurisdictionId: jurisdictionUK.id,
+				entityTypeId: entityTypeUkLtd.id
+			})
+			.returning();
+
+		await tx.insert(member).values({ organisationId: org.id, userId, role: MemberRole.Owner });
+
+		return { ok: true, org };
+	});
 }
 
 export async function updateOrg(data: OrganisationFormData) {
