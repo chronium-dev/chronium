@@ -91,8 +91,8 @@ export const eventTypeSeeds = [
 		domain: DomainType.Statutory
 	},
 	{
-		key: 'confirmation_statement_date',
-		name: 'Confirmation Statement Date',
+		key: 'confirmation_statement_period_end',
+		name: 'Confirmation Statement Period End',
 		description: 'Anniversary of company incorporation.',
 		domain: DomainType.Statutory
 	},
@@ -279,6 +279,13 @@ export const obligationTypeSeeds = [
 	},
 
 	{
+		key: 'submit_final_fps',
+		name: 'Submit Final FPS',
+		description: 'Final Full Payment Submission due.',
+		domain: DomainType.Statutory
+	},
+
+	{
 		key: 'renew_insurance',
 		name: 'Renew Insurance Policy',
 		description: 'Renew company insurance policy.',
@@ -433,12 +440,17 @@ export const obligationTemplateSeeds = [
 		obligationTypeKey: 'file_annual_accounts',
 		dueOffsetMonths: 9,
 		dueOffsetDays: 0,
-		defaultNotes: 'Your accountant normally prepares and files these with Companies House.'
+		firstOccurrenceOverride: true,
+		firstOccurrenceBase: 'incorporation',
+		firstOccurrenceMonths: 21,
+		firstOccurrenceDays: 0,
+		defaultNotes:
+			'Accounts must be filed 9 months after the accounting period end (first accounts: 21 months from incorporation).'
 	},
 
 	{
 		name: 'File Confirmation Statement',
-		triggerEventTypeKey: 'confirmation_statement_date',
+		triggerEventTypeKey: 'confirmation_statement_period_end',
 		obligationTypeKey: 'file_confirmation_statement',
 		dueOffsetDays: 14,
 		defaultNotes: 'Must be filed within 14 days of the confirmation date.'
@@ -457,7 +469,7 @@ export const obligationTemplateSeeds = [
 		name: 'File CT600',
 		triggerEventTypeKey: 'corporation_tax_period_end',
 		obligationTypeKey: 'file_ct600',
-		dueOffsetDays: 365,
+		dueOffsetMonths: 12,
 		defaultNotes:
 			'For most UK limited companies, a Company Tax Return (form CT600) must be filed with HM Revenue & Customs (HMRC) 12 months after the end of the accounting period it covers'
 	},
@@ -489,7 +501,7 @@ export const obligationTemplateSeeds = [
 	{
 		name: 'Submit Final FPS',
 		triggerEventTypeKey: 'payroll_year_end',
-		obligationTypeKey: 'pay_paye',
+		obligationTypeKey: 'submit_final_fps',
 		dueOffsetDays: 19,
 		defaultNotes: 'Final Full Payment Submission must be sent by 19 April.'
 	},
@@ -512,7 +524,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Backup Restore Test',
-		triggerEventTypeKey: 'backup_test_due', // ✅ FIXED
+		triggerEventTypeKey: 'backup_test_due',
 		obligationTypeKey: 'backup_restore_test',
 		dueOffsetDays: 0,
 		defaultNotes: 'Regularly test backup restoration to ensure data recovery is possible.'
@@ -609,7 +621,7 @@ export const defaultRecurrenceRules = [
 		startDate: new Date()
 	},
 	{
-		eventTypeKey: 'backup_test_due', // ✅ FIXED
+		eventTypeKey: 'backup_test_due',
 		organisationId: organisationUkLtd.id,
 		name: 'Annual Backup Test',
 		frequency: RecurrenceFrequencyType.Yearly,
@@ -617,7 +629,7 @@ export const defaultRecurrenceRules = [
 		startDate: new Date()
 	},
 	{
-		eventTypeKey: 'cyber_security_review_due', // ✅ FIXED
+		eventTypeKey: 'cyber_security_review_due', 
 		organisationId: organisationUkLtd.id,
 		name: 'Annual Cyber Security Review',
 		frequency: RecurrenceFrequencyType.Yearly,

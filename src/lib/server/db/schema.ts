@@ -154,7 +154,7 @@ export const organisation = pgTable('organisation', {
 		.notNull(),
 	incorporationDate: date('incorporation_date').notNull(),
 	financialYearEndMonth: integer('financial_year_end_month').notNull(), // 1–12
-	financialYearEndDay: integer('financial_year_end_day').notNull(),
+	financialYearEndDay: integer('financial_year_end_day').notNull(), // NB: 0 -> means last day of month
 	vatRegistered: boolean('vat_registered').notNull(),
 	vatFrequency: vatFrequencyEnum('vat_frequency'),
 	// How often do they submit returns? 'quarterly' | 'monthly' | 'annual'
@@ -168,6 +168,7 @@ export const organisation = pgTable('organisation', {
 	payrollActive: boolean('payroll_active').notNull(),
 	employeeCount: employeeCountEnum('employee_count'),
 	businessPremises: boolean('business_premises').notNull(),
+	obligationGenerationHorizon: date('obligation_generation_horizon', { mode: 'date' }),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()
@@ -228,7 +229,7 @@ export const events = pgTable(
 	},
 	(table) => [
 		index('events_event_type_idx').on(table.eventTypeId),
-		uniqueIndex('events_unique').on(table.organisationId, table.eventTypeId, table.eventDate)
+		uniqueIndex('events_unique').on(table.organisationId, table.eventTypeId, table.eventDate) // 🔜 include assetId later
 	]
 );
 
@@ -252,6 +253,10 @@ export const obligationTemplates = pgTable(
 		entityTypeId: text('entity_type_id').references(() => entityTypes.id),
 		dueOffsetMonths: integer('due_offset_months').notNull().default(0),
 		dueOffsetDays: integer('due_offset_days').notNull().default(0),
+		firstOccurrenceOverride: boolean('first_occurrence_override'),
+		firstOccurrenceBase: text('first_occurrence_base'),
+		firstOccurrenceMonths: integer('first_occurrence_months'),
+		firstOccurrenceDays: integer('first_occurrence_days'),
 		defaultNotes: text('default_notes'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -287,6 +292,9 @@ export const obligations = pgTable(
 			.notNull(),
 		templateId: text('template_id').references(() => obligationTemplates.id),
 		generatedFromEventId: text('generated_from_event_id').references(() => events.id),
+		assignedToUserId: text('assigned_to_user_id')
+			.references(() => user.id)
+			.notNull(),
 		dueDate: date('due_date', { mode: 'date' }).notNull(),
 		status: obligationStatusEnum('status').default('pending').notNull(),
 		userNotes: text('user_notes'),

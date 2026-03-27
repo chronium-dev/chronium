@@ -1,0 +1,1 @@
+export type FormMessage = { status: number; text: string };

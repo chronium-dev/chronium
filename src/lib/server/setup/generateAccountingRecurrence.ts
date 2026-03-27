@@ -3,6 +3,7 @@
 import { db } from '$lib/server/db';
 import { eventTypes, recurrenceRules } from '$lib/server/db/schema';
 import type { Organisation } from '$lib/types/organisations';
+import { getCustomDate } from '$lib/utils/dates';
 import { eq } from 'drizzle-orm';
 
 export async function generateAccountingRecurrence(org: Organisation) {
@@ -22,10 +23,10 @@ export async function generateAccountingRecurrence(org: Organisation) {
 
 	let year = now.getFullYear();
 
-	let fyEnd = new Date(year, org.financialYearEndMonth - 1, org.financialYearEndDay);
+	let fyEnd = getCustomDate(year, org.financialYearEndMonth - 1, org.financialYearEndDay);
 
-	if (fyEnd < now) {
-		fyEnd = new Date(year + 1, org.financialYearEndMonth - 1, org.financialYearEndDay);
+	if (fyEnd <= now) {
+		fyEnd = getCustomDate(year + 1, org.financialYearEndMonth - 1, org.financialYearEndDay);
 	}
 
 	// 🔵 Accounting period

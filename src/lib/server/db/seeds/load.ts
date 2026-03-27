@@ -1,13 +1,11 @@
 import { db } from '../index.ts';
 import * as schema from './../schema';
 import {
-	defaultRecurrenceRules,
 	entityTypeUkLtd,
 	eventTypeSeeds,
 	jurisdictionUK,
 	obligationTemplateSeeds,
-	obligationTypeSeeds,
-	organisationUkLtd
+	obligationTypeSeeds
 } from './chronium-uk-seed';
 
 // 1. Properly type the transaction object using Drizzle's ExtractTablesWithRelations
@@ -77,7 +75,7 @@ const load = async () => {
 
 			await tx.insert(schema.jurisdictions).values(jurisdictionUK);
 			await tx.insert(schema.entityTypes).values(entityTypeUkLtd);
-			await tx.insert(schema.organisation).values(organisationUkLtd);
+			//await tx.insert(schema.organisation).values(organisationUkLtd);
 			await tx.insert(schema.eventTypes).values(eventTypeSeeds);
 			await tx.insert(schema.obligationTypes).values(obligationTypeSeeds);
 
@@ -103,26 +101,30 @@ const load = async () => {
 					jurisdictionId: jurisdictionUK.id,
 					entityTypeId: entityTypeUkLtd.id,
 					dueOffsetDays: item.dueOffsetDays,
-					dueOffsetMonths: item.dueOffsetMonths
+					dueOffsetMonths: item.dueOffsetMonths,
+					firstOccurrenceOverride: item.firstOccurrenceOverride,
+					firstOccurrenceBase: item.firstOccurrenceBase,
+					firstOccurrenceMonths: item.firstOccurrenceMonths,
+					firstOccurrenceDays: item.firstOccurrenceDays
 				});
 			}
 
-			for (const item of defaultRecurrenceRules) {
-				const eventTypeId = eventTypeMap.get(item.eventTypeKey);
-				// Guard: Drizzle will complain if these are undefined but marked .notNull()
-				if (!eventTypeId) {
-					throw new Error(`Missing lookup for ${item.eventTypeKey}`);
-				}
+			// for (const item of defaultRecurrenceRules) {
+			// 	const eventTypeId = eventTypeMap.get(item.eventTypeKey);
+			// 	// Guard: Drizzle will complain if these are undefined but marked .notNull()
+			// 	if (!eventTypeId) {
+			// 		throw new Error(`Missing lookup for ${item.eventTypeKey}`);
+			// 	}
 
-				await tx.insert(schema.recurrenceRules).values({
-					organisationId: organisationUkLtd.id,
-					eventTypeId: eventTypeId,
-					name: item.name,
-					startDate: item.startDate,
-					frequency: item.frequency,
-					interval: item.interval
-				});
-			}
+			// 	await tx.insert(schema.recurrenceRules).values({
+			// 		organisationId: organisationUkLtd.id,
+			// 		eventTypeId: eventTypeId,
+			// 		name: item.name,
+			// 		startDate: item.startDate,
+			// 		frequency: item.frequency,
+			// 		interval: item.interval
+			// 	});
+			// }
 		});
 
 		console.log('✅ Seed completed successfully.');

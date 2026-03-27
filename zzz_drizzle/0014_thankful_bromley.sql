@@ -1,1 +1,0 @@
-ALTER TABLE "obligations" ADD COLUMN "user_notes" text;

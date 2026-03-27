@@ -9,7 +9,7 @@ import { generatePayrollRecurrence } from '$lib/server/setup/generatePayrollRecu
 import { generateVatRecurrence } from '$lib/server/setup/generateVatRecurrence';
 import type { Organisation } from '$lib/types/organisations';
 
-export async function generateCompliancePack(org: Organisation) {
+export async function generateCompliancePack(org: Organisation, userId: string) {
 	// 1. Recurrence rules
 	await generateAccountingRecurrence(org);
 	await generateConfirmationStatementRecurrence(org);
@@ -23,5 +23,5 @@ export async function generateCompliancePack(org: Organisation) {
 	await generateFirstYearCorporationTaxEvents(org);
 
 	// 4. Obligations
-	await generateObligationsForOrg(org.id);
+	await generateObligationsForOrg(org.id, userId);
 }

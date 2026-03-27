@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Form from '$lib/components/ui/form';
 	import { theme } from '$lib/stores/theme';
+	import type { FormMessage } from '$lib/types/forms';
 	import { cn } from '$lib/utils';
 	import { toProperCase } from '$lib/utils/misc';
 	import { organisationFormSchema, type OrganisationSchema } from '$lib/validations/organisation';
@@ -19,7 +20,7 @@
 	} = $props();
 
 	const sf = untrack(() =>
-		superForm(data, {
+		superForm<Infer<OrganisationSchema>, FormMessage>(data, {
 			validators: zod4Client(organisationFormSchema),
 			validationMethod: 'oninput'
 		})
@@ -53,16 +54,6 @@
 			$formData.vatStartDate = undefined;
 		}
 	}
-
-	function handleVatFrequencyChange(value: 'monthly' | 'quarterly' | 'annual') {
-		$formData.vatFrequency = value;
-		if (value !== 'monthly') {
-			$formData.vatStartDate = undefined;
-		}
-	}
-
-	// const colorScheme = $derived(themeMode.current === 'dark' ? 'dark' : 'light');
-	// $inspect(colorScheme);
 
 	let isDark = $state(false);
 
@@ -191,9 +182,7 @@
 									type="radio"
 									name={props.name}
 									value={option}
-									checked={$formData.vatFrequency === option}
-									onchange={() =>
-										handleVatFrequencyChange(option as 'monthly' | 'quarterly' | 'annual')}
+									bind:group={$formData.vatFrequency}
 									class="h-4 w-4 border-input text-primary focus:ring-ring"
 								/>
 								<span class="text-sm">{toProperCase(option)}</span>

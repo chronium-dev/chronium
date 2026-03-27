@@ -1,1 +1,0 @@
-ALTER TABLE "obligation_templates" ADD COLUMN "notes" text;
