@@ -68,7 +68,7 @@ export async function generateEventsForOrg(orgId: string) {
 					organisationId: orgId,
 					eventTypeId: rule.eventTypeId,
 					eventDate: current,
-					generated: true
+					//generated: true
 				})
 				.onConflictDoNothing();
 

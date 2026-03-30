@@ -92,6 +92,13 @@
       "when": 1774789162197,
       "tag": "0012_mighty_green_goblin",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1774883476867,
+      "tag": "0013_elite_dazzler",
+      "breakpoints": true
     }
   ]
 }

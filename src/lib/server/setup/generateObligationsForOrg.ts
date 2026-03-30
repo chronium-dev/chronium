@@ -33,10 +33,10 @@ export async function generateObligationsForOrg(orgId: string, userId: string) {
 	const templatesByEventType = new Map<string, typeof templates>();
 
 	for (const t of templates) {
-		if (!templatesByEventType.has(t.eventTypeId)) {
-			templatesByEventType.set(t.eventTypeId, []);
+		if (!templatesByEventType.has(t.triggerEventTypeId)) {
+			templatesByEventType.set(t.triggerEventTypeId, []);
 		}
-		templatesByEventType.get(t.eventTypeId)!.push(t);
+		templatesByEventType.get(t.triggerEventTypeId)!.push(t);
 	}
 
 	// 🔑 2. Load events for org
@@ -83,6 +83,7 @@ export async function generateObligationsForOrg(orgId: string, userId: string) {
 					templateId: template.id,
 					generatedFromEventId: event.id,
 					dueDate,
+					eventDate: event.anchorDate ?? event.eventDate,
 					status: ObligationStatusType.Pending,
 					assignedToUserId: userId
 				})

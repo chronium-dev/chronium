@@ -103,7 +103,7 @@ const load = async () => {
 					obligationTypeId: obligationId,
 					eventTypeId: triggerId,
 					jurisdictionId: jurisdictionUK.id,
-					entityTypeId: entityTypeUkLtd.id,
+					triggerEventTypeId: entityTypeUkLtd.id,
 					dueOffsetDays: item.dueOffsetDays,
 					dueOffsetMonths: item.dueOffsetMonths,
 					firstOccurrenceOverride: item.firstOccurrenceOverride,

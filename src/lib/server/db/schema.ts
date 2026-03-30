@@ -27,7 +27,7 @@ export const obligationStatusEnum = pgEnum('obligation_status', [
 export type ObligationStatusType = (typeof obligationStatusEnum.enumValues)[number];
 export const ObligationStatusType = {
 	Pending: 'pending',
-	Complated: 'completed',
+	Completed: 'completed',
 	Skipped: 'skipped',
 	Cancelled: 'cancelled'
 } as const satisfies Record<string, ObligationStatusType>;
@@ -220,7 +220,7 @@ export const events = pgTable(
 			.notNull(),
 		anchorDate: date('anchor_date', { mode: 'date' }),
 		eventDate: date('event_date', { mode: 'date' }).notNull(),
-		generated: boolean('generated').default(true),
+		//generated: boolean('generated').default(true),
 		obligationsGeneratedAt: timestamp('obligations_generated_at'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -247,7 +247,7 @@ export const obligationTemplates = pgTable(
 		obligationTypeId: text('obligation_type_id')
 			.references(() => obligationTypes.id, { onDelete: 'cascade' })
 			.notNull(),
-		eventTypeId: text('event_type_id')
+		triggerEventTypeId: text('event_type_id')
 			.references(() => eventTypes.id, { onDelete: 'cascade' })
 			.notNull(),
 		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),
@@ -266,13 +266,13 @@ export const obligationTemplates = pgTable(
 			.notNull()
 	},
 	(table) => [
-		index('obligation_templates_trigger_event_idx').on(table.eventTypeId),
-		uniqueIndex('obligation_template_rule_unique').on(
-			table.eventTypeId,
-			table.obligationTypeId,
-			table.jurisdictionId,
-			table.entityTypeId
-		)
+		index('obligation_templates_trigger_event_idx').on(table.triggerEventTypeId),
+		// uniqueIndex('obligation_template_rule_unique').on(
+		// 	table.triggerEventTypeId,
+		// 	table.obligationTypeId,
+		// 	table.jurisdictionId,
+		// 	table.entityTypeId
+		// )
 	]
 );
 
@@ -293,13 +293,12 @@ export const obligations = pgTable(
 			.notNull(),
 		templateId: text('template_id').references(() => obligationTemplates.id),
 		generatedFromEventId: text('generated_from_event_id').references(() => events.id),
-		assignedToUserId: text('assigned_to_user_id')
-			.references(() => user.id)
-			.notNull(),
+		assignedToUserId: text('assigned_to_user_id').references(() => user.id),
 		dueDate: date('due_date', { mode: 'date' }).notNull(),
+		eventDate: date('event_date', { mode: 'date' }).notNull(),
 		status: obligationStatusEnum('status').default('pending').notNull(),
 		userNotes: text('user_notes'),
-		generated: boolean('generated').default(true),
+		//generated: boolean('generated').default(true),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()

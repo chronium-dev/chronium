@@ -24,8 +24,8 @@ export async function generateFirstYearCorporationTaxEvents(org: Organisation) {
 				organisationId: org.id,
 				eventTypeId: ctEventType.id,
 				eventDate: period.end,
-				anchorDate: period.start, // 👈 IMPORTANT
-				generated: true
+				anchorDate: period.start // 👈 IMPORTANT
+				//generated: true
 			})
 			.onConflictDoNothing();
 	}

@@ -1,9 +1,11 @@
-import { generateAccountingRecurrence } from '$lib/server/setup/generateAccountingRecurrence';
-import { generateConfirmationStatementRecurrence } from '$lib/server/setup/generateConfirmationStatementRecurrence';
-import { generateEventsForOrg } from '$lib/server/setup/generateEventsForOrg';
-import { generateFirstYearCorporationTaxEvents } from '$lib/server/setup/generateFirstYearCorporationTaxEvents';
-import { generatePayrollRecurrence } from '$lib/server/setup/generatePayrollRecurrence';
-import { generateVatRecurrence } from '$lib/server/setup/generateVatRecurrence';
+import {
+	generateAccountingRecurrence,
+	generateConfirmationStatementRecurrence,
+	generateEventsForOrg,
+	generateFirstYearCorporationTaxEvents,
+	generatePayrollRecurrence,
+	generateVatRecurrence
+} from '$lib/server/setup';
 import type { Organisation } from '$lib/types/organisations';
 
 export async function ensureEventsForOrg(org: Organisation, userId: string) {
