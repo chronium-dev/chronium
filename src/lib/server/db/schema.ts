@@ -221,6 +221,7 @@ export const events = pgTable(
 		anchorDate: date('anchor_date', { mode: 'date' }),
 		eventDate: date('event_date', { mode: 'date' }).notNull(),
 		generated: boolean('generated').default(true),
+		obligationsGeneratedAt: timestamp('obligations_generated_at'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()
@@ -229,7 +230,7 @@ export const events = pgTable(
 	},
 	(table) => [
 		index('events_event_type_idx').on(table.eventTypeId),
-		uniqueIndex('events_unique').on(table.organisationId, table.eventTypeId, table.eventDate) // 🔜 include assetId later
+		uniqueIndex('events_unique').on(table.organisationId, table.eventTypeId, table.eventDate)
 	]
 );
 
@@ -246,7 +247,7 @@ export const obligationTemplates = pgTable(
 		obligationTypeId: text('obligation_type_id')
 			.references(() => obligationTypes.id, { onDelete: 'cascade' })
 			.notNull(),
-		triggerEventTypeId: text('trigger_event_type_id')
+		eventTypeId: text('event_type_id')
 			.references(() => eventTypes.id, { onDelete: 'cascade' })
 			.notNull(),
 		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),
@@ -265,9 +266,9 @@ export const obligationTemplates = pgTable(
 			.notNull()
 	},
 	(table) => [
-		index('obligation_templates_trigger_event_idx').on(table.triggerEventTypeId),
+		index('obligation_templates_trigger_event_idx').on(table.eventTypeId),
 		uniqueIndex('obligation_template_rule_unique').on(
-			table.triggerEventTypeId,
+			table.eventTypeId,
 			table.obligationTypeId,
 			table.jurisdictionId,
 			table.entityTypeId
@@ -307,13 +308,9 @@ export const obligations = pgTable(
 	},
 	(table) => [
 		index('obligations_organisation_idx').on(table.organisationId),
-		uniqueIndex('obligation_generation_event_Id_unique').on(
+		uniqueIndex('obligation_generation_event_id_unique').on(
 			table.generatedFromEventId,
 			table.templateId
-		),
-		uniqueIndex('obligation_generation_event_obligation_unique').on(
-			table.generatedFromEventId,
-			table.obligationTypeId
 		)
 	]
 );

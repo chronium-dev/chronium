@@ -84,20 +84,24 @@ const load = async () => {
 
 			// Use for...of so 'await' actually works inside the loop
 			for (const item of obligationTemplateSeeds) {
-				const triggerId = eventTypeMap.get(item.triggerEventTypeKey);
+				const triggerId = eventTypeMap.get(item.eventTypeKey!);
 				const obligationId = obligationTypeMap.get(item.obligationTypeKey);
 
+				console.log({ eventTypeKey: item.eventTypeKey, obligationTypeKey: item.obligationTypeKey });
+
 				// Guard: Drizzle will complain if these are undefined but marked .notNull()
-				if (!triggerId || !obligationId) {
-					throw new Error(
-						`Missing lookup for ${item.triggerEventTypeKey} or ${item.obligationTypeKey}`
-					);
+				if (!triggerId) {
+					throw new Error(`Missing Event Type lookup for "${item.eventTypeKey}"`);
+				}
+
+				if (!obligationId) {
+					throw new Error(`Missing Obligation Type lookup for "${item.obligationTypeKey}"`);
 				}
 
 				await tx.insert(schema.obligationTemplates).values({
 					name: item.name,
 					obligationTypeId: obligationId,
-					triggerEventTypeId: triggerId,
+					eventTypeId: triggerId,
 					jurisdictionId: jurisdictionUK.id,
 					entityTypeId: entityTypeUkLtd.id,
 					dueOffsetDays: item.dueOffsetDays,

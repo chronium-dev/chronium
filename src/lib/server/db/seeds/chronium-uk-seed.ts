@@ -147,7 +147,7 @@ export const eventTypeSeeds = [
 		domain: DomainType.Operational
 	},
 	{
-		key: 'backup_test_due',
+		key: 'backup_restore_test_due',
 		name: 'Backup Restore Test Due',
 		description: 'Backup restore test is due.',
 		domain: DomainType.Operational
@@ -300,22 +300,22 @@ export const obligationTypeSeeds = [
 	},
 
 	{
-		key: 'perform_pat_testing',
+		key: 'pat_test_due',
 		name: 'PAT Testing',
 		description: 'Portable appliance electrical safety testing.',
 		domain: DomainType.Operational
 	},
 
 	{
-		key: 'fire_safety_inspection',
+		key: 'fire_safety_inspection_due',
 		name: 'Fire Safety Inspection',
 		description: 'Inspection of fire safety measures.',
 		domain: DomainType.Operational
 	},
 
 	{
-		key: 'vehicle_mot',
-		name: 'Vehicle MOT',
+		key: 'vehicle_mot_due',
+		name: 'Vehicle MOT Due',
 		description: 'Annual vehicle MOT test.',
 		domain: DomainType.Operational
 	},
@@ -342,7 +342,7 @@ export const obligationTypeSeeds = [
 	},
 
 	{
-		key: 'backup_restore_test',
+		key: 'backup_restore_test_due',
 		name: 'Backup Restore Test',
 		description: 'Verify company data backups can be restored.',
 		domain: DomainType.Operational
@@ -430,13 +430,25 @@ export const obligationTypeSeeds = [
 		name: 'Shareholder Meeting',
 		description: 'Shareholders meet to review company performance.',
 		domain: DomainType.Governance
+	},
+	{
+		key: 'policy_review',
+		name: 'Policy Review',
+		domain: DomainType.Governance,
+		description: 'Review Company policies'
+	},
+	{
+		key: 'iso_review',
+		name: 'ISO Review',
+		domain: DomainType.Governance,
+		description: 'Review ISO Standards'
 	}
 ];
 
 export const obligationTemplateSeeds = [
 	{
 		name: 'File Annual Accounts',
-		triggerEventTypeKey: 'accounting_period_end',
+		eventTypeKey: 'accounting_period_end',
 		obligationTypeKey: 'file_annual_accounts',
 		dueOffsetMonths: 9,
 		dueOffsetDays: 0,
@@ -450,7 +462,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'File Confirmation Statement',
-		triggerEventTypeKey: 'confirmation_statement_period_end',
+		eventTypeKey: 'confirmation_statement_period_end',
 		obligationTypeKey: 'file_confirmation_statement',
 		dueOffsetDays: 14,
 		defaultNotes: 'Must be filed within 14 days of the confirmation date.'
@@ -458,7 +470,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Pay Corporation Tax',
-		triggerEventTypeKey: 'corporation_tax_period_end',
+		eventTypeKey: 'corporation_tax_period_end',
 		obligationTypeKey: 'pay_corporation_tax',
 		dueOffsetMonths: 9, // 9 months
 		dueOffsetDays: 1, // ... + 1 day
@@ -467,7 +479,7 @@ export const obligationTemplateSeeds = [
 	},
 	{
 		name: 'File CT600',
-		triggerEventTypeKey: 'corporation_tax_period_end',
+		eventTypeKey: 'corporation_tax_period_end',
 		obligationTypeKey: 'file_ct600',
 		dueOffsetMonths: 12,
 		defaultNotes:
@@ -475,7 +487,7 @@ export const obligationTemplateSeeds = [
 	},
 	{
 		name: 'Submit VAT Return',
-		triggerEventTypeKey: 'vat_period_end',
+		eventTypeKey: 'vat_period_end',
 		obligationTypeKey: 'submit_vat_return',
 		dueOffsetMonths: 1,
 		dueOffsetDays: 7,
@@ -483,7 +495,7 @@ export const obligationTemplateSeeds = [
 	},
 	{
 		name: 'Pay VAT',
-		triggerEventTypeKey: 'vat_period_end',
+		eventTypeKey: 'vat_period_end',
 		obligationTypeKey: 'pay_vat',
 		dueOffsetMonths: 1,
 		dueOffsetDays: 7,
@@ -492,7 +504,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Pay PAYE',
-		triggerEventTypeKey: 'payroll_month_end',
+		eventTypeKey: 'payroll_month_end',
 		obligationTypeKey: 'pay_paye',
 		dueOffsetDays: 22,
 		defaultNotes: 'PAYE must be paid by the 22nd of the following month (electronic payment).'
@@ -500,7 +512,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Submit Final FPS',
-		triggerEventTypeKey: 'payroll_year_end',
+		eventTypeKey: 'payroll_year_end',
 		obligationTypeKey: 'submit_final_fps',
 		dueOffsetDays: 19,
 		defaultNotes: 'Final Full Payment Submission must be sent by 19 April.'
@@ -508,7 +520,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Renew Domain',
-		triggerEventTypeKey: 'domain_registered',
+		eventTypeKey: 'domain_registered',
 		obligationTypeKey: 'renew_domain',
 		dueOffsetDays: 365,
 		defaultNotes: 'Ensure domain auto-renew is enabled to prevent website or email disruption.'
@@ -516,7 +528,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Renew SSL Certificate',
-		triggerEventTypeKey: 'ssl_certificate_issued',
+		eventTypeKey: 'ssl_certificate_issued',
 		obligationTypeKey: 'renew_ssl_certificate',
 		dueOffsetDays: 365,
 		defaultNotes: 'Expired SSL certificates will cause browsers to mark your website as insecure.'
@@ -524,15 +536,15 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Backup Restore Test',
-		triggerEventTypeKey: 'backup_test_due',
-		obligationTypeKey: 'backup_restore_test',
-		dueOffsetDays: 0,
+		eventTypeKey: 'backup_restore_test_due',
+		obligationTypeKey: 'backup_restore_test_due',
+		dueOffsetMonth: 6,
 		defaultNotes: 'Regularly test backup restoration to ensure data recovery is possible.'
 	},
 
 	{
 		name: 'Insurance Renewal',
-		triggerEventTypeKey: 'insurance_policy_started',
+		eventTypeKey: 'insurance_policy_started',
 		obligationTypeKey: 'renew_insurance',
 		dueOffsetDays: 365,
 		defaultNotes: 'Check renewal quotes and ensure cover reflects current business risks.'
@@ -540,7 +552,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Supplier Contract Review',
-		triggerEventTypeKey: 'supplier_contract_signed',
+		eventTypeKey: 'supplier_contract_signed',
 		obligationTypeKey: 'review_supplier_contract',
 		dueOffsetDays: 365,
 		defaultNotes: 'Check pricing, termination notice periods, and renewal clauses.'
@@ -548,7 +560,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Office Lease Review',
-		triggerEventTypeKey: 'office_lease_signed',
+		eventTypeKey: 'office_lease_signed',
 		obligationTypeKey: 'office_lease_review',
 		dueOffsetDays: 365,
 		defaultNotes: 'Review break clauses and lease renewal timelines well in advance.'
@@ -556,7 +568,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Annual Staff Appraisal',
-		triggerEventTypeKey: 'employee_hired',
+		eventTypeKey: 'employee_hired',
 		obligationTypeKey: 'staff_annual_appraisal',
 		dueOffsetDays: 365,
 		defaultNotes: 'Annual performance review discussing development goals and feedback.'
@@ -564,7 +576,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Cyber Security Review',
-		triggerEventTypeKey: 'cyber_security_review_due', // ✅ FIXED
+		eventTypeKey: 'cyber_security_review_due', // ✅ FIXED
 		obligationTypeKey: 'cyber_security_review',
 		dueOffsetDays: 0,
 		defaultNotes: 'Review MFA usage, password policies, and system access controls.'
@@ -572,7 +584,7 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Disaster Recovery Test',
-		triggerEventTypeKey: 'disaster_recovery_test_due', // ✅ FIXED
+		eventTypeKey: 'disaster_recovery_test_due', // ✅ FIXED
 		obligationTypeKey: 'disaster_recovery_test',
 		dueOffsetDays: 0,
 		defaultNotes: 'Test restoring systems from backup and verify recovery procedures.'
@@ -580,10 +592,28 @@ export const obligationTemplateSeeds = [
 
 	{
 		name: 'Website Terms Review',
-		triggerEventTypeKey: 'policy_review',
+		eventTypeKey: 'policy_review',
 		obligationTypeKey: 'website_terms_review',
 		dueOffsetDays: 365,
 		defaultNotes: 'Ensure privacy policy, cookie policy and terms comply with current regulations.'
+	},
+	{
+		name: 'Arrange and complete MOT',
+		eventTypeKey: 'vehicle_mot_due',
+		obligationTypeKey: 'vehicle_mot_due',
+		dueOffsetDays: 335 // ~30 days before next MOT
+	},
+	{
+		name: 'Conduct annual fire safety inspection',
+		eventTypeKey: 'fire_safety_inspection_due',
+		obligationTypeKey: 'fire_safety_inspection_due',
+		dueOffsetMonths: 12
+	},
+	{
+		name: 'Complete PAT testing',
+		eventTypeKey: 'pat_test_due',
+		obligationTypeKey: 'pat_test_due',
+		dueOffsetMonths: 12
 	}
 ];
 
@@ -621,15 +651,15 @@ export const defaultRecurrenceRules = [
 		startDate: new Date()
 	},
 	{
-		eventTypeKey: 'backup_test_due',
+		eventTypeKey: 'backup_restore_test_due',
 		organisationId: organisationUkLtd.id,
-		name: 'Annual Backup Test',
+		name: 'Annual Backup / Restore Test',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
 		startDate: new Date()
 	},
 	{
-		eventTypeKey: 'cyber_security_review_due', 
+		eventTypeKey: 'cyber_security_review_due',
 		organisationId: organisationUkLtd.id,
 		name: 'Annual Cyber Security Review',
 		frequency: RecurrenceFrequencyType.Yearly,

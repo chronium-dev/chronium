@@ -1,6 +1,7 @@
 # Chronium V1 Engine Specification
 
 ## Purpose
+
 This document describes the architecture and behaviour of the Chronium V1 obligation engine. It is intended to provide enough context for a new conversation with ChatGPT (or another developer) to immediately understand how the system works.
 
 Chronium is an obligation tracking system that converts real-world events and recurring schedules into concrete obligations with due dates.
@@ -182,7 +183,7 @@ Accounts filed = 15 Jan
 
 Database values:
 
-- eventDate = 15 Jan  
+- eventDate = 15 Jan
 - anchorDate = 31 Dec
 
 Engine rule:
@@ -197,7 +198,7 @@ Templates define how obligations are generated from events.
 
 Key fields:
 
-- triggerEventTypeId
+- eventTypeId
 - obligationTypeId
 - dueOffsetDays
 - jurisdictionId
@@ -336,11 +337,11 @@ Accounting year end: **31 March 2026**
 
 Generated obligations:
 
-| Obligation | Due Date | Source |
-|------------|----------|--------|
-| File Accounts | 31 Dec 2026 | Accounting Period End |
-| Pay Corporation Tax | 1 Jan 2027 | Accounting Period End |
-| File CT600 | 31 Mar 2027 | Accounting Period End |
+| Obligation          | Due Date    | Source                |
+| ------------------- | ----------- | --------------------- |
+| File Accounts       | 31 Dec 2026 | Accounting Period End |
+| Pay Corporation Tax | 1 Jan 2027  | Accounting Period End |
+| File CT600          | 31 Mar 2027 | Accounting Period End |
 
 Timeline:
 
@@ -460,7 +461,7 @@ export async function processEvent(eventId: string) {
 
   const templates = await db.select()
     .from(obligationTemplates)
-    .where(eq(obligationTemplates.triggerEventTypeId, event.eventTypeId));
+    .where(eq(obligationTemplates.eventTypeId, event.eventTypeId));
 
   for (const template of templates) {
 
@@ -642,4 +643,3 @@ and
 Recurrence Rules → Obligations
 
 This structure allows the system to scale from simple compliance tracking into a full organisational obligation management platform.
-

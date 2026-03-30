@@ -1,44 +1,67 @@
-// src/lib/server/engine/generateEvents.ts
-
 import { db } from '$lib/server/db';
 import { events, organisation } from '$lib/server/db/schema';
-import { addMonths, addYears, max } from 'date-fns';
-import { eq } from 'drizzle-orm';
-// import { events, organisations } from '$lib/server/db/schema';
+import { addMonths, addYears, isAfter } from 'date-fns';
+import { desc, eq } from 'drizzle-orm';
 
-const TARGET_HORIZON_MONTHS = Number.parseInt(process.env.TARGET_HORIZON_MONTHS || '24');
+const TARGET_HORIZON_MONTHS = Number.parseInt(process.env.TARGET_HORIZON_MONTHS ?? '24');
+
+function getNextDate(current: Date, rule: any): Date {
+	if (rule.frequency === 'monthly') {
+		return addMonths(current, rule.interval);
+	}
+
+	if (rule.frequency === 'yearly') {
+		return addYears(current, rule.interval);
+	}
+
+	throw new Error(`Unsupported frequency: ${rule.frequency}`);
+}
 
 export async function generateEventsForOrg(orgId: string) {
-	// 1. Load organisation
+	const now = new Date();
+
+	// 🔑 Load organisation horizon
 	const org = await db.query.organisation.findFirst({
 		where: (o, { eq }) => eq(o.id, orgId)
 	});
 
 	if (!org) throw new Error('Organisation not found');
 
-	// 2. Calculate boundaries
-	const now = new Date();
-
+	const currentHorizon = org.obligationGenerationHorizon ?? now;
 	const targetHorizon = addMonths(now, TARGET_HORIZON_MONTHS);
 
-	const currentHorizon = org.obligationGenerationHorizon ?? now;
-
 	// ✅ Nothing to do
-	if (currentHorizon >= targetHorizon) return;
+	if (!isAfter(targetHorizon, currentHorizon)) {
+		return;
+	}
 
-	// 3. Load recurrence rules
+	// 🔑 Load recurrence rules
 	const rules = await db.query.recurrenceRules.findMany({
 		where: (r, { eq }) => eq(r.organisationId, orgId)
 	});
 
-	// 4. Generate incrementally
 	for (const rule of rules) {
-		// Start from the later of:
-		// - rule.startDate
-		// - current horizon
-		let current = max([new Date(rule.startDate), currentHorizon]);
+		// 🔍 Find last generated event for this rule (INCLUDING asset)
+		const lastEvent = await db.query.events.findFirst({
+			where: (e, { and, eq, isNull }) =>
+				and(
+					eq(e.organisationId, orgId),
+					eq(e.eventTypeId, rule.eventTypeId)
+				),
+			orderBy: (e) => desc(e.eventDate)
+		});
 
-		while (current <= targetHorizon) {
+		let current: Date;
+
+		if (lastEvent) {
+			// ✅ Continue sequence correctly
+			current = getNextDate(lastEvent.eventDate, rule);
+		} else {
+			// ✅ First generation
+			current = new Date(rule.startDate);
+		}
+
+		while (current <= targetHorizon && (!rule.endDate || current <= rule.endDate)) {
 			await db
 				.insert(events)
 				.values({
@@ -46,20 +69,14 @@ export async function generateEventsForOrg(orgId: string) {
 					eventTypeId: rule.eventTypeId,
 					eventDate: current,
 					generated: true
-					// 🔜 add assetId here later
 				})
 				.onConflictDoNothing();
 
-			// increment
-			if (rule.frequency === 'monthly') {
-				current = addMonths(current, rule.interval);
-			} else if (rule.frequency === 'yearly') {
-				current = addYears(current, rule.interval);
-			}
+			current = getNextDate(current, rule);
 		}
 	}
 
-	// 5. Advance horizon (CRITICAL)
+	// 🔐 Advance horizon (THIS is what prevents reprocessing)
 	await db
 		.update(organisation)
 		.set({
@@ -67,45 +84,3 @@ export async function generateEventsForOrg(orgId: string) {
 		})
 		.where(eq(organisation.id, orgId));
 }
-
-// // src/lib/server/engine/generateEvents.ts
-
-// import { addMonths, addYears } from 'date-fns';
-// import { db } from '$lib/server/db';
-// import { events } from '$lib/server/db/schema';
-
-// const monthsAhead = Number.parseInt(process.env.TARGET_HORIZON_MONTHS!);
-
-// export async function generateEventsForOrg(
-// 	orgId: string
-// ) {
-// 	const rules = await db.query.recurrenceRules.findMany({
-// 		where: (r, { eq }) => eq(r.organisationId, orgId)
-// 	});
-
-// 	const now = new Date();
-// 	const end = addMonths(now, monthsAhead);
-
-// 	for (const rule of rules) {
-// 		let current = new Date(rule.startDate);
-
-// 		while (current <= end) {
-// 			await db
-// 				.insert(events)
-// 				.values({
-// 					organisationId: orgId,
-// 					eventTypeId: rule.eventTypeId,
-// 					eventDate: current,
-// 					generated: true
-// 				})
-// 				.onConflictDoNothing();
-
-// 			// increment
-// 			if (rule.frequency === 'monthly') {
-// 				current = addMonths(current, rule.interval);
-// 			} else if (rule.frequency === 'yearly') {
-// 				current = addYears(current, rule.interval);
-// 			}
-// 		}
-// 	}
-// }

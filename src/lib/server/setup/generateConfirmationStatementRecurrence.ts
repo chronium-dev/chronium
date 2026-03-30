@@ -5,7 +5,7 @@ import { eventTypes, recurrenceRules } from '$lib/server/db/schema';
 import { addYears, subDays } from 'date-fns';
 import { eq } from 'drizzle-orm';
 
-export async function generateConfirmationStatement(org: any) {
+export async function generateConfirmationStatementRecurrence(org: any) {
 	const eventType = await db.query.eventTypes.findFirst({
 		where: eq(eventTypes.key, 'confirmation_statement_period_end')
 	});

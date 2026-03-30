@@ -78,6 +78,20 @@
       "when": 1774612101679,
       "tag": "0010_abnormal_reptil",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1774690965331,
+      "tag": "0011_rainy_thena",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1774789162197,
+      "tag": "0012_mighty_green_goblin",
+      "breakpoints": true
     }
   ]
 }

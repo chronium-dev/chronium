@@ -12,7 +12,7 @@ type SelectedEventConfig = {
 	name?: string;
 };
 
-export async function applySelectedEventTypes(orgId: string, selections: SelectedEventConfig[]) {
+export async function applySelectedEventTypes(orgId: string, selections: SelectedEventConfig[], userId: string) {
 	for (const sel of selections) {
 		const eventType = await db.query.eventTypes.findFirst({
 			where: eq(eventTypes.key, sel.eventTypeKey)
@@ -32,5 +32,5 @@ export async function applySelectedEventTypes(orgId: string, selections: Selecte
 
 	// regenerate future timeline
 	await generateEventsForOrg(orgId);
-	await generateObligationsForOrg(orgId);
+	await generateObligationsForOrg(orgId, userId);
 }

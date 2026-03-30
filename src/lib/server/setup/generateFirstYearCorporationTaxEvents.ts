@@ -18,12 +18,15 @@ export async function generateFirstYearCorporationTaxEvents(org: Organisation) {
 	const periods = splitCorporationTaxPeriods(start, end);
 
 	for (const period of periods) {
-		await db.insert(events).values({
-			organisationId: org.id,
-			eventTypeId: ctEventType.id,
-			eventDate: period.end,
-			anchorDate: period.start, // 👈 IMPORTANT
-			generated: true
-		});
+		await db
+			.insert(events)
+			.values({
+				organisationId: org.id,
+				eventTypeId: ctEventType.id,
+				eventDate: period.end,
+				anchorDate: period.start, // 👈 IMPORTANT
+				generated: true
+			})
+			.onConflictDoNothing();
 	}
 }
