@@ -1,3 +1,4 @@
+import type { DBClient } from '$lib/server/db';
 import {
 	generateAccountingRecurrence,
 	generateConfirmationStatementRecurrence,
@@ -8,9 +9,9 @@ import {
 } from '$lib/server/setup';
 import type { Organisation } from '$lib/types/organisations';
 
-export async function ensureEventsForOrg(org: Organisation, userId: string) {
+export async function ensureEventsForOrg(db: DBClient, org: Organisation, userId: string) {
 	// 1. Ensure recurrence rules exist
-	await generateAccountingRecurrence(org);
+	await generateAccountingRecurrence(db, org);
 	await generateConfirmationStatementRecurrence(org);
 	await generateVatRecurrence(org);
 	await generatePayrollRecurrence(org);

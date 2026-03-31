@@ -5,6 +5,12 @@ import { desc, eq } from 'drizzle-orm';
 
 const TARGET_HORIZON_MONTHS = Number.parseInt(process.env.TARGET_HORIZON_MONTHS ?? '24');
 
+/**
+ * NB: “Dates are clamped to end-of-month when necessary”
+ * ... e.g. Jan 31 + 1 month → Feb 28 ✅ (good)
+ * 
+ */
+
 function getNextDate(current: Date, rule: any): Date {
 	if (rule.frequency === 'monthly') {
 		return addMonths(current, rule.interval);

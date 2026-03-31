@@ -101,13 +101,13 @@ const load = async () => {
 				await tx.insert(schema.obligationTemplates).values({
 					name: item.name,
 					obligationTypeId: obligationId,
-					eventTypeId: triggerId,
+					triggerEventTypeId: triggerId,
 					jurisdictionId: jurisdictionUK.id,
-					triggerEventTypeId: entityTypeUkLtd.id,
+					entityTypeId: entityTypeUkLtd.id,
 					dueOffsetDays: item.dueOffsetDays,
 					dueOffsetMonths: item.dueOffsetMonths,
-					firstOccurrenceOverride: item.firstOccurrenceOverride,
 					firstOccurrenceBase: item.firstOccurrenceBase,
+					firstOccurrenceYears: item.firstOccurrenceYears,
 					firstOccurrenceMonths: item.firstOccurrenceMonths,
 					firstOccurrenceDays: item.firstOccurrenceDays
 				});

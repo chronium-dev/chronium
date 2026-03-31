@@ -452,8 +452,8 @@ export const obligationTemplateSeeds = [
 		obligationTypeKey: 'file_annual_accounts',
 		dueOffsetMonths: 9,
 		dueOffsetDays: 0,
-		firstOccurrenceOverride: true,
 		firstOccurrenceBase: 'incorporation',
+		firstOccurrenceYears: 0,
 		firstOccurrenceMonths: 21,
 		firstOccurrenceDays: 0,
 		defaultNotes:

@@ -1,31 +1,67 @@
 import { db } from '$lib/server/db';
 import { events, obligations, ObligationStatusType } from '$lib/server/db/schema';
+import type { Organisation } from '$lib/types/organisations';
 import { addDays, addMonths, addYears } from 'date-fns';
-import { and, desc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
-function applyOffset(eventDate: Date, template: any, isFirst: boolean): Date {
-	// ✅ First occurrence override
-	if (isFirst && template.firstOccurrenceOffsetDays != null) {
-		return addDays(eventDate, template.firstOccurrenceOffsetDays);
+/**
+ * NB: “Dates are clamped to end-of-month when necessary”
+ * ... e.g. Jan 31 + 1 month → Feb 28 ✅ (good)
+ *
+ */
+
+function applyDateOffsets(baseDate: Date, years?: number, months?: number, days?: number): Date {
+	let date = new Date(baseDate);
+
+	if (years) {
+		date = addYears(date, years);
 	}
 
-	// ✅ Standard offsets
-	if (template.dueOffsetDays != null) {
-		return addDays(eventDate, template.dueOffsetDays);
+	if (months) {
+		date = addMonths(date, months);
 	}
 
-	if (template.dueOffsetMonths != null) {
-		return addMonths(eventDate, template.dueOffsetMonths);
+	if (days) {
+		date = addDays(date, days);
 	}
 
-	if (template.dueOffsetYears != null) {
-		return addYears(eventDate, template.dueOffsetYears);
-	}
-
-	return eventDate;
+	return date;
 }
 
-export async function generateObligationsForOrg(orgId: string, userId: string) {
+function applyOffset(eventDate: Date, template: any, org: any, isFirst: boolean): Date {
+	// ✅ FIRST OCCURRENCE OVERRIDE?
+	const hasOverride =
+		template.firstOccurrenceMonths != null ||
+		template.firstOccurrenceDays != null ||
+		template.firstOccurrenceYears != null;
+
+	if (isFirst && hasOverride) {
+		let baseDate: Date;
+
+		if (template.firstOccurrenceBase === 'incorporation_date') {
+			baseDate = new Date(org.incorporationDate);
+		} else {
+			baseDate = new Date(eventDate);
+		}
+
+		return applyDateOffsets(
+			baseDate,
+			template.firstOccurrenceYears,
+			template.firstOccurrenceMonths,
+			template.firstOccurrenceDays
+		);
+	}
+
+	// ✅ STANDARD CASE
+	return applyDateOffsets(
+		new Date(eventDate),
+		template.dueOffsetYears,
+		template.dueOffsetMonths,
+		template.dueOffsetDays
+	);
+}
+
+export async function generateObligationsForOrg(org: Organisation, userId: string) {
 	// 🔑 1. Load templates
 	const templates = await db.query.obligationTemplates.findMany();
 
@@ -39,60 +75,62 @@ export async function generateObligationsForOrg(orgId: string, userId: string) {
 		templatesByEventType.get(t.triggerEventTypeId)!.push(t);
 	}
 
-	// 🔑 2. Load events for org
-	// Only fetch unprocessed events
-	const unprocessedEvents = await db.query.events.findMany({
-		where: (e, { eq, isNull }) => and(eq(e.organisationId, orgId), isNull(e.obligationsGeneratedAt))
+	// 🔑 2. Load ALL events for org (not just unprocessed)
+	const allEvents = await db.query.events.findMany({
+		where: (e, { eq }) => eq(e.organisationId, org.id)
 	});
 
-	for (const event of unprocessedEvents) {
-		const templatesForEvent = templatesByEventType.get(event.eventTypeId);
+	// 🧠 3. Group events by eventTypeId (i.e. event stream)
+	const eventsByType = new Map<string, typeof allEvents>();
 
+	for (const e of allEvents) {
+		if (!eventsByType.has(e.eventTypeId)) {
+			eventsByType.set(e.eventTypeId, []);
+		}
+		eventsByType.get(e.eventTypeId)!.push(e);
+	}
+
+	// 🔁 4. Process each event stream independently
+	for (const [eventTypeId, eventsForType] of eventsByType.entries()) {
+		const templatesForEvent = templatesByEventType.get(eventTypeId);
 		if (!templatesForEvent) continue;
 
-		for (const template of templatesForEvent) {
-			// 🔐 Idempotency check
-			const existing = await db.query.obligations.findFirst({
-				where: (o, { and, eq }) =>
-					and(eq(o.generatedFromEventId, event.id), eq(o.templateId, template.id))
-			});
+		// 📅 Sort events chronologically
+		const sortedEvents = [...eventsForType].sort(
+			(a, b) => a.eventDate.getTime() - b.eventDate.getTime()
+		);
 
-			if (existing) continue;
+		// 🥇 Determine TRUE first event (deterministic)
+		const firstEventDate = sortedEvents[0].eventDate;
 
-			// 🔍 First occurrence check (per eventType + asset)
-			const priorEvent = await db.query.events.findFirst({
-				where: (e, { and, eq, lt }) =>
-					and(
-						eq(e.organisationId, orgId),
-						eq(e.eventTypeId, event.eventTypeId),
-						lt(e.eventDate, event.eventDate)
-					),
-				orderBy: (e) => desc(e.eventDate)
-			});
+		// 🔁 Process each event
+		for (const event of sortedEvents) {
+			const isFirst = event.eventDate.getTime() === firstEventDate.getTime();
 
-			const isFirst = !priorEvent;
+			for (const template of templatesForEvent) {
+				// 🧠 Due date
+				const dueDate = applyOffset(event.eventDate, template, org, isFirst);
 
-			// 🧠 Due date
-			const dueDate = applyOffset(event.eventDate, template, isFirst);
+				await db
+					.insert(obligations)
+					.values({
+						organisationId: org.id,
+						obligationTypeId: template.obligationTypeId,
+						templateId: template.id,
+						generatedFromEventId: event.id,
+						dueDate,
+						eventDate: event.anchorDate ?? event.eventDate,
+						status: ObligationStatusType.Pending,
+						assignedToUserId: userId
+					})
+					.onConflictDoNothing();
+			}
 
+			// ✅ Mark event as processed (optional now becuase obligationsGeneratedAt is not used currently...)
 			await db
-				.insert(obligations)
-				.values({
-					organisationId: orgId,
-					obligationTypeId: template.obligationTypeId,
-					templateId: template.id,
-					generatedFromEventId: event.id,
-					dueDate,
-					eventDate: event.anchorDate ?? event.eventDate,
-					status: ObligationStatusType.Pending,
-					assignedToUserId: userId
-				})
-				.onConflictDoNothing();
+				.update(events)
+				.set({ obligationsGeneratedAt: new Date() })
+				.where(eq(events.id, event.id));
 		}
-		// ✅ Mark event as processed
-		await db
-			.update(events)
-			.set({ obligationsGeneratedAt: new Date() })
-			.where(eq(events.id, event.id));
 	}
 }

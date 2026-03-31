@@ -18,12 +18,15 @@ export async function generateConfirmationStatementRecurrence(org: any) {
 
 	const firstPeriodEnd = subDays(addYears(incorporationDate, 1), 1);
 
-	await db.insert(recurrenceRules).values({
-		organisationId: org.id,
-		eventTypeId: eventType.id,
-		name: 'Confirmation Statement Period End',
-		startDate: firstPeriodEnd,
-		frequency: 'yearly',
-		interval: 1
-	});
+	await db
+		.insert(recurrenceRules)
+		.values({
+			organisationId: org.id,
+			eventTypeId: eventType.id,
+			name: 'Confirmation Statement Period End',
+			startDate: firstPeriodEnd,
+			frequency: 'yearly',
+			interval: 1
+		})
+		.onConflictDoNothing();
 }

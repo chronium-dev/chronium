@@ -15,12 +15,15 @@ export async function generatePayrollRecurrence(org: Organisation) {
 
 	if (!eventType) return;
 
-	await db.insert(recurrenceRules).values({
-		organisationId: org.id,
-		eventTypeId: eventType.id,
-		name: 'Payroll Month End',
-		startDate: endOfMonth(new Date()),
-		frequency: 'monthly',
-		interval: 1
-	});
+	await db
+		.insert(recurrenceRules)
+		.values({
+			organisationId: org.id,
+			eventTypeId: eventType.id,
+			name: 'Payroll Month End',
+			startDate: endOfMonth(new Date()),
+			frequency: 'monthly',
+			interval: 1
+		})
+		.onConflictDoNothing();
 }

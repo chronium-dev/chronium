@@ -22,12 +22,15 @@ export async function generatePayrollYearEnd(org: Organisation) {
 		taxYearEnd = new Date(year + 1, 3, 5);
 	}
 
-	await db.insert(recurrenceRules).values({
-		organisationId: org.id,
-		eventTypeId: eventType.id,
-		name: 'Payroll Year End',
-		startDate: taxYearEnd,
-		frequency: 'yearly',
-		interval: 1
-	});
+	await db
+		.insert(recurrenceRules)
+		.values({
+			organisationId: org.id,
+			eventTypeId: eventType.id,
+			name: 'Payroll Year End',
+			startDate: taxYearEnd,
+			frequency: 'yearly',
+			interval: 1
+		})
+		.onConflictDoNothing();
 }

@@ -34,14 +34,17 @@ export async function generateVatRecurrence(org: Organisation) {
 
 	// 🟢 MONTHLY
 	if (org.vatFrequency === 'monthly') {
-		await db.insert(recurrenceRules).values({
-			organisationId: org.id,
-			eventTypeId: vatEventType.id,
-			name: 'Monthly VAT Period End',
-			startDate: endOfMonth(baseDate),
-			frequency: RecurrenceFrequencyType.Monthly,
-			interval: 1
-		});
+		await db
+			.insert(recurrenceRules)
+			.values({
+				organisationId: org.id,
+				eventTypeId: vatEventType.id,
+				name: 'Monthly VAT Period End',
+				startDate: endOfMonth(baseDate),
+				frequency: RecurrenceFrequencyType.Monthly,
+				interval: 1
+			})
+			.onConflictDoNothing();
 		return;
 	}
 
@@ -63,26 +66,32 @@ export async function generateVatRecurrence(org: Organisation) {
 			firstPeriodEnd = endOfMonth(new Date(nextYear, months[0] - 1, 1));
 		}
 
-		await db.insert(recurrenceRules).values({
-			organisationId: org.id,
-			eventTypeId: vatEventType.id,
-			name: 'Quarterly VAT Period End',
-			startDate: firstPeriodEnd,
-			frequency: RecurrenceFrequencyType.Monthly,
-			interval: 3
-		});
+		await db
+			.insert(recurrenceRules)
+			.values({
+				organisationId: org.id,
+				eventTypeId: vatEventType.id,
+				name: 'Quarterly VAT Period End',
+				startDate: firstPeriodEnd,
+				frequency: RecurrenceFrequencyType.Monthly,
+				interval: 3
+			})
+			.onConflictDoNothing();
 		return;
 	}
 
 	// 🔵 ANNUAL
 	if (org.vatFrequency === 'annual') {
-		await db.insert(recurrenceRules).values({
-			organisationId: org.id,
-			eventTypeId: vatEventType.id,
-			name: 'Annual VAT Period End',
-			startDate: endOfMonth(baseDate),
-			frequency: RecurrenceFrequencyType.Yearly,
-			interval: 1
-		});
+		await db
+			.insert(recurrenceRules)
+			.values({
+				organisationId: org.id,
+				eventTypeId: vatEventType.id,
+				name: 'Annual VAT Period End',
+				startDate: endOfMonth(baseDate),
+				frequency: RecurrenceFrequencyType.Yearly,
+				interval: 1
+			})
+			.onConflictDoNothing();
 	}
 }

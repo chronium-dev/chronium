@@ -252,10 +252,11 @@ export const obligationTemplates = pgTable(
 			.notNull(),
 		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),
 		entityTypeId: text('entity_type_id').references(() => entityTypes.id),
+		dueOffsetYears: integer('due_offset_years').notNull().default(0),
 		dueOffsetMonths: integer('due_offset_months').notNull().default(0),
 		dueOffsetDays: integer('due_offset_days').notNull().default(0),
-		firstOccurrenceOverride: boolean('first_occurrence_override'),
 		firstOccurrenceBase: text('first_occurrence_base'),
+		firstOccurrenceYears: integer('first_occurrence_years'),
 		firstOccurrenceMonths: integer('first_occurrence_months'),
 		firstOccurrenceDays: integer('first_occurrence_days'),
 		defaultNotes: text('default_notes'),
@@ -266,7 +267,7 @@ export const obligationTemplates = pgTable(
 			.notNull()
 	},
 	(table) => [
-		index('obligation_templates_trigger_event_idx').on(table.triggerEventTypeId),
+		index('obligation_templates_trigger_event_idx').on(table.triggerEventTypeId)
 		// uniqueIndex('obligation_template_rule_unique').on(
 		// 	table.triggerEventTypeId,
 		// 	table.obligationTypeId,

@@ -1,12 +1,12 @@
 // generateAccountingRecurrence.ts
 
-import { db } from '$lib/server/db';
+import { type DBClient } from '$lib/server/db';
 import { eventTypes, recurrenceRules } from '$lib/server/db/schema';
 import type { Organisation } from '$lib/types/organisations';
 import { getCustomDate } from '$lib/utils/dates';
 import { eq } from 'drizzle-orm';
 
-export async function generateAccountingRecurrence(org: Organisation) {
+export async function generateAccountingRecurrence(db: DBClient, org: Organisation) {
 	const accountingEventType = await db.query.eventTypes.findFirst({
 		where: eq(eventTypes.key, 'accounting_period_end')
 	});
@@ -30,26 +30,32 @@ export async function generateAccountingRecurrence(org: Organisation) {
 	}
 
 	// 🔵 Accounting period
-	await db.insert(recurrenceRules).values({
-		organisationId: org.id,
-		eventTypeId: accountingEventType.id,
-		name: 'Accounting Period End',
-		startDate: fyEnd,
-		monthDay: org.financialYearEndDay,
-		month: org.financialYearEndMonth,
-		frequency: 'yearly',
-		interval: 1
-	});
+	await db
+		.insert(recurrenceRules)
+		.values({
+			organisationId: org.id,
+			eventTypeId: accountingEventType.id,
+			name: 'Accounting Period End',
+			startDate: fyEnd,
+			monthDay: org.financialYearEndDay,
+			month: org.financialYearEndMonth,
+			frequency: 'yearly',
+			interval: 1
+		})
+		.onConflictDoNothing();
 
 	// 🟢 Corporation tax period (same dates for now)
-	await db.insert(recurrenceRules).values({
-		organisationId: org.id,
-		eventTypeId: ctEventType.id,
-		name: 'Corporation Tax Period End',
-		startDate: fyEnd,
-		monthDay: org.financialYearEndDay,
-		month: org.financialYearEndMonth,
-		frequency: 'yearly',
-		interval: 1
-	});
+	await db
+		.insert(recurrenceRules)
+		.values({
+			organisationId: org.id,
+			eventTypeId: ctEventType.id,
+			name: 'Corporation Tax Period End',
+			startDate: fyEnd,
+			monthDay: org.financialYearEndDay,
+			month: org.financialYearEndMonth,
+			frequency: 'yearly',
+			interval: 1
+		})
+		.onConflictDoNothing();
 }

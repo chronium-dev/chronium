@@ -1,0 +1,1 @@
+ALTER TABLE "obligation_templates" ADD COLUMN "due_offset_years" integer DEFAULT 0 NOT NULL;
