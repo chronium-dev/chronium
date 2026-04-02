@@ -1,4 +1,4 @@
-import { db } from '$lib/server/db';
+import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { events, organisation } from '$lib/server/db/schema';
 import { addMonths, addYears, isAfter } from 'date-fns';
 import { desc, eq } from 'drizzle-orm';
@@ -8,7 +8,7 @@ const TARGET_HORIZON_MONTHS = Number.parseInt(process.env.TARGET_HORIZON_MONTHS 
 /**
  * NB: “Dates are clamped to end-of-month when necessary”
  * ... e.g. Jan 31 + 1 month → Feb 28 ✅ (good)
- * 
+ *
  */
 
 function getNextDate(current: Date, rule: any): Date {
@@ -23,7 +23,9 @@ function getNextDate(current: Date, rule: any): Date {
 	throw new Error(`Unsupported frequency: ${rule.frequency}`);
 }
 
-export async function generateEventsForOrg(orgId: string) {
+export async function generateEventsForOrg(orgId: string, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+
 	const now = new Date();
 
 	// 🔑 Load organisation horizon
@@ -50,10 +52,7 @@ export async function generateEventsForOrg(orgId: string) {
 		// 🔍 Find last generated event for this rule (INCLUDING asset)
 		const lastEvent = await db.query.events.findFirst({
 			where: (e, { and, eq, isNull }) =>
-				and(
-					eq(e.organisationId, orgId),
-					eq(e.eventTypeId, rule.eventTypeId)
-				),
+				and(eq(e.organisationId, orgId), eq(e.eventTypeId, rule.eventTypeId)),
 			orderBy: (e) => desc(e.eventDate)
 		});
 
@@ -73,7 +72,7 @@ export async function generateEventsForOrg(orgId: string) {
 				.values({
 					organisationId: orgId,
 					eventTypeId: rule.eventTypeId,
-					eventDate: current,
+					eventDate: current
 					//generated: true
 				})
 				.onConflictDoNothing();

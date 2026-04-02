@@ -1,8 +1,8 @@
-import { db } from '$lib/server/db';
+import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { events, obligations, ObligationStatusType } from '$lib/server/db/schema';
 import type { Organisation } from '$lib/types/organisations';
 import { addDays, addMonths, addYears } from 'date-fns';
-import { eq } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
 
 /**
  * NB: “Dates are clamped to end-of-month when necessary”
@@ -61,9 +61,15 @@ function applyOffset(eventDate: Date, template: any, org: any, isFirst: boolean)
 	);
 }
 
-export async function generateObligationsForOrg(org: Organisation, userId: string) {
+export async function generateObligationsForOrg(
+	org: Organisation,
+	userId: string,
+	tx?: DBExecutor
+) {
+	const exec = getExecutor(tx);
+
 	// 🔑 1. Load templates
-	const templates = await db.query.obligationTemplates.findMany();
+	const templates = await exec.query.obligationTemplates.findMany();
 
 	// 🧠 Group templates by eventTypeId
 	const templatesByEventType = new Map<string, typeof templates>();
@@ -76,7 +82,7 @@ export async function generateObligationsForOrg(org: Organisation, userId: strin
 	}
 
 	// 🔑 2. Load ALL events for org (not just unprocessed)
-	const allEvents = await db.query.events.findMany({
+	const allEvents = await exec.query.events.findMany({
 		where: (e, { eq }) => eq(e.organisationId, org.id)
 	});
 
@@ -101,36 +107,51 @@ export async function generateObligationsForOrg(org: Organisation, userId: strin
 		);
 
 		// 🥇 Determine TRUE first event (deterministic)
-		const firstEventDate = sortedEvents[0].eventDate;
+		const firstEvent = sortedEvents[0];
+
+		const rowsToInsert = [];
+		const processedEventIds: string[] = [];
 
 		// 🔁 Process each event
 		for (const event of sortedEvents) {
-			const isFirst = event.eventDate.getTime() === firstEventDate.getTime();
+			const isFirst = event.id === firstEvent.id;
 
 			for (const template of templatesForEvent) {
 				// 🧠 Due date
 				const dueDate = applyOffset(event.eventDate, template, org, isFirst);
 
-				await db
-					.insert(obligations)
-					.values({
-						organisationId: org.id,
-						obligationTypeId: template.obligationTypeId,
-						templateId: template.id,
-						generatedFromEventId: event.id,
-						dueDate,
-						eventDate: event.anchorDate ?? event.eventDate,
-						status: ObligationStatusType.Pending,
-						assignedToUserId: userId
-					})
-					.onConflictDoNothing();
+				rowsToInsert.push({
+					organisationId: org.id,
+					obligationTypeId: template.obligationTypeId,
+					templateId: template.id,
+					generatedFromEventId: event.id,
+					dueDate,
+					eventDate: event.anchorDate ?? event.eventDate,
+					status: ObligationStatusType.Pending,
+					assignedToUserId: userId
+				});
 			}
 
-			// ✅ Mark event as processed (optional now becuase obligationsGeneratedAt is not used currently...)
-			await db
+			// ✅ Mark event as processed (optional now because obligationsGeneratedAt is not used currently...)
+			processedEventIds.push(event.id);
+		}
+
+		if (rowsToInsert.length > 0) {
+			const chunkSize = 500;
+
+			for (let i = 0; i < rowsToInsert.length; i += chunkSize) {
+				await exec
+					.insert(obligations)
+					.values(rowsToInsert.slice(i, i + chunkSize))
+					.onConflictDoNothing();
+			}
+		}
+
+		if (processedEventIds.length > 0) {
+			await exec
 				.update(events)
 				.set({ obligationsGeneratedAt: new Date() })
-				.where(eq(events.id, event.id));
+				.where(inArray(events.id, processedEventIds));
 		}
 	}
 }

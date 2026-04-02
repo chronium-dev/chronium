@@ -1,12 +1,14 @@
 // generatePayrollRecurrence.ts
 
-import { db } from '$lib/server/db';
+import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { eventTypes, recurrenceRules } from '$lib/server/db/schema';
 import type { Organisation } from '$lib/types/organisations';
 import { endOfMonth } from 'date-fns';
 import { eq } from 'drizzle-orm';
 
-export async function generatePayrollRecurrence(org: Organisation) {
+export async function generatePayrollRecurrence(org: Organisation, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+
 	if (!org.payrollActive) return;
 
 	const eventType = await db.query.eventTypes.findFirst({

@@ -6,7 +6,7 @@ export function getFirstAccountingPeriodEnd(org: Organisation): Date {
 
 	let end = getCustomDate(
 		inc.getFullYear(),
-		org.financialYearEndMonth - 1,
+		org.financialYearEndMonth,
 		org.financialYearEndDay
 	);
 
@@ -14,7 +14,7 @@ export function getFirstAccountingPeriodEnd(org: Organisation): Date {
 	if (end <= inc) {
 		end = getCustomDate(
 			inc.getFullYear() + 1,
-			org.financialYearEndMonth - 1,
+			org.financialYearEndMonth,
 			org.financialYearEndDay
 		);
 	}

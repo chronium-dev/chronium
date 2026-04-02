@@ -1,11 +1,13 @@
-import { db } from '$lib/server/db';
+import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { events, eventTypes } from '$lib/server/db/schema';
 import { getFirstAccountingPeriodEnd } from '$lib/server/setup/getFirstAccountingPeriodEnd';
 import { splitCorporationTaxPeriods } from '$lib/server/setup/splitCorporationTaxPeriods';
 import type { Organisation } from '$lib/types/organisations';
 import { eq } from 'drizzle-orm';
 
-export async function generateFirstYearCorporationTaxEvents(org: Organisation) {
+export async function generateFirstYearCorporationTaxEvents(org: Organisation, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+
 	const ctEventType = await db.query.eventTypes.findFirst({
 		where: eq(eventTypes.key, 'corporation_tax_period_end')
 	});

@@ -1,12 +1,14 @@
 // generateAccountingRecurrence.ts
 
-import { type DBClient } from '$lib/server/db';
+import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { eventTypes, recurrenceRules } from '$lib/server/db/schema';
 import type { Organisation } from '$lib/types/organisations';
 import { getCustomDate } from '$lib/utils/dates';
 import { eq } from 'drizzle-orm';
 
-export async function generateAccountingRecurrence(db: DBClient, org: Organisation) {
+export async function generateAccountingRecurrence(org: Organisation, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+
 	const accountingEventType = await db.query.eventTypes.findFirst({
 		where: eq(eventTypes.key, 'accounting_period_end')
 	});
@@ -23,10 +25,10 @@ export async function generateAccountingRecurrence(db: DBClient, org: Organisati
 
 	let year = now.getFullYear();
 
-	let fyEnd = getCustomDate(year, org.financialYearEndMonth - 1, org.financialYearEndDay);
+	let fyEnd = getCustomDate(year, org.financialYearEndMonth, org.financialYearEndDay);
 
 	if (fyEnd <= now) {
-		fyEnd = getCustomDate(year + 1, org.financialYearEndMonth - 1, org.financialYearEndDay);
+		fyEnd = getCustomDate(year + 1, org.financialYearEndMonth, org.financialYearEndDay);
 	}
 
 	// 🔵 Accounting period

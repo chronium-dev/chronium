@@ -1,6 +1,6 @@
 // src/lib/server/setup/generateVatRecurrence.ts
 
-import { db } from '$lib/server/db';
+import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { eventTypes, RecurrenceFrequencyType, recurrenceRules } from '$lib/server/db/schema';
 import type { Organisation } from '$lib/types/organisations';
 import { endOfMonth } from 'date-fns';
@@ -14,7 +14,9 @@ const quarterMonths: Record<VatQuarterGroup, number[]> = {
 	feb: [2, 5, 8, 11]
 };
 
-export async function generateVatRecurrence(org: Organisation) {
+export async function generateVatRecurrence(org: Organisation, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+
 	if (!org.vatRegistered || !org.vatFrequency) return;
 
 	const vatEventType = await db.query.eventTypes.findFirst({

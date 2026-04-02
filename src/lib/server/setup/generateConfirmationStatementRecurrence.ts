@@ -1,11 +1,13 @@
 // generateConfirmationStatement.ts
 
-import { db } from '$lib/server/db';
+import { db, getExecutor, type DBExecutor } from '$lib/server/db';
 import { eventTypes, recurrenceRules } from '$lib/server/db/schema';
 import { addYears, subDays } from 'date-fns';
 import { eq } from 'drizzle-orm';
 
-export async function generateConfirmationStatementRecurrence(org: any) {
+export async function generateConfirmationStatementRecurrence(org: any, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+	
 	const eventType = await db.query.eventTypes.findFirst({
 		where: eq(eventTypes.key, 'confirmation_statement_period_end')
 	});
