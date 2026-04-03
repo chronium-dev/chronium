@@ -11,20 +11,23 @@ export const organisationFormSchema = z
 		name: z
 			.string({ error: 'Company name is required' })
 			.min(2, 'Must be at least 2 characters long')
-			.max(100, 'Must be 100 characters or fewer'),
+			.max(100, 'Must be 100 characters or fewer')
+			.default('ABC Motors Ltd'),
 		incorporationDate: z
 			.string({ error: 'Incorporation date is required' })
-			.min(1, 'Incorporation date is required'),
+			.min(1, 'Incorporation date is required')
+			.default('2025-02-12'),
 		financialYearEnd: z
-			.string({ error: 'Financial year end date is required' })
-			.min(1, 'Financial year end date is required'),
+			.string({ error: 'Next financial year end date is required' })
+			.min(1, 'Next financial year end date is required')
+			.default('2025-02-28'),
 		vatRegistered: z.enum(['yes', 'no'], {
 			error: 'Please select an option'
 		}),
-		vatFrequency: z.enum(vatFrequencyEnum.enumValues).nullish(),
+		vatFrequency: z.enum(vatFrequencyEnum.enumValues).nullish().default('quarterly'),
 		// How often do they submit returns? 'quarterly' | 'monthly' | 'annual'
 
-		vatQuarterGroup: z.enum(vatQuarterGroupEnum.enumValues).nullish(),
+		vatQuarterGroup: z.enum(vatQuarterGroupEnum.enumValues).nullish().default('mar'),
 		// If quarterly → which stagger? 'jan' | 'feb' | 'mar' (NULL if not quarterly)
 
 		vatStartDate: z.string().nullish(),

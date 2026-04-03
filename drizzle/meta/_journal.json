@@ -120,6 +120,13 @@
       "when": 1774946550156,
       "tag": "0016_faithful_true_believers",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1775214094454,
+      "tag": "0017_thankful_talkback",
+      "breakpoints": true
     }
   ]
 }

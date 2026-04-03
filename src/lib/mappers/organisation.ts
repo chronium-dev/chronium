@@ -5,12 +5,10 @@ import type { OrganisationFormData } from '$lib/validations/organisation';
 
 // Form → DB
 export function mapOrgFormDataToDbValues(data: OrganisationFormData) {
-	// const dom = new Date(data.financialYearEnd).getDay();
-
 	return {
 		...data,
 		financialYearEndMonth: new Date(data.financialYearEnd).getMonth(),
-		financialYearEndDay: new Date(data.financialYearEnd).getDay(),
+		financialYearEndDay: new Date(data.financialYearEnd).getDate(),
 		vatRegistered: data.vatRegistered === 'yes',
 		payrollActive: data.payrollActive === 'yes',
 		businessPremises: data.businessPremises === 'yes'

@@ -2,18 +2,18 @@ import type { Organisation } from '$lib/types/organisations';
 import { getCustomDate } from '$lib/utils/dates';
 
 export function getFirstAccountingPeriodEnd(org: Organisation): Date {
-	const inc = new Date(org.incorporationDate);
+	const incorporationDate = new Date(org.incorporationDate);
 
 	let end = getCustomDate(
-		inc.getFullYear(),
+		incorporationDate.getFullYear(),
 		org.financialYearEndMonth,
 		org.financialYearEndDay
 	);
 
 	// If FYE already passed → next year
-	if (end <= inc) {
+	if (end <= incorporationDate) {
 		end = getCustomDate(
-			inc.getFullYear() + 1,
+			incorporationDate.getFullYear() + 1,
 			org.financialYearEndMonth,
 			org.financialYearEndDay
 		);

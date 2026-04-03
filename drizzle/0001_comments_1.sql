@@ -8,3 +8,5 @@ comment on table obligations is 'Obligations are the results (tasks) generated b
 
 comment on table recurrence_rules is 'Some obligations are not triggered by events. These are stored in recurrence_rules.';
 
+comment on column recurrence_rules.start_date is 'The first point in time from which this rule begins generating events. i.e. When does this obligation stream begin?';
+comment on column recurrence_rules.end_date is 'Stop generating events after this date';

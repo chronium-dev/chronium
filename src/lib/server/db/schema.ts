@@ -247,7 +247,7 @@ export const obligationTemplates = pgTable(
 		obligationTypeId: text('obligation_type_id')
 			.references(() => obligationTypes.id, { onDelete: 'cascade' })
 			.notNull(),
-		triggerEventTypeId: text('event_type_id')
+		triggerEventTypeId: text('trigger_event_type_id')
 			.references(() => eventTypes.id, { onDelete: 'cascade' })
 			.notNull(),
 		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),

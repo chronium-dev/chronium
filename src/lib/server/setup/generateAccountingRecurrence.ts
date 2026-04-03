@@ -2,6 +2,8 @@
 
 import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { eventTypes, recurrenceRules } from '$lib/server/db/schema';
+import { getFirstAccountingPeriodEnd } from '$lib/server/setup/getFirstAccountingPeriodEnd';
+import { getRelevantAccountingPeriodEnd } from '$lib/server/setup/getRelevantAccountingPeriodEnd';
 import type { Organisation } from '$lib/types/organisations';
 import { getCustomDate } from '$lib/utils/dates';
 import { eq } from 'drizzle-orm';
@@ -21,15 +23,16 @@ export async function generateAccountingRecurrence(org: Organisation, tx?: DBExe
 		throw new Error('Missing accounting_period_end or corporation_tax_period_end event types');
 	}
 
-	const now = new Date();
+	// const now = new Date();
 
-	let year = now.getFullYear();
+	// let year = now.getFullYear();
 
-	let fyEnd = getCustomDate(year, org.financialYearEndMonth, org.financialYearEndDay);
+	// let fyEnd = getCustomDate(year, org.financialYearEndMonth, org.financialYearEndDay);
 
-	if (fyEnd <= now) {
-		fyEnd = getCustomDate(year + 1, org.financialYearEndMonth, org.financialYearEndDay);
-	}
+	// if (fyEnd <= now) {
+	// 	fyEnd = getCustomDate(year + 1, org.financialYearEndMonth, org.financialYearEndDay);
+	// }
+	const accountingAnchor = getRelevantAccountingPeriodEnd(org);
 
 	// 🔵 Accounting period
 	await db
@@ -38,7 +41,7 @@ export async function generateAccountingRecurrence(org: Organisation, tx?: DBExe
 			organisationId: org.id,
 			eventTypeId: accountingEventType.id,
 			name: 'Accounting Period End',
-			startDate: fyEnd,
+			startDate: accountingAnchor,
 			monthDay: org.financialYearEndDay,
 			month: org.financialYearEndMonth,
 			frequency: 'yearly',
@@ -53,7 +56,7 @@ export async function generateAccountingRecurrence(org: Organisation, tx?: DBExe
 			organisationId: org.id,
 			eventTypeId: ctEventType.id,
 			name: 'Corporation Tax Period End',
-			startDate: fyEnd,
+			startDate: accountingAnchor,
 			monthDay: org.financialYearEndDay,
 			month: org.financialYearEndMonth,
 			frequency: 'yearly',
