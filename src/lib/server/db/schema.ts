@@ -1,3 +1,4 @@
+import type { DateOperationPipeline, FirstOccurrenceBase } from '$lib/types/obligationTemplates';
 import {
 	employeeCountEnum,
 	vatFrequencyEnum,
@@ -8,6 +9,7 @@ import {
 	date,
 	index,
 	integer,
+	jsonb,
 	pgEnum,
 	pgTable,
 	text,
@@ -255,10 +257,12 @@ export const obligationTemplates = pgTable(
 		dueOffsetYears: integer('due_offset_years').notNull().default(0),
 		dueOffsetMonths: integer('due_offset_months').notNull().default(0),
 		dueOffsetDays: integer('due_offset_days').notNull().default(0),
-		firstOccurrenceBase: text('first_occurrence_base'),
+		firstOccurrenceBase: text('first_occurrence_base').$type<FirstOccurrenceBase>(),
 		firstOccurrenceYears: integer('first_occurrence_years'),
 		firstOccurrenceMonths: integer('first_occurrence_months'),
 		firstOccurrenceDays: integer('first_occurrence_days'),
+		dueDateOperations: jsonb('due_date_operations').$type<DateOperationPipeline>(), // DateOperation[]
+		firstOccurrenceOperations: jsonb('first_occurrence_operations').$type<DateOperationPipeline>(), // DateOperation[]
 		defaultNotes: text('default_notes'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })

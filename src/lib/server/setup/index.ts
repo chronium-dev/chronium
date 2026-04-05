@@ -4,7 +4,7 @@ export * from './generateAccountingRecurrence';
 export * from './generateCompliancePack';
 export * from './generateConfirmationStatementRecurrence';
 export * from './generateEventsForOrg';
-export * from './generateFirstYearCorporationTaxEvents';
+// export * from './generateFirstYearCorporationTaxEvents';
 export * from './generateObligationsForOrg';
 export * from './generatePayrollRecurrence';
 export * from './generatePayrollYearEnd';

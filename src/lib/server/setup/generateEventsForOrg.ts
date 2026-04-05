@@ -1,22 +1,22 @@
 import { getExecutor, type DBExecutor } from '$lib/server/db';
-import { events, organisation } from '$lib/server/db/schema';
-import { addMonths, addYears, isAfter } from 'date-fns';
-import { desc, eq } from 'drizzle-orm';
+import { events, RecurrenceFrequencyType } from '$lib/server/db/schema';
+import type { RecurrenceRule } from '$lib/types/rules';
+import { addDays, addMonths, addYears } from 'date-fns';
 
-const TARGET_HORIZON_MONTHS = Number.parseInt(process.env.TARGET_HORIZON_MONTHS ?? '24');
+const WINDOW_PAST_DAYS = 540; // ~18 months
+const TARGET_HORIZON_MONTHS = 24;
 
 /**
  * NB: “Dates are clamped to end-of-month when necessary”
- * ... e.g. Jan 31 + 1 month → Feb 28 ✅ (good)
- *
+ * ... e.g. Jan 31 + 1 month → Feb 28 ✅
  */
 
-function getNextDate(current: Date, rule: any): Date {
-	if (rule.frequency === 'monthly') {
+function getNextDate(current: Date, rule: RecurrenceRule): Date {
+	if (rule.frequency === RecurrenceFrequencyType.Monthly) {
 		return addMonths(current, rule.interval);
 	}
 
-	if (rule.frequency === 'yearly') {
+	if (rule.frequency === RecurrenceFrequencyType.Yearly) {
 		return addYears(current, rule.interval);
 	}
 
@@ -27,21 +27,8 @@ export async function generateEventsForOrg(orgId: string, tx?: DBExecutor) {
 	const db = getExecutor(tx);
 
 	const now = new Date();
-
-	// 🔑 Load organisation horizon
-	const org = await db.query.organisation.findFirst({
-		where: (o, { eq }) => eq(o.id, orgId)
-	});
-
-	if (!org) throw new Error('Organisation not found');
-
-	const currentHorizon = org.obligationGenerationHorizon ?? now;
-	const targetHorizon = addMonths(now, TARGET_HORIZON_MONTHS);
-
-	// ✅ Nothing to do
-	if (!isAfter(targetHorizon, currentHorizon)) {
-		return;
-	}
+	const windowStart = addDays(now, -WINDOW_PAST_DAYS);
+	const windowEnd = addMonths(now, TARGET_HORIZON_MONTHS);
 
 	// 🔑 Load recurrence rules
 	const rules = await db.query.recurrenceRules.findMany({
@@ -49,43 +36,33 @@ export async function generateEventsForOrg(orgId: string, tx?: DBExecutor) {
 	});
 
 	for (const rule of rules) {
-		// 🔍 Find last generated event for this rule (INCLUDING asset)
-		const lastEvent = await db.query.events.findFirst({
-			where: (e, { and, eq, isNull }) =>
-				and(eq(e.organisationId, orgId), eq(e.eventTypeId, rule.eventTypeId)),
-			orderBy: (e) => desc(e.eventDate)
-		});
+		let currentDate = new Date(rule.startDate);
 
-		let current: Date;
+		// 🔥 Fast-forward to near windowStart (avoid unnecessary looping)
+		while (currentDate < windowStart) {
+			const next = getNextDate(currentDate, rule);
 
-		if (lastEvent) {
-			// ✅ Continue sequence correctly
-			current = getNextDate(lastEvent.eventDate, rule);
-		} else {
-			// ✅ First generation
-			current = new Date(rule.startDate);
+			// Stop just before we enter the window
+			if (next >= windowStart) break;
+
+			currentDate = next;
 		}
 
-		while (current <= targetHorizon && (!rule.endDate || current <= rule.endDate)) {
-			await db
-				.insert(events)
-				.values({
-					organisationId: orgId,
-					eventTypeId: rule.eventTypeId,
-					eventDate: current
-					//generated: true
-				})
-				.onConflictDoNothing();
+		// 🔁 Generate events within window
+		while (currentDate <= windowEnd && (!rule.endDate || currentDate <= rule.endDate)) {
+			// Only insert if inside window
+			if (currentDate >= windowStart) {
+				await db
+					.insert(events)
+					.values({
+						organisationId: orgId,
+						eventTypeId: rule.eventTypeId,
+						eventDate: currentDate
+					})
+					.onConflictDoNothing();
+			}
 
-			current = getNextDate(current, rule);
+			currentDate = getNextDate(currentDate, rule);
 		}
 	}
-
-	// 🔐 Advance horizon (THIS is what prevents reprocessing)
-	await db
-		.update(organisation)
-		.set({
-			obligationGenerationHorizon: targetHorizon
-		})
-		.where(eq(organisation.id, orgId));
 }

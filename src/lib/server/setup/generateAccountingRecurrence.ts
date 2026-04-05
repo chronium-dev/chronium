@@ -23,15 +23,6 @@ export async function generateAccountingRecurrence(org: Organisation, tx?: DBExe
 		throw new Error('Missing accounting_period_end or corporation_tax_period_end event types');
 	}
 
-	// const now = new Date();
-
-	// let year = now.getFullYear();
-
-	// let fyEnd = getCustomDate(year, org.financialYearEndMonth, org.financialYearEndDay);
-
-	// if (fyEnd <= now) {
-	// 	fyEnd = getCustomDate(year + 1, org.financialYearEndMonth, org.financialYearEndDay);
-	// }
 	const accountingAnchor = getRelevantAccountingPeriodEnd(org);
 
 	// 🔵 Accounting period

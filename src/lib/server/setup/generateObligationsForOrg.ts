@@ -1,8 +1,42 @@
 import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { events, obligations, ObligationStatusType } from '$lib/server/db/schema';
+import type { DateOperationPipeline, ObligationTemplate } from '$lib/types/obligationTemplates';
 import type { Organisation } from '$lib/types/organisations';
-import { addDays, addMonths, addYears } from 'date-fns';
+import { addDays, addMonths, addYears, endOfMonth } from 'date-fns';
 import { inArray } from 'drizzle-orm';
+
+export function applyOperations(baseDate: Date, ops: DateOperationPipeline): Date {
+	let date = new Date(baseDate);
+
+	for (const op of ops) {
+		switch (op.type) {
+			case 'add':
+				if (op.unit === 'days') date = addDays(date, op.value);
+				if (op.unit === 'months') date = addMonths(date, op.value);
+				if (op.unit === 'years') date = addYears(date, op.value);
+				break;
+
+			case 'end_of_month':
+				date = endOfMonth(date);
+				break;
+		}
+	}
+
+	return date;
+}
+
+function resolveBaseDate(
+	eventDate: Date,
+	template: ObligationTemplate,
+	org: Organisation,
+	isFirst: boolean
+): Date {
+	if (isFirst && template.firstOccurrenceBase === 'incorporation_date') {
+		return new Date(org.incorporationDate);
+	}
+
+	return new Date(eventDate);
+}
 
 /**
  * NB: “Dates are clamped to end-of-month when necessary”
@@ -28,37 +62,38 @@ function applyDateOffsets(baseDate: Date, years?: number, months?: number, days?
 	return date;
 }
 
-function applyOffset(eventDate: Date, template: any, org: any, isFirst: boolean): Date {
-	// ✅ FIRST OCCURRENCE OVERRIDE?
-	const hasOverride =
-		template.firstOccurrenceMonths != null ||
-		template.firstOccurrenceDays != null ||
-		template.firstOccurrenceYears != null;
+function applyOffset(
+	eventDate: Date,
+	template: ObligationTemplate,
+	org: Organisation,
+	isFirst: boolean
+): Date {
+	const baseDate = resolveBaseDate(eventDate, template, org, isFirst);
 
-	if (isFirst && hasOverride) {
-		let baseDate: Date;
-
-		if (template.firstOccurrenceBase === 'incorporation_date') {
-			baseDate = new Date(org.incorporationDate);
-		} else {
-			baseDate = new Date(eventDate);
-		}
-
-		return applyDateOffsets(
-			baseDate,
-			template.firstOccurrenceYears,
-			template.firstOccurrenceMonths,
-			template.firstOccurrenceDays
-		);
+	// ✅ 1. First occurrence operations (highest priority)
+	if (isFirst && template.firstOccurrenceOperations?.length) {
+		return applyOperations(baseDate, template.firstOccurrenceOperations);
 	}
 
-	// ✅ STANDARD CASE
-	return applyDateOffsets(
-		new Date(eventDate),
-		template.dueOffsetYears,
-		template.dueOffsetMonths,
-		template.dueOffsetDays
-	);
+	// ✅ 2. Standard operations
+	if (template.dueDateOperations?.length) {
+		return applyOperations(baseDate, template.dueDateOperations);
+	}
+
+	// ✅ 3. Legacy fallback (your existing logic)
+	const years = isFirst
+		? (template.firstOccurrenceYears ?? template.dueOffsetYears ?? 0)
+		: (template.dueOffsetYears ?? 0);
+
+	const months = isFirst
+		? (template.firstOccurrenceMonths ?? template.dueOffsetMonths ?? 0)
+		: (template.dueOffsetMonths ?? 0);
+
+	const days = isFirst
+		? (template.firstOccurrenceDays ?? template.dueOffsetDays ?? 0)
+		: (template.dueOffsetDays ?? 0);
+
+	return applyDateOffsets(baseDate, years, months, days);
 }
 
 export async function generateObligationsForOrg(
@@ -73,7 +108,6 @@ export async function generateObligationsForOrg(
 
 	// 🧠 Group templates by eventTypeId
 	const templatesByEventType = new Map<string, typeof templates>();
-
 	for (const t of templates) {
 		if (!templatesByEventType.has(t.triggerEventTypeId)) {
 			templatesByEventType.set(t.triggerEventTypeId, []);
@@ -88,7 +122,6 @@ export async function generateObligationsForOrg(
 
 	// 🧠 3. Group events by eventTypeId (i.e. event stream)
 	const eventsByType = new Map<string, typeof allEvents>();
-
 	for (const e of allEvents) {
 		if (!eventsByType.has(e.eventTypeId)) {
 			eventsByType.set(e.eventTypeId, []);
