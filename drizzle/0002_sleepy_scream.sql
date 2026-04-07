@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX "event_type_key_org_id_unique" ON "event_types" USING btree ("key","organisation_id");

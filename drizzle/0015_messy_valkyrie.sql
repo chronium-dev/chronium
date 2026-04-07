@@ -1,1 +1,0 @@
-ALTER TABLE "obligation_templates" DROP COLUMN "first_occurrence_override";

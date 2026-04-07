@@ -1,9 +1,4 @@
 import {
-	type DateOperationPipeline,
-	type FirstOccurrenceBase,
-	type FirstOccurrenceStrategy
-} from '$lib/types/obligationTemplates';
-import {
 	employeeCountEnum,
 	vatFrequencyEnum,
 	vatQuarterGroupEnum
@@ -13,7 +8,6 @@ import {
 	date,
 	index,
 	integer,
-	jsonb,
 	pgEnum,
 	pgTable,
 	text,
@@ -58,7 +52,13 @@ export const DomainType = {
 	Governance: 'governance'
 } as const satisfies Record<string, DomainType>;
 
-//export vatFrequencyEnum as vatFrequencyEnum from '../../../lib/validations/organisation';
+export const obligationCategoryEnum = pgEnum('obligation_category', [
+	'statutory',
+	'operational',
+	'governance'
+]);
+
+export const obligationSourceEnum = pgEnum('obligation_source', ['system', 'user']);
 
 export const user = pgTable('user', {
 	id: text('id').primaryKey(),
@@ -209,145 +209,6 @@ export const member = pgTable(
 	]
 );
 
-/**
- * These represent things that happened.
- */
-export const events = pgTable(
-	'events',
-	{
-		id: text('id')
-			.primaryKey()
-			.$defaultFn(() => createId()),
-		organisationId: text('organisation_id')
-			.references(() => organisation.id, { onDelete: 'cascade' })
-			.notNull(),
-		eventTypeId: text('event_type_id')
-			.references(() => eventTypes.id, { onDelete: 'cascade' })
-			.notNull(),
-		anchorDate: date('anchor_date', { mode: 'date' }),
-		eventDate: date('event_date', { mode: 'date' }).notNull(),
-		//generated: boolean('generated').default(true),
-		// obligationsGeneratedAt: timestamp('obligations_generated_at'),
-		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true })
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull()
-	},
-	(table) => [
-		index('events_event_type_idx').on(table.eventTypeId),
-		uniqueIndex('events_unique').on(table.organisationId, table.eventTypeId, table.eventDate)
-	]
-);
-
-/**
- * This is where rules live.
- */
-export const obligationTemplates = pgTable(
-	'obligation_templates',
-	{
-		id: text('id')
-			.primaryKey()
-			.$defaultFn(() => createId()),
-		name: text('name').notNull(),
-		obligationTypeId: text('obligation_type_id')
-			.references(() => obligationTypes.id, { onDelete: 'cascade' })
-			.notNull(),
-		triggerEventTypeId: text('trigger_event_type_id').references(() => eventTypes.id, {
-			onDelete: 'cascade'
-		}),
-		// .notNull(),
-		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),
-		entityTypeId: text('entity_type_id').references(() => entityTypes.id),
-		firstOccurrenceStrategy: text('first_occurrence_strategy')
-			.$type<FirstOccurrenceStrategy>()
-			.default('threshold'),
-		firstOccurrenceBase: text('first_occurrence_base').$type<FirstOccurrenceBase>(),
-		dueDateOperations: jsonb('due_date_operations').$type<DateOperationPipeline>().notNull(), // DateOperation[]
-		firstOccurrenceOperations: jsonb('first_occurrence_operations').$type<DateOperationPipeline>(), // DateOperation[]
-		defaultNotes: text('default_notes'),
-		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true })
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull()
-	},
-	(table) => [index('obligation_templates_trigger_event_idx').on(table.triggerEventTypeId)]
-);
-
-/**
- * Generated obligations.
- */
-export const obligations = pgTable(
-	'obligations',
-	{
-		id: text('id')
-			.primaryKey()
-			.$defaultFn(() => createId()),
-		organisationId: text('organisation_id')
-			.references(() => organisation.id, { onDelete: 'cascade' })
-			.notNull(),
-		obligationTypeId: text('obligation_type_id')
-			.references(() => obligationTypes.id, { onDelete: 'cascade' })
-			.notNull(),
-		templateId: text('template_id').references(() => obligationTemplates.id),
-		generatedFromEventId: text('generated_from_event_id').references(() => events.id),
-		assignedToUserId: text('assigned_to_user_id').references(() => user.id),
-		dueDate: date('due_date', { mode: 'date' }).notNull(),
-		eventDate: date('event_date', { mode: 'date' }).notNull(),
-		status: obligationStatusEnum('status').default('pending').notNull(),
-		userNotes: text('user_notes'),
-		//generated: boolean('generated').default(true),
-		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true })
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull()
-	},
-	(table) => [
-		index('obligations_organisation_idx').on(table.organisationId),
-		uniqueIndex('obligation_generation_event_id_unique').on(
-			table.generatedFromEventId,
-			table.templateId
-		)
-	]
-);
-
-export const eventTypes = pgTable(
-	'event_types',
-	{
-		id: text('id')
-			.primaryKey()
-			.$defaultFn(() => createId()),
-		key: text('key').notNull().unique(),
-		name: text('name').notNull(),
-		description: text('description'),
-		domain: domainEnum('domain').notNull(),
-		organisationId: text('organisation_id').references(() => organisation.id),
-		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true })
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull()
-	},
-	(table) => [uniqueIndex('event_type_key_org_id_unique').on(table.key, table.organisationId)]
-);
-
-export const obligationTypes = pgTable('obligation_types', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => createId()),
-	key: text('key').unique().notNull(),
-	name: text('name').notNull(),
-	description: text('description'),
-	domain: domainEnum('domain').notNull(),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true })
-		.defaultNow()
-		.$onUpdate(() => new Date())
-		.notNull()
-});
-
 export const jurisdictions = pgTable('jurisdictions', {
 	id: text('id')
 		.primaryKey()
@@ -374,6 +235,208 @@ export const entityTypes = pgTable('entity_types', {
 		.notNull()
 });
 
+//
+// Recurrence Rule (USER ONLY)
+//
+export const recurrenceRules = pgTable('recurrence_rules', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => createId()),
+	frequency: recurrenceFrequencyEnum('frequency').notNull(),
+	interval: integer('interval').notNull().default(1),
+	anchorDate: date('anchor_date').notNull(),
+	dayOfMonth: integer('day_of_month'),
+	monthOfYear: integer('month_of_year'),
+	endOfMonth: boolean('end_of_month').default(false),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull()
+});
+
+//
+// Obligation Definition
+//
+
+export const obligationDefinitions = pgTable('obligation_definitions', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => createId()),
+	name: text('name').notNull(),
+	category: obligationCategoryEnum('category').notNull(),
+	source: obligationSourceEnum('source').notNull(),
+	recurrenceRuleId: text('recurrence_rule_id').references(() => recurrenceRules.id),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull()
+});
+
+//
+// Obligation Instance
+//
+
+export const obligations = pgTable('obligations', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => createId()),
+	organisationId: text('organisation_id')
+		.references(() => organisation.id)
+		.notNull(),
+	obligationDefinitionId: text('obligation_definition_id')
+		.references(() => obligationDefinitions.id)
+		.notNull(),
+	dueDate: date('due_date').notNull(),
+	status: obligationStatusEnum('status').notNull().default('pending'),
+	notes: text('notes'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull()
+});
+
+// /**
+//  * These represent things that happened.
+//  */
+// export const events = pgTable(
+// 	'events',
+// 	{
+// 		id: text('id')
+// 			.primaryKey()
+// 			.$defaultFn(() => createId()),
+// 		organisationId: text('organisation_id')
+// 			.references(() => organisation.id, { onDelete: 'cascade' })
+// 			.notNull(),
+// 		eventTypeId: text('event_type_id')
+// 			.references(() => eventTypes.id, { onDelete: 'cascade' })
+// 			.notNull(),
+// 		anchorDate: date('anchor_date', { mode: 'date' }),
+// 		eventDate: date('event_date', { mode: 'date' }).notNull(),
+// 		//generated: boolean('generated').default(true),
+// 		// obligationsGeneratedAt: timestamp('obligations_generated_at'),
+// 		createdAt: timestamp('created_at').defaultNow().notNull(),
+// 		updatedAt: timestamp('updated_at', { withTimezone: true })
+// 			.defaultNow()
+// 			.$onUpdate(() => new Date())
+// 			.notNull()
+// 	},
+// 	(table) => [
+// 		index('events_event_type_idx').on(table.eventTypeId),
+// 		uniqueIndex('events_unique').on(table.organisationId, table.eventTypeId, table.eventDate)
+// 	]
+// );
+
+/**
+ * This is where rules live.
+ */
+// export const obligationTemplates = pgTable(
+// 	'obligation_templates',
+// 	{
+// 		id: text('id')
+// 			.primaryKey()
+// 			.$defaultFn(() => createId()),
+// 		name: text('name').notNull(),
+// 		obligationTypeId: text('obligation_type_id')
+// 			.references(() => obligationTypes.id, { onDelete: 'cascade' })
+// 			.notNull(),
+// 		triggerEventTypeId: text('trigger_event_type_id').references(() => eventTypes.id, {
+// 			onDelete: 'cascade'
+// 		}),
+// 		// .notNull(),
+// 		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),
+// 		entityTypeId: text('entity_type_id').references(() => entityTypes.id),
+// 		firstOccurrenceStrategy: text('first_occurrence_strategy')
+// 			.$type<FirstOccurrenceStrategy>()
+// 			.default('threshold'),
+// 		firstOccurrenceBase: text('first_occurrence_base').$type<FirstOccurrenceBase>(),
+// 		dueDateOperations: jsonb('due_date_operations').$type<DateOperationPipeline>().notNull(), // DateOperation[]
+// 		firstOccurrenceOperations: jsonb('first_occurrence_operations').$type<DateOperationPipeline>(), // DateOperation[]
+// 		defaultNotes: text('default_notes'),
+// 		createdAt: timestamp('created_at').defaultNow().notNull(),
+// 		updatedAt: timestamp('updated_at', { withTimezone: true })
+// 			.defaultNow()
+// 			.$onUpdate(() => new Date())
+// 			.notNull()
+// 	},
+// 	(table) => [index('obligation_templates_trigger_event_idx').on(table.triggerEventTypeId)]
+// );
+
+/**
+ * Generated obligations.
+ */
+// export const obligations = pgTable(
+// 	'obligations',
+// 	{
+// 		id: text('id')
+// 			.primaryKey()
+// 			.$defaultFn(() => createId()),
+// 		organisationId: text('organisation_id')
+// 			.references(() => organisation.id, { onDelete: 'cascade' })
+// 			.notNull(),
+// 		obligationTypeId: text('obligation_type_id')
+// 			.references(() => obligationTypes.id, { onDelete: 'cascade' })
+// 			.notNull(),
+// 		templateId: text('template_id').references(() => obligationTemplates.id),
+// 		generatedFromEventId: text('generated_from_event_id').references(() => events.id),
+// 		assignedToUserId: text('assigned_to_user_id').references(() => user.id),
+// 		dueDate: date('due_date', { mode: 'date' }).notNull(),
+// 		eventDate: date('event_date', { mode: 'date' }).notNull(),
+// 		status: obligationStatusEnum('status').default('pending').notNull(),
+// 		userNotes: text('user_notes'),
+// 		//generated: boolean('generated').default(true),
+// 		createdAt: timestamp('created_at').defaultNow().notNull(),
+// 		updatedAt: timestamp('updated_at', { withTimezone: true })
+// 			.defaultNow()
+// 			.$onUpdate(() => new Date())
+// 			.notNull()
+// 	},
+// 	(table) => [
+// 		index('obligations_organisation_idx').on(table.organisationId),
+// 		uniqueIndex('obligation_generation_event_id_unique').on(
+// 			table.generatedFromEventId,
+// 			table.templateId
+// 		)
+// 	]
+// );
+
+// export const eventTypes = pgTable(
+// 	'event_types',
+// 	{
+// 		id: text('id')
+// 			.primaryKey()
+// 			.$defaultFn(() => createId()),
+// 		key: text('key').notNull().unique(),
+// 		name: text('name').notNull(),
+// 		description: text('description'),
+// 		domain: domainEnum('domain').notNull(),
+// 		organisationId: text('organisation_id').references(() => organisation.id),
+// 		createdAt: timestamp('created_at').defaultNow().notNull(),
+// 		updatedAt: timestamp('updated_at', { withTimezone: true })
+// 			.defaultNow()
+// 			.$onUpdate(() => new Date())
+// 			.notNull()
+// 	},
+// 	(table) => [uniqueIndex('event_type_key_org_id_unique').on(table.key, table.organisationId)]
+// );
+
+// export const obligationTypes = pgTable('obligation_types', {
+// 	id: text('id')
+// 		.primaryKey()
+// 		.$defaultFn(() => createId()),
+// 	key: text('key').unique().notNull(),
+// 	name: text('name').notNull(),
+// 	description: text('description'),
+// 	domain: domainEnum('domain').notNull(),
+// 	createdAt: timestamp('created_at').defaultNow().notNull(),
+// 	updatedAt: timestamp('updated_at', { withTimezone: true })
+// 		.defaultNow()
+// 		.$onUpdate(() => new Date())
+// 		.notNull()
+// });
+
 // {
 // 		eventTypeKey: 'board_meeting_held',
 // 		organisationId: organisationSeeds[0].id,
@@ -382,32 +445,32 @@ export const entityTypes = pgTable('entity_types', {
 // 		interval: 3
 // 	},
 
-export const recurrenceRules = pgTable(
-	'recurrence_rules',
-	{
-		id: text('id')
-			.primaryKey()
-			.$defaultFn(() => createId()),
-		organisationId: text('organisation_id')
-			.notNull()
-			.references(() => organisation.id, { onDelete: 'cascade' }),
-		eventTypeId: text('event_type_id')
-			.references(() => eventTypes.id, { onDelete: 'cascade' })
-			.notNull(),
-		name: text('name').notNull(),
-		startDate: date('start_date', { mode: 'date' }).notNull(),
-		endDate: date('end_date', { mode: 'date' }),
-		frequency: recurrenceFrequencyEnum('frequency').notNull(),
-		interval: integer('interval').default(1).notNull(),
-		weekDay: integer('weekday'),
-		// optional (0-6)
-		monthDay: integer('month_day'),
-		month: integer('month'),
-		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true })
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull()
-	},
-	(table) => [uniqueIndex('recurrence_rule_unique').on(table.organisationId, table.eventTypeId)]
-);
+// export const recurrenceRules = pgTable(
+// 	'recurrence_rules',
+// 	{
+// 		id: text('id')
+// 			.primaryKey()
+// 			.$defaultFn(() => createId()),
+// 		organisationId: text('organisation_id')
+// 			.notNull()
+// 			.references(() => organisation.id, { onDelete: 'cascade' }),
+// 		eventTypeId: text('event_type_id')
+// 			.references(() => eventTypes.id, { onDelete: 'cascade' })
+// 			.notNull(),
+// 		name: text('name').notNull(),
+// 		startDate: date('start_date', { mode: 'date' }).notNull(),
+// 		endDate: date('end_date', { mode: 'date' }),
+// 		frequency: recurrenceFrequencyEnum('frequency').notNull(),
+// 		interval: integer('interval').default(1).notNull(),
+// 		weekDay: integer('weekday'),
+// 		// optional (0-6)
+// 		monthDay: integer('month_day'),
+// 		month: integer('month'),
+// 		createdAt: timestamp('created_at').defaultNow().notNull(),
+// 		updatedAt: timestamp('updated_at', { withTimezone: true })
+// 			.defaultNow()
+// 			.$onUpdate(() => new Date())
+// 			.notNull()
+// 	},
+// 	(table) => [uniqueIndex('recurrence_rule_unique').on(table.organisationId, table.eventTypeId)]
+// );

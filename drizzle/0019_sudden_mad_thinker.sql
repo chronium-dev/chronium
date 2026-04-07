@@ -1,1 +1,0 @@
-ALTER TABLE "obligation_templates" ALTER COLUMN "trigger_event_type_id" DROP NOT NULL;

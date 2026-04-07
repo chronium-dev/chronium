@@ -1,7 +1,7 @@
 // +page.server.ts
 import { createOrg } from '$lib/server/db/queries';
-import { generateCompliancePack } from '$lib/server/setup/generateCompliancePack';
-import { inferVatQuarterGroup } from '$lib/server/setup/inferVatQuarterGroup';
+import { inferVatQuarterGroup } from '$lib/server/process/inferVatQuarterGroup';
+import { invokeGenerators } from '$lib/server/process/invokeGenerators';
 import type { FormMessage } from '$lib/types/forms';
 import { organisationFormSchema } from '$lib/validations/organisation';
 import { error, fail } from '@sveltejs/kit';
@@ -51,7 +51,7 @@ export const actions: Actions = {
 				return setError(form, 'name', createResult.message);
 			}
 
-			await generateCompliancePack(createResult.org, userId);
+			await invokeGenerators(createResult.org, userId);
 
 			return message(form, { status: 200, text: 'Company created successfully!' });
 		} catch (err) {
