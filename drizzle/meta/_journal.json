@@ -127,6 +127,27 @@
       "when": 1775214094454,
       "tag": "0017_thankful_talkback",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1775493879569,
+      "tag": "0018_blue_the_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1775561868221,
+      "tag": "0019_sudden_mad_thinker",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1775562075310,
+      "tag": "0020_powerful_puppet_master",
+      "breakpoints": true
     }
   ]
 }

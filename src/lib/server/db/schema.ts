@@ -1,4 +1,8 @@
-import type { DateOperationPipeline, FirstOccurrenceBase } from '$lib/types/obligationTemplates';
+import {
+	type DateOperationPipeline,
+	type FirstOccurrenceBase,
+	type FirstOccurrenceStrategy
+} from '$lib/types/obligationTemplates';
 import {
 	employeeCountEnum,
 	vatFrequencyEnum,
@@ -223,7 +227,7 @@ export const events = pgTable(
 		anchorDate: date('anchor_date', { mode: 'date' }),
 		eventDate: date('event_date', { mode: 'date' }).notNull(),
 		//generated: boolean('generated').default(true),
-		obligationsGeneratedAt: timestamp('obligations_generated_at'),
+		// obligationsGeneratedAt: timestamp('obligations_generated_at'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()
@@ -249,19 +253,17 @@ export const obligationTemplates = pgTable(
 		obligationTypeId: text('obligation_type_id')
 			.references(() => obligationTypes.id, { onDelete: 'cascade' })
 			.notNull(),
-		triggerEventTypeId: text('trigger_event_type_id')
-			.references(() => eventTypes.id, { onDelete: 'cascade' })
-			.notNull(),
+		triggerEventTypeId: text('trigger_event_type_id').references(() => eventTypes.id, {
+			onDelete: 'cascade'
+		}),
+		// .notNull(),
 		jurisdictionId: text('jurisdiction_id').references(() => jurisdictions.id),
 		entityTypeId: text('entity_type_id').references(() => entityTypes.id),
-		dueOffsetYears: integer('due_offset_years').notNull().default(0),
-		dueOffsetMonths: integer('due_offset_months').notNull().default(0),
-		dueOffsetDays: integer('due_offset_days').notNull().default(0),
+		firstOccurrenceStrategy: text('first_occurrence_strategy')
+			.$type<FirstOccurrenceStrategy>()
+			.default('threshold'),
 		firstOccurrenceBase: text('first_occurrence_base').$type<FirstOccurrenceBase>(),
-		firstOccurrenceYears: integer('first_occurrence_years'),
-		firstOccurrenceMonths: integer('first_occurrence_months'),
-		firstOccurrenceDays: integer('first_occurrence_days'),
-		dueDateOperations: jsonb('due_date_operations').$type<DateOperationPipeline>(), // DateOperation[]
+		dueDateOperations: jsonb('due_date_operations').$type<DateOperationPipeline>().notNull(), // DateOperation[]
 		firstOccurrenceOperations: jsonb('first_occurrence_operations').$type<DateOperationPipeline>(), // DateOperation[]
 		defaultNotes: text('default_notes'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -270,15 +272,7 @@ export const obligationTemplates = pgTable(
 			.$onUpdate(() => new Date())
 			.notNull()
 	},
-	(table) => [
-		index('obligation_templates_trigger_event_idx').on(table.triggerEventTypeId)
-		// uniqueIndex('obligation_template_rule_unique').on(
-		// 	table.triggerEventTypeId,
-		// 	table.obligationTypeId,
-		// 	table.jurisdictionId,
-		// 	table.entityTypeId
-		// )
-	]
+	(table) => [index('obligation_templates_trigger_event_idx').on(table.triggerEventTypeId)]
 );
 
 /**

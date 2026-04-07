@@ -1,9 +1,11 @@
 import { getExecutor, type DBExecutor } from '$lib/server/db';
-import { events, obligations, ObligationStatusType } from '$lib/server/db/schema';
+import { obligations, ObligationStatusType } from '$lib/server/db/schema';
 import type { DateOperationPipeline, ObligationTemplate } from '$lib/types/obligationTemplates';
 import type { Organisation } from '$lib/types/organisations';
 import { addDays, addMonths, addYears, endOfMonth } from 'date-fns';
-import { inArray } from 'drizzle-orm';
+
+const WINDOW_PAST_DAYS = 540;
+const TARGET_HORIZON_MONTHS = 24;
 
 export function applyOperations(baseDate: Date, ops: DateOperationPipeline): Date {
 	let date = new Date(baseDate);
@@ -23,6 +25,20 @@ export function applyOperations(baseDate: Date, ops: DateOperationPipeline): Dat
 	}
 
 	return date;
+}
+
+function getFirstOccurrenceThreshold(template: ObligationTemplate, org: Organisation): Date | null {
+	if (!template.firstOccurrenceOperations?.length) return null;
+
+	let baseDate: Date | null = null;
+
+	if (template.firstOccurrenceBase === 'incorporation_date') {
+		baseDate = new Date(org.incorporationDate);
+	}
+
+	if (!baseDate) return null;
+
+	return applyOperations(baseDate, template.firstOccurrenceOperations);
 }
 
 function resolveBaseDate(
@@ -70,30 +86,18 @@ function applyOffset(
 ): Date {
 	const baseDate = resolveBaseDate(eventDate, template, org, isFirst);
 
-	// ✅ 1. First occurrence operations (highest priority)
+	// ✅ First occurrence
 	if (isFirst && template.firstOccurrenceOperations?.length) {
 		return applyOperations(baseDate, template.firstOccurrenceOperations);
 	}
 
-	// ✅ 2. Standard operations
-	if (template.dueDateOperations?.length) {
-		return applyOperations(baseDate, template.dueDateOperations);
-	}
+	// ✅ Standard (always required now)
+	if (template.dueDateOperations.length === 0)
+		throw new Error(
+			`Template "${template.name}" does not have a valid "dueDateOperations" setting.`
+		);
 
-	// ✅ 3. Legacy fallback (your existing logic)
-	const years = isFirst
-		? (template.firstOccurrenceYears ?? template.dueOffsetYears ?? 0)
-		: (template.dueOffsetYears ?? 0);
-
-	const months = isFirst
-		? (template.firstOccurrenceMonths ?? template.dueOffsetMonths ?? 0)
-		: (template.dueOffsetMonths ?? 0);
-
-	const days = isFirst
-		? (template.firstOccurrenceDays ?? template.dueOffsetDays ?? 0)
-		: (template.dueOffsetDays ?? 0);
-
-	return applyDateOffsets(baseDate, years, months, days);
+	return applyOperations(baseDate, template.dueDateOperations);
 }
 
 export async function generateObligationsForOrg(
@@ -103,11 +107,15 @@ export async function generateObligationsForOrg(
 ) {
 	const exec = getExecutor(tx);
 
+	const now = new Date();
+	const windowStart = addDays(now, -WINDOW_PAST_DAYS);
+	const windowEnd = addMonths(now, TARGET_HORIZON_MONTHS);
+
 	// 🔑 1. Load templates
 	const templates = await exec.query.obligationTemplates.findMany();
 
 	// 🧠 Group templates by eventTypeId
-	const templatesByEventType = new Map<string, typeof templates>();
+	const templatesByEventType = new Map<string, ObligationTemplate[]>();
 	for (const t of templates) {
 		if (!templatesByEventType.has(t.triggerEventTypeId)) {
 			templatesByEventType.set(t.triggerEventTypeId, []);
@@ -115,21 +123,38 @@ export async function generateObligationsForOrg(
 		templatesByEventType.get(t.triggerEventTypeId)!.push(t);
 	}
 
-	// 🔑 2. Load ALL events for org (not just unprocessed)
-	const allEvents = await exec.query.events.findMany({
-		where: (e, { eq }) => eq(e.organisationId, org.id)
+	// 🔥 2. Load ONLY events in window
+	const windowedEvents = await exec.query.events.findMany({
+		where: (e, { eq, and, gte, lte }) =>
+			and(eq(e.organisationId, org.id), gte(e.eventDate, windowStart), lte(e.eventDate, windowEnd))
 	});
 
-	// 🧠 3. Group events by eventTypeId (i.e. event stream)
-	const eventsByType = new Map<string, typeof allEvents>();
-	for (const e of allEvents) {
+	if (windowedEvents.length === 0) return;
+
+	// 🧠 3. Group events by eventTypeId
+	const eventsByType = new Map<string, typeof windowedEvents>();
+	for (const e of windowedEvents) {
 		if (!eventsByType.has(e.eventTypeId)) {
 			eventsByType.set(e.eventTypeId, []);
 		}
 		eventsByType.get(e.eventTypeId)!.push(e);
 	}
 
-	// 🔁 4. Process each event stream independently
+	// // 🔑 4. Preload TRUE first events (global scope)
+	// const trueFirstEventIdByType = new Map<string, string>();
+
+	// for (const eventTypeId of eventsByType.keys()) {
+	// 	const first = await exec.query.events.findFirst({
+	// 		where: (e, { eq, and }) => and(eq(e.organisationId, org.id), eq(e.eventTypeId, eventTypeId)),
+	// 		orderBy: (e, { asc }) => asc(e.eventDate)
+	// 	});
+
+	// 	if (first) {
+	// 		trueFirstEventIdByType.set(eventTypeId, first.id);
+	// 	}
+	// }
+
+	// 🔁 5. Process each event stream
 	for (const [eventTypeId, eventsForType] of eventsByType.entries()) {
 		const templatesForEvent = templatesByEventType.get(eventTypeId);
 		if (!templatesForEvent) continue;
@@ -139,18 +164,38 @@ export async function generateObligationsForOrg(
 			(a, b) => a.eventDate.getTime() - b.eventDate.getTime()
 		);
 
-		// 🥇 Determine TRUE first event (deterministic)
-		const firstEvent = sortedEvents[0];
+		if (sortedEvents.length === 0) continue;
+
+		// const firstEventInWindow = sortedEvents[0];
+		// const trueFirstEventId = trueFirstEventIdByType.get(eventTypeId);
 
 		const rowsToInsert = [];
-		const processedEventIds: string[] = [];
 
-		// 🔁 Process each event
-		for (const event of sortedEvents) {
-			const isFirst = event.id === firstEvent.id;
+		for (const template of templatesForEvent) {
+			// const scope = template.firstOccurrenceScope ?? 'global';
 
-			for (const template of templatesForEvent) {
-				// 🧠 Due date
+			const firstThreshold = getFirstOccurrenceThreshold(template, org);
+			let firstApplied = false;
+
+			for (const event of sortedEvents) {
+				let isFirst = false;
+
+				// if (firstThreshold && !firstApplied && event.eventDate >= firstThreshold) {
+				// 	isFirst = true;
+				// 	firstApplied = true;
+				// }
+
+				const qualifiesForFirst = firstThreshold && event.eventDate >= firstThreshold;
+				if (qualifiesForFirst && !firstApplied) {
+					isFirst = true;
+					firstApplied = true;
+				}
+
+				// 🚨 Skip events BEFORE first occurrence
+				if (firstThreshold && !firstApplied && event.eventDate < firstThreshold) {
+					continue;
+				}
+
 				const dueDate = applyOffset(event.eventDate, template, org, isFirst);
 
 				rowsToInsert.push({
@@ -164,11 +209,7 @@ export async function generateObligationsForOrg(
 					assignedToUserId: userId
 				});
 			}
-
-			// ✅ Mark event as processed (optional now because obligationsGeneratedAt is not used currently...)
-			processedEventIds.push(event.id);
 		}
-
 		if (rowsToInsert.length > 0) {
 			const chunkSize = 500;
 
@@ -178,13 +219,6 @@ export async function generateObligationsForOrg(
 					.values(rowsToInsert.slice(i, i + chunkSize))
 					.onConflictDoNothing();
 			}
-		}
-
-		if (processedEventIds.length > 0) {
-			await exec
-				.update(events)
-				.set({ obligationsGeneratedAt: new Date() })
-				.where(inArray(events.id, processedEventIds));
 		}
 	}
 }

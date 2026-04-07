@@ -1,0 +1,1 @@
+ALTER TABLE "obligation_templates" ADD COLUMN "first_occurrence_strategy" text DEFAULT 'threshold';

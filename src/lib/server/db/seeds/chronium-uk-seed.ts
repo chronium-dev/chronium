@@ -35,7 +35,7 @@ export const eventTypeSeeds = [
 		domain: DomainType.Statutory
 	},
 	{
-		key: 'insurance_policy_started',
+		key: 'insurance_policy_renewal',
 		name: 'Insurance Policy Started',
 		description: 'Start date of an insurance policy.',
 		domain: DomainType.Operational
@@ -123,7 +123,7 @@ export const eventTypeSeeds = [
 
 	// ✅ Future “due” events (fixed)
 	{
-		key: 'pat_test_due',
+		key: 'pat_testing',
 		name: 'PAT Testing Due',
 		description: 'Portable appliance testing is due.',
 		domain: DomainType.Operational
@@ -300,7 +300,7 @@ export const obligationTypeSeeds = [
 	},
 
 	{
-		key: 'pat_test_due',
+		key: 'pat_testing',
 		name: 'PAT Testing',
 		description: 'Portable appliance electrical safety testing.',
 		domain: DomainType.Operational
@@ -450,12 +450,18 @@ export const obligationTemplateSeeds = [
 		name: 'File Annual Accounts',
 		eventTypeKey: 'accounting_period_end',
 		obligationTypeKey: 'file_annual_accounts',
-		dueOffsetMonths: 9,
-		dueOffsetDays: 0,
+
 		firstOccurrenceBase: 'incorporation_date',
-		firstOccurrenceYears: 0,
-		firstOccurrenceMonths: 21,
-		firstOccurrenceDays: 0,
+		firstOccurrenceOperations: [
+			{ type: 'add', unit: 'months', value: 21 },
+			{ type: 'end_of_month' }
+		],
+
+		dueDateOperations: [
+			{ type: 'add', unit: 'months', value: 9 },
+			{ type: 'end_of_month' } // ensure it lands on month-end
+		],
+
 		defaultNotes:
 			'Accounts must be filed 9 months after the accounting period end (first accounts: 21 months from incorporation).'
 	},
@@ -464,7 +470,9 @@ export const obligationTemplateSeeds = [
 		name: 'File Confirmation Statement',
 		eventTypeKey: 'confirmation_statement_period_end',
 		obligationTypeKey: 'file_confirmation_statement',
-		dueOffsetDays: 14,
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 14 }],
+
 		defaultNotes: 'Must be filed within 14 days of the confirmation date.'
 	},
 
@@ -472,148 +480,186 @@ export const obligationTemplateSeeds = [
 		name: 'Pay Corporation Tax',
 		eventTypeKey: 'corporation_tax_period_end',
 		obligationTypeKey: 'pay_corporation_tax',
-		dueOffsetMonths: 9, // 9 months
-		dueOffsetDays: 1, // ... + 1 day
+
+		firstOccurrenceStrategy: 'absolute',
+		firstOccurrenceBase: 'incorporation_date',
+		firstOccurrenceOperations: [
+			{ type: 'add', unit: 'months', value: 12 },
+			{ type: 'add', unit: 'days', value: 1 }
+		],
+
+		dueDateOperations: [
+			{ type: 'add', unit: 'months', value: 9 },
+			{ type: 'add', unit: 'days', value: 1 }
+		],
+
 		defaultNotes:
 			'Corporation tax must normally be paid nine months and one day after the accounting period ends.'
 	},
+
 	{
 		name: 'File CT600',
 		eventTypeKey: 'corporation_tax_period_end',
 		obligationTypeKey: 'file_ct600',
-		dueOffsetMonths: 12,
-		defaultNotes:
-			'For most UK limited companies, a Company Tax Return (form CT600) must be filed with HM Revenue & Customs (HMRC) 12 months after the end of the accounting period it covers'
+
+		dueDateOperations: [{ type: 'add', unit: 'months', value: 12 }],
+
+		defaultNotes: 'CT600 must be filed 12 months after the end of the accounting period.'
 	},
+
 	{
 		name: 'Submit VAT Return',
 		eventTypeKey: 'vat_period_end',
 		obligationTypeKey: 'submit_vat_return',
-		dueOffsetMonths: 1,
-		dueOffsetDays: 7,
-		defaultNotes: 'VAT Return must be submitted quarterly, monthly or annually'
+
+		dueDateOperations: [
+			{ type: 'add', unit: 'months', value: 1 },
+			{ type: 'add', unit: 'days', value: 7 }
+		]
 	},
+
 	{
 		name: 'Pay VAT',
 		eventTypeKey: 'vat_period_end',
 		obligationTypeKey: 'pay_vat',
-		dueOffsetMonths: 1,
-		dueOffsetDays: 7,
-		defaultNotes: 'VAT due must be paid quarterly, monthly or annually'
-	},
 
+		dueDateOperations: [
+			{ type: 'add', unit: 'months', value: 1 },
+			{ type: 'add', unit: 'days', value: 7 }
+		]
+	},
 	{
 		name: 'Pay PAYE',
 		eventTypeKey: 'payroll_month_end',
 		obligationTypeKey: 'pay_paye',
-		dueOffsetDays: 22,
-		defaultNotes: 'PAYE must be paid by the 22nd of the following month (electronic payment).'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 22 }]
 	},
 
 	{
 		name: 'Submit Final FPS',
 		eventTypeKey: 'payroll_year_end',
 		obligationTypeKey: 'submit_final_fps',
-		dueOffsetDays: 19,
-		defaultNotes: 'Final Full Payment Submission must be sent by 19 April.'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 19 }]
 	},
+
+	// ------------------------
+	// Operational
+	// ------------------------
 
 	{
 		name: 'Renew Domain',
 		eventTypeKey: 'domain_registered',
 		obligationTypeKey: 'renew_domain',
-		dueOffsetDays: 365,
-		defaultNotes: 'Ensure domain auto-renew is enabled to prevent website or email disruption.'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 365 }]
 	},
 
 	{
 		name: 'Renew SSL Certificate',
 		eventTypeKey: 'ssl_certificate_issued',
 		obligationTypeKey: 'renew_ssl_certificate',
-		dueOffsetDays: 365,
-		defaultNotes: 'Expired SSL certificates will cause browsers to mark your website as insecure.'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 365 }]
 	},
 
 	{
 		name: 'Backup Restore Test',
 		eventTypeKey: 'backup_restore_test_due',
 		obligationTypeKey: 'backup_restore_test_due',
-		dueOffsetMonth: 6,
-		defaultNotes: 'Regularly test backup restoration to ensure data recovery is possible.'
+
+		dueDateOperations: [{ type: 'add', unit: 'months', value: 6 }]
 	},
 
 	{
 		name: 'Insurance Renewal',
-		eventTypeKey: 'insurance_policy_started',
+		eventTypeKey: 'insurance_policy_renewal',
 		obligationTypeKey: 'renew_insurance',
-		dueOffsetDays: 365,
-		defaultNotes: 'Check renewal quotes and ensure cover reflects current business risks.'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 365 }]
 	},
 
 	{
 		name: 'Supplier Contract Review',
 		eventTypeKey: 'supplier_contract_signed',
 		obligationTypeKey: 'review_supplier_contract',
-		dueOffsetDays: 365,
-		defaultNotes: 'Check pricing, termination notice periods, and renewal clauses.'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 365 }]
 	},
 
 	{
 		name: 'Office Lease Review',
 		eventTypeKey: 'office_lease_signed',
 		obligationTypeKey: 'office_lease_review',
-		dueOffsetDays: 365,
-		defaultNotes: 'Review break clauses and lease renewal timelines well in advance.'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 365 }]
 	},
 
 	{
 		name: 'Annual Staff Appraisal',
 		eventTypeKey: 'employee_hired',
 		obligationTypeKey: 'staff_annual_appraisal',
-		dueOffsetDays: 365,
-		defaultNotes: 'Annual performance review discussing development goals and feedback.'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 365 }]
 	},
+
+	// ------------------------
+	// Governance (event-driven)
+	// ------------------------
 
 	{
 		name: 'Cyber Security Review',
-		eventTypeKey: 'cyber_security_review_due', // ✅ FIXED
+		eventTypeKey: 'cyber_security_review_due',
 		obligationTypeKey: 'cyber_security_review',
-		dueOffsetDays: 0,
-		defaultNotes: 'Review MFA usage, password policies, and system access controls.'
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 0 }]
 	},
 
 	{
 		name: 'Disaster Recovery Test',
-		eventTypeKey: 'disaster_recovery_test_due', // ✅ FIXED
+		eventTypeKey: 'disaster_recovery_test_due',
 		obligationTypeKey: 'disaster_recovery_test',
-		dueOffsetDays: 0,
-		defaultNotes: 'Test restoring systems from backup and verify recovery procedures.'
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 0 }]
 	},
 
 	{
 		name: 'Website Terms Review',
 		eventTypeKey: 'policy_review',
 		obligationTypeKey: 'website_terms_review',
-		dueOffsetDays: 365,
-		defaultNotes: 'Ensure privacy policy, cookie policy and terms comply with current regulations.'
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 365 }]
 	},
+
 	{
 		name: 'Arrange and complete MOT',
 		eventTypeKey: 'vehicle_mot_due',
 		obligationTypeKey: 'vehicle_mot_due',
-		dueOffsetDays: 335 // ~30 days before next MOT
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 335 }]
 	},
+
 	{
 		name: 'Conduct annual fire safety inspection',
 		eventTypeKey: 'fire_safety_inspection_due',
 		obligationTypeKey: 'fire_safety_inspection_due',
-		dueOffsetMonths: 12
+
+		dueDateOperations: [{ type: 'add', unit: 'months', value: 12 }]
 	},
+
 	{
-		name: 'Complete PAT testing',
-		eventTypeKey: 'pat_test_due',
-		obligationTypeKey: 'pat_test_due',
-		dueOffsetMonths: 12
+		name: 'PAT Testing',
+		eventTypeKey: 'pat_testing',
+		obligationTypeKey: 'pat_testing',
+
+		dueDateOperations: [{ type: 'add', unit: 'days', value: 365 }]
+	},
+
+	{
+		name: 'Board Meeting',
+		eventTypeKey: 'board_meeting',
+		obligationTypeKey: 'board_meeting',
+
+		dueDateOperations: [{ type: 'add', unit: 'months', value: 3 }]
 	}
 ];
 

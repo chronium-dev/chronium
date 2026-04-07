@@ -1,3 +1,7 @@
+import type {
+	DateOperationPipeline,
+	FirstOccurrenceBase
+} from '../../../types/obligationTemplates.ts';
 import { db } from '../index.ts';
 import * as schema from './../schema';
 import {
@@ -87,10 +91,13 @@ const load = async () => {
 				const triggerId = eventTypeMap.get(item.eventTypeKey!);
 				const obligationId = obligationTypeMap.get(item.obligationTypeKey);
 
-				console.log({ eventTypeKey: item.eventTypeKey, obligationTypeKey: item.obligationTypeKey });
+				console.log({
+					eventTypeKey: item.eventTypeKey,
+					obligationTypeKey: item.obligationTypeKey
+				});
 
 				// Guard: Drizzle will complain if these are undefined but marked .notNull()
-				if (!triggerId) {
+				if (item.firstOccurrenceStrategy !== 'absolute' && !triggerId) {
 					throw new Error(`Missing Event Type lookup for "${item.eventTypeKey}"`);
 				}
 
@@ -104,12 +111,9 @@ const load = async () => {
 					triggerEventTypeId: triggerId,
 					jurisdictionId: jurisdictionUK.id,
 					entityTypeId: entityTypeUkLtd.id,
-					dueOffsetDays: item.dueOffsetDays,
-					dueOffsetMonths: item.dueOffsetMonths,
-					firstOccurrenceBase: item.firstOccurrenceBase,
-					firstOccurrenceYears: item.firstOccurrenceYears,
-					firstOccurrenceMonths: item.firstOccurrenceMonths,
-					firstOccurrenceDays: item.firstOccurrenceDays
+					firstOccurrenceBase: item.firstOccurrenceBase as FirstOccurrenceBase | null,
+					dueDateOperations: item.dueDateOperations as DateOperationPipeline,
+					firstOccurrenceOperations: item.firstOccurrenceOperations as DateOperationPipeline | null
 				});
 			}
 

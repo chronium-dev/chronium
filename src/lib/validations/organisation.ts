@@ -5,6 +5,7 @@ export const employeeCountEnum = pgEnum('employee_count_enum', ['0', '1-5', '6-2
 export const vatFrequencyEnum = pgEnum('vat_frequency_enum', ['quarterly', 'monthly', 'annual']);
 export const vatQuarterGroupEnum = pgEnum('vat_quarter_group_enum', ['jan', 'feb', 'mar']);
 
+
 export const organisationFormSchema = z
 	.object({
 		id: z.string().optional(),
