@@ -1,7 +1,7 @@
 // compliance/annualAccounts.ts
 
 import type { Organisation } from '$lib/types/organisations';
-import { addMonths, isAfter } from 'date-fns';
+import { addMonths, min, isAfter } from 'date-fns';
 
 // type Organisation = {
 // 	incorporationDate: Date;
@@ -13,8 +13,32 @@ export function generateAnnualAccountsObligations(org: Organisation, from: Date,
 	const results: Date[] = [];
 
 	//
-	// 1. First Accounts
+	// 1. Determine FIRST accounting period end
 	//
+
+	const firstFye = new Date(
+		new Date(org.incorporationDate).getFullYear(),
+		org.financialYearEndMonth - 1,
+		org.financialYearEndDay
+	);
+
+	// If incorporation is AFTER FYE → move to next year
+	if (firstFye <= org.incorporationDate) {
+		firstFye.setFullYear(firstFye.getFullYear() + 1);
+	}
+
+	//
+	// 2. Cap first period at 18 months
+	//
+
+	const maxFirstPeriodEnd = addMonths(org.incorporationDate, 18);
+
+	const firstPeriodEnd = min([firstFye, maxFirstPeriodEnd]);
+
+	//
+	// 3. First filing deadline
+	//
+
 	const firstDueDate = addMonths(org.incorporationDate, 21);
 
 	if (firstDueDate >= from && firstDueDate <= to) {
@@ -22,9 +46,10 @@ export function generateAnnualAccountsObligations(org: Organisation, from: Date,
 	}
 
 	//
-	// 2. Subsequent Years
+	// 4. Subsequent periods (normal cycle)
 	//
-	let year = new Date(org.incorporationDate).getFullYear();
+
+	let year = firstPeriodEnd.getFullYear();
 
 	while (true) {
 		const fyEnd = new Date(year, org.financialYearEndMonth - 1, org.financialYearEndDay);
@@ -33,7 +58,7 @@ export function generateAnnualAccountsObligations(org: Organisation, from: Date,
 
 		if (dueDate > to) break;
 
-		// Avoid duplicating first period
+		// Avoid overlap with first filing
 		if (isAfter(dueDate, firstDueDate)) {
 			if (dueDate >= from) {
 				results.push(dueDate);

@@ -1,7 +1,7 @@
 <script>
 	import ThemeDropdownMainMenu from './ThemeDropdownMainMenu.svelte';
 
-	const currentYear = new Date().getFullYear();
+	const currentYear = new UTCDate().getFullYear();
 </script>
 
 <footer class="border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">

@@ -670,7 +670,7 @@ export const defaultRecurrenceRules = [
 		name: 'Quarterly Board Meeting',
 		frequency: RecurrenceFrequencyType.Monthly,
 		interval: 3,
-		startDate: new Date()
+		startDate: new UTCDate()
 	},
 	{
 		eventTypeKey: 'shareholder_meeting',
@@ -678,7 +678,7 @@ export const defaultRecurrenceRules = [
 		name: 'Annual Shareholder Meeting',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
-		startDate: new Date()
+		startDate: new UTCDate()
 	},
 	{
 		eventTypeKey: 'risk_assessment_review',
@@ -686,7 +686,7 @@ export const defaultRecurrenceRules = [
 		name: 'Annual Risk Review',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
-		startDate: new Date()
+		startDate: new UTCDate()
 	},
 	{
 		eventTypeKey: 'policy_review',
@@ -694,7 +694,7 @@ export const defaultRecurrenceRules = [
 		name: 'Annual Policy Review',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
-		startDate: new Date()
+		startDate: new UTCDate()
 	},
 	{
 		eventTypeKey: 'backup_restore_test_due',
@@ -702,7 +702,7 @@ export const defaultRecurrenceRules = [
 		name: 'Annual Backup / Restore Test',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
-		startDate: new Date()
+		startDate: new UTCDate()
 	},
 	{
 		eventTypeKey: 'cyber_security_review_due',
@@ -710,6 +710,6 @@ export const defaultRecurrenceRules = [
 		name: 'Annual Cyber Security Review',
 		frequency: RecurrenceFrequencyType.Yearly,
 		interval: 1,
-		startDate: new Date()
+		startDate: new UTCDate()
 	}
 ];

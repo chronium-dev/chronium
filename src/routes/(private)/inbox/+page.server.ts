@@ -368,7 +368,7 @@ export const actions = {
 						.update(rating)
 						.set({
 							unread: false,
-							readAt: new Date(),
+							readAt: new UTCDate(),
 							readByUserId: validated.data.createdByUserId,
 							readByUserName: validated.data.replyUserName
 						})
@@ -384,7 +384,7 @@ export const actions = {
 						linkEmail: validated.data.email,
 						linkStatus: 'pending',
 						linkUsed: false,
-						linkExpiresAt: addDays(new Date(), ratingsConfig.replyLinkExpiryDays),
+						linkExpiresAt: addDays(new UTCDate(), ratingsConfig.replyLinkExpiryDays),
 						createdByUserId: userId
 					})
 					.returning();

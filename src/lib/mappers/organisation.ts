@@ -17,7 +17,12 @@ export function mapOrgFormDataToDbValues(data: OrganisationFormData) {
 
 // DB → Form defaults
 export function toFormDefaults(org: Organisation): Partial<OrganisationFormData> {
-	const dt = new Date(new Date().getFullYear(), org.financialYearEndMonth, org.financialYearEndDay);
+	const dt = new Date(
+		new UTCDate().getFullYear(),
+		org.financialYearEndMonth,
+		org.financialYearEndDay
+	);
+
 	return {
 		...org,
 		financialYearEnd: dt.toISOString(),

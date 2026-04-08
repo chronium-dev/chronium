@@ -7,16 +7,20 @@ import {
 } from '$lib/server/process/compliance';
 import { generateCorporationTaxObligations } from '$lib/server/process/compliance/generateCorporationTaxObligations';
 import { generateFromRecurrence } from '$lib/server/process/generateFromRecurrence';
-import type { DefinitionSet } from '$lib/types/obligationDefinitions';
+import type {
+	ObligationDefinitionWithRecurrenceRuleSet,
+	ObligationInsertSet
+} from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 
 export async function generateObligationsForOrg(
 	org: Organisation,
-	definitions: DefinitionSet,
+	definitions: ObligationDefinitionWithRecurrenceRuleSet,
 	from: Date,
-	to: Date
+	to: Date,
+	userId: string
 ) {
-	const obligations = [];
+	const obligations: ObligationInsertSet = [];
 
 	for (const def of definitions) {
 		if (def.source === 'system') {
@@ -43,7 +47,8 @@ export async function generateObligationsForOrg(
 				obligations.push({
 					organisationId: org.id,
 					obligationDefinitionId: def.id,
-					dueDate
+					dueDate,
+					assignedToUserId: userId
 				});
 			}
 		}

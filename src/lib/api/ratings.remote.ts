@@ -1,5 +1,5 @@
 import { command, getRequestEvent } from '$app/server';
-import { db} from '$lib/server/db';
+import { db } from '$lib/server/db';
 import { rating, ratingReply } from '$lib/server/db/schema';
 import { RatingStatus } from '$lib/types/ratings';
 import {
@@ -20,7 +20,7 @@ export const markRatingAsRead = command(userStampRatingSchema, async (params) =>
 		.update(rating)
 		.set({
 			unread: false,
-			readAt: new Date(),
+			readAt: new UTCDate(),
 			readByUserName: params.userName,
 			readByUserId: params.userId,
 			lastUpdatedByWhom: params.userName
@@ -60,7 +60,7 @@ export const markRatingAsClosed = command(userStampRatingSchema, async (params) 
 		.update(rating)
 		.set({
 			status: RatingStatus.Closed,
-			closedAt: new Date(),
+			closedAt: new UTCDate(),
 			closedByUserId: params.userId,
 			closedByUserName: params.userName,
 			lastUpdatedByWhom: params.userName
@@ -198,8 +198,8 @@ export const resetRatingStatus = command(userStampRatingSchema, async (params) =
 				.update(rating)
 				.set({
 					status: newStatus as RatingStatus,
-					updatedAt: new Date(),
-					touchedAt: new Date(),
+					updatedAt: new UTCDate(),
+					touchedAt: new UTCDate(),
 					closedAt: null,
 					closedByUserId: null,
 					closedByUserName: null,
@@ -226,7 +226,7 @@ export const markRatingReplyAsRead = command(ratingReplyUserStampSchema, async (
 		.update(ratingReply)
 		.set({
 			unread: false,
-			readAt: new Date(),
+			readAt: new UTCDate(),
 			readByUserName: params.userName,
 			readByUserId: params.userId,
 			replyUserName: params.userName,

@@ -1,15 +1,16 @@
 // recurrence.ts
 
-import { addMonths, addYears, isAfter, isBefore } from 'date-fns';
+import type { RecurrenceRule } from '$lib/types/rules';
+import { addMonths, addWeeks, addYears, isAfter, isBefore } from 'date-fns';
 
-type RecurrenceRule = {
-	frequency: 'monthly' | 'quarterly' | 'yearly';
-	interval: number;
-	anchorDate: Date;
-	dayOfMonth?: number | null;
-	monthOfYear?: number | null;
-	endOfMonth?: boolean | null;
-};
+// type RecurrenceRule = {
+// 	frequency: 'monthly' | 'quarterly' | 'yearly';
+// 	interval: number;
+// 	anchorDate: Date;
+// 	dayOfMonth?: number | null;
+// 	monthOfYear?: number | null;
+// 	endOfMonth?: boolean | null;
+// };
 
 export function generateFromRecurrence(rule: RecurrenceRule, from: Date, to: Date): Date[] {
 	const results: Date[] = [];
@@ -29,7 +30,10 @@ export function generateFromRecurrence(rule: RecurrenceRule, from: Date, to: Dat
 
 function increment(date: Date, rule: RecurrenceRule): Date {
 	switch (rule.frequency) {
-		case 'monthly':
+		case 'weekly':
+			return addWeeks(date, rule.interval);
+
+			case 'monthly':
 			return addMonths(date, rule.interval);
 
 		case 'quarterly':

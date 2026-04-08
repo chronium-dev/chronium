@@ -1,4 +1,5 @@
 // +page.server.ts
+import { db } from '$lib/server/db';
 import { createOrg } from '$lib/server/db/queries';
 import { inferVatQuarterGroup } from '$lib/server/process/inferVatQuarterGroup';
 import { invokeGenerators } from '$lib/server/process/invokeGenerators';
@@ -45,15 +46,16 @@ export const actions: Actions = {
 		try {
 			// ✅ Apply the transform only here, after superforms has validated
 			const result = organisationFormSchemaTransformed.parse(form.data);
+			await db.transaction(async (tx) => {
+				const createResult = await createOrg(result, userId);
+				if (!createResult.ok) {
+					return setError(form, 'name', createResult.message);
+				}
 
-			const createResult = await createOrg(result, userId);
-			if (!createResult.ok) {
-				return setError(form, 'name', createResult.message);
-			}
+				await invokeGenerators(createResult.org, userId);
 
-			await invokeGenerators(createResult.org, userId);
-
-			return message(form, { status: 200, text: 'Company created successfully!' });
+				return message(form, { status: 200, text: 'Company created successfully!' });
+			});
 		} catch (err) {
 			// Unexpected errors
 			console.log('err:', err);
