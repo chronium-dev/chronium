@@ -6,12 +6,15 @@ import {
 	member,
 	obligationDefinitions,
 	obligations,
+	obligationTemplates,
 	organisation,
 	recurrenceRules,
 	session,
 	user,
 	verification
 } from './schema';
+
+// ─── User ────────────────────────────────────────────────────────────────────
 
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
@@ -20,6 +23,8 @@ export const userRelations = relations(user, ({ many }) => ({
 	assignedObligations: many(obligations)
 }));
 
+// ─── Session ─────────────────────────────────────────────────────────────────
+
 export const sessionRelations = relations(session, ({ one }) => ({
 	user: one(user, {
 		fields: [session.userId],
@@ -27,12 +32,20 @@ export const sessionRelations = relations(session, ({ one }) => ({
 	})
 }));
 
+// ─── Account ─────────────────────────────────────────────────────────────────
+
 export const accountRelations = relations(account, ({ one }) => ({
 	user: one(user, {
 		fields: [account.userId],
 		references: [user.id]
 	})
 }));
+
+// ─── Verification ─────────────────────────────────────────────────────────────
+// No FK relations — verification rows are keyed by identifier (e.g. email),
+// not a hard foreign key to user. No relations needed.
+
+// ─── Organisation ─────────────────────────────────────────────────────────────
 
 export const organisationRelations = relations(organisation, ({ one, many }) => ({
 	jurisdiction: one(jurisdictions, {
@@ -44,9 +57,12 @@ export const organisationRelations = relations(organisation, ({ one, many }) => 
 		references: [entityTypes.id]
 	}),
 	members: many(member),
+	obligationDefinitions: many(obligationDefinitions),
 	recurrenceRules: many(recurrenceRules),
 	obligations: many(obligations)
 }));
+
+// ─── Member ───────────────────────────────────────────────────────────────────
 
 export const memberRelations = relations(member, ({ one }) => ({
 	organisation: one(organisation, {
@@ -59,15 +75,24 @@ export const memberRelations = relations(member, ({ one }) => ({
 	})
 }));
 
+// ─── Jurisdiction ─────────────────────────────────────────────────────────────
+
 export const jurisdictionRelations = relations(jurisdictions, ({ many }) => ({
 	organisations: many(organisation)
 }));
+
+// ─── EntityType ───────────────────────────────────────────────────────────────
 
 export const entityTypeRelations = relations(entityTypes, ({ many }) => ({
 	organisations: many(organisation)
 }));
 
-export const recurrenceRulesRelations = relations(recurrenceRules, ({ one, many }) => ({
+// ─── ObligationTemplate ───────────────────────────────────────────────────────
+// System-level templates — no FK relations to other tables in this schema.
+
+// ─── RecurrenceRule ───────────────────────────────────────────────────────────
+
+export const recurrenceRuleRelations = relations(recurrenceRules, ({ one, many }) => ({
 	organisation: one(organisation, {
 		fields: [recurrenceRules.organisationId],
 		references: [organisation.id]
@@ -75,7 +100,13 @@ export const recurrenceRulesRelations = relations(recurrenceRules, ({ one, many 
 	obligationDefinitions: many(obligationDefinitions)
 }));
 
-export const obligationDefinitionsRelations = relations(obligationDefinitions, ({ one, many }) => ({
+// ─── ObligationDefinition ─────────────────────────────────────────────────────
+
+export const obligationDefinitionRelations = relations(obligationDefinitions, ({ one, many }) => ({
+	organisation: one(organisation, {
+		fields: [obligationDefinitions.organisationId],
+		references: [organisation.id]
+	}),
 	recurrenceRule: one(recurrenceRules, {
 		fields: [obligationDefinitions.recurrenceRuleId],
 		references: [recurrenceRules.id]
@@ -83,16 +114,18 @@ export const obligationDefinitionsRelations = relations(obligationDefinitions, (
 	obligations: many(obligations)
 }));
 
-export const obligationsRelations = relations(obligations, ({ one }) => ({
+// ─── Obligation ───────────────────────────────────────────────────────────────
+
+export const obligationRelations = relations(obligations, ({ one }) => ({
 	organisation: one(organisation, {
 		fields: [obligations.organisationId],
 		references: [organisation.id]
 	}),
-	obligationDefinition: one(obligationDefinitions, {
+	definition: one(obligationDefinitions, {
 		fields: [obligations.obligationDefinitionId],
 		references: [obligationDefinitions.id]
 	}),
-	assignedToUser: one(user, {
+	assignedTo: one(user, {
 		fields: [obligations.assignedToUserId],
 		references: [user.id]
 	})

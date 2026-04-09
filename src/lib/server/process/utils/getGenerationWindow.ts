@@ -1,14 +1,24 @@
 import type { Organisation } from '$lib/types/organisations';
 import { UTCDate } from '@date-fns/utc';
-import { addDays } from 'date-fns';
+import { addMonths, subMonths } from 'date-fns';
+
+const LOOKBACK_MONTHS = Number.parseInt(process.env.LOOKBACK_MONTHS!);
+const HORIZON_MONTHS = Number.parseInt(process.env.HORIZON_MONTHS!);
 
 export function getGenerationWindow(org: Organisation) {
 	const today = new UTCDate();
 
-	const from = org.obligationGenerationHorizon ?? today;
+	// First run (no watermark)
+	if (!org.obligationsGeneratedTo) {
+		return {
+			from: subMonths(today, LOOKBACK_MONTHS),
+			to: addMonths(today, HORIZON_MONTHS)
+		};
+	}
 
-	// TODO - this 90 days period should not be hard-coded. And should we use months instead??
-	const to = addDays(today, 90);
-
-	return { from, to };
+	// Incremental run
+	return {
+		from: org.obligationsGeneratedTo,
+		to: addMonths(today, HORIZON_MONTHS)
+	};
 }

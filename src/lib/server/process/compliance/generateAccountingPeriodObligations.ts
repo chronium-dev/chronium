@@ -34,3 +34,4 @@ export function generateAccountingPeriodObligations(
 
 	return obligations;
 }
+

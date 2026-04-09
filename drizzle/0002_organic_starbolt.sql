@@ -1,0 +1,1 @@
+ALTER TABLE "organisation" RENAME COLUMN "obligation_generation_horizon" TO "obligation_generation_to";

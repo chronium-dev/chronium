@@ -7,6 +7,7 @@ import { UTCDate } from '@date-fns/utc';
 import {
 	boolean,
 	date,
+	foreignKey,
 	index,
 	integer,
 	pgEnum,
@@ -178,13 +179,13 @@ export const organisation = pgTable('organisation', {
 	vatQuarterGroup: vatQuarterGroupEnum('vat_quarter_group'),
 	// If quarterly → which stagger? 'mar' | 'jan' | 'feb' (NULL if not quarterly)
 
-	vatStartDate: date('vat_start_date', { mode: 'date' }),
+	vatStartDate: date('vat_start_date'),
 	// Set initially to the next VAT period end date? Optional but VERY useful for alignment
 
 	payrollActive: boolean('payroll_active').notNull(),
 	employeeCount: employeeCountEnum('employee_count'),
 	businessPremises: boolean('business_premises').notNull(),
-	obligationGenerationHorizon: date('obligation_generation_horizon', { mode: 'date' }),
+	obligationsGeneratedTo: date('obligation_generation_to'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()
@@ -254,14 +255,21 @@ export const obligationDefinitions = pgTable(
 		name: text('name').notNull(), // e.g. 'Annual Accounts'
 		category: obligationCategoryEnum('category').notNull(),
 		isSystem: boolean('is_system').default(true),
-		recurrenceRuleId: text('recurrence_rule_id').references(() => recurrenceRules.id),
+		recurrenceRuleId: text('recurrence_rule_id'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()
 			.$onUpdate(() => new UTCDate())
 			.notNull()
 	},
-	(table) => [uniqueIndex('obligation_definitions_key_unique').on(table.key)]
+	(table) => [
+		foreignKey({
+			columns: [table.recurrenceRuleId],
+			foreignColumns: [recurrenceRules.id],
+			name: 'fk_obligations_definition_recurrence_rule' // Your custom name
+		}),
+		uniqueIndex('obligation_definitions_key_unique').on(table.key)
+	]
 );
 
 /**
@@ -277,7 +285,7 @@ export const recurrenceRules = pgTable('recurrence_rules', {
 		.references(() => organisation.id, { onDelete: 'cascade' }),
 	frequency: recurrenceFrequencyEnum('frequency').notNull(),
 	interval: integer('interval').notNull().default(1),
-	anchorDate: date('anchor_date', { mode: 'date' }).notNull(),
+	anchorDate: date('anchor_date').notNull(),
 	dayOfMonth: integer('day_of_month'),
 	monthOfYear: integer('month_of_year'),
 	endOfMonth: boolean('end_of_month').default(false),
@@ -301,10 +309,8 @@ export const obligations = pgTable(
 		organisationId: text('organisation_id')
 			.references(() => organisation.id)
 			.notNull(),
-		obligationDefinitionId: text('obligation_definition_id')
-			.references(() => obligationDefinitions.id)
-			.notNull(),
-		dueDate: date('due_date', { mode: 'date' }).notNull(),
+		obligationDefinitionId: text('obligation_definition_id').notNull(),
+		dueDate: date('due_date').notNull(),
 		status: obligationStatusEnum('status').notNull().default('pending'),
 		assignedToUserId: text('assigned_to_user_id').references(() => user.id),
 		notes: text('notes'),
@@ -315,6 +321,11 @@ export const obligations = pgTable(
 			.notNull()
 	},
 	(table) => [
+		foreignKey({
+			columns: [table.obligationDefinitionId],
+			foreignColumns: [obligationDefinitions.id],
+			name: 'fk_obligations_definition' // Your custom name
+		}),
 		uniqueIndex('unique_obligation_instance').on(
 			table.organisationId,
 			table.obligationDefinitionId,
