@@ -1,3 +1,4 @@
+import { UTCDate } from '@date-fns/utc';
 import { lastDayOfMonth, set } from 'date-fns';
 
 /**
@@ -8,7 +9,7 @@ import { lastDayOfMonth, set } from 'date-fns';
  * @param day - The day of the month (0 to 31)
  */
 export function getCustomDate(year: number, month: number, day: number): Date {
-	const baseDate = new Date(year, month, 1);
+	const baseDate = new UTCDate(year, month, 1);
 
 	if (day === 0) {
 		return lastDayOfMonth(baseDate);

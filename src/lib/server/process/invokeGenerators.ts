@@ -1,5 +1,6 @@
-import { db } from '$lib/server/db';
-import { generateForOrganisation } from '$lib/server/process/generateForOrganisation';
+import { type DBExecutor } from '$lib/server/db';
+import { generateComplianceObligations } from '$lib/server/process/compliance/generateComplianceObligations';
+import { getGenerationWindow } from '$lib/server/process/utils/getGenerationWindow';
 import type { Organisation } from '$lib/types/organisations';
 
 /**
@@ -11,8 +12,12 @@ import type { Organisation } from '$lib/types/organisations';
  * @param org
  * @param userId
  */
-export async function invokeGenerators(org: Organisation, userId: string) {
-	await db.transaction(async (tx) => {
-		await generateForOrganisation(org, userId, tx);
-	});
+export async function invokeGenerators(org: Organisation, userId: string, tx?: DBExecutor) {
+	// Establish the working window in which we will generate obligations
+	const { from, to } = getGenerationWindow(org);
+
+	// Nothing to do
+	if (from >= to) return;
+
+	await generateComplianceObligations(org, userId, from, to, tx);
 }

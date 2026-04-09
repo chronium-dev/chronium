@@ -3,6 +3,7 @@ import {
 	vatFrequencyEnum,
 	vatQuarterGroupEnum
 } from '$lib/validations/organisation';
+import { UTCDate } from '@date-fns/utc';
 import {
 	boolean,
 	date,
@@ -15,7 +16,6 @@ import {
 	uniqueIndex
 } from 'drizzle-orm/pg-core';
 import { createId } from '../../../lib/utils/createid';
-import { UTCDate } from '@date-fns/utc';
 
 export { employeeCountEnum, vatFrequencyEnum, vatQuarterGroupEnum };
 
@@ -219,6 +219,51 @@ export const member = pgTable(
 	]
 );
 
+export const obligationTemplates = pgTable(
+	'obligation_templates',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		key: text('key').notNull(), // e.g. 'annual_accounts'
+		name: text('name').notNull(), // e.g. 'Annual Accounts'
+		category: obligationCategoryEnum('category').notNull(),
+		isSystem: boolean('is_system').default(true),
+		createdAt: timestamp('created_at').defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new UTCDate())
+			.notNull()
+	},
+	(table) => [uniqueIndex('obligation_templates_key_unique').on(table.key)]
+);
+
+//
+// Obligation Definition
+//
+export const obligationDefinitions = pgTable(
+	'obligation_definitions',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => createId()),
+		organisationId: text('organisation_id')
+			.references(() => organisation.id)
+			.notNull(),
+		key: text('key').notNull(), // e.g. 'annual_accounts'
+		name: text('name').notNull(), // e.g. 'Annual Accounts'
+		category: obligationCategoryEnum('category').notNull(),
+		isSystem: boolean('is_system').default(true),
+		recurrenceRuleId: text('recurrence_rule_id').references(() => recurrenceRules.id),
+		createdAt: timestamp('created_at').defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new UTCDate())
+			.notNull()
+	},
+	(table) => [uniqueIndex('obligation_definitions_key_unique').on(table.key)]
+);
+
 /**
  * Used ONLY for user-defined obligations.
  * Simple date-math config — no domain logic.
@@ -242,30 +287,6 @@ export const recurrenceRules = pgTable('recurrence_rules', {
 		.$onUpdate(() => new UTCDate())
 		.notNull()
 });
-
-//
-// Obligation Definition
-//
-
-export const obligationDefinitions = pgTable(
-	'obligation_definitions',
-	{
-		id: text('id')
-			.primaryKey()
-			.$defaultFn(() => createId()),
-		key: text('key').notNull(), // e.g. 'annual_accounts'
-		name: text('name').notNull(), // e.g. 'Annual Accounts'
-		category: obligationCategoryEnum('category').notNull(),
-		source: obligationSourceEnum('source').notNull(),
-		recurrenceRuleId: text('recurrence_rule_id').references(() => recurrenceRules.id),
-		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at', { withTimezone: true })
-			.defaultNow()
-			.$onUpdate(() => new UTCDate())
-			.notNull()
-	},
-	(table) => [uniqueIndex('obligation_definitions_key_unique').on(table.key)]
-);
 
 /**
  * A concrete, dated occurrence of an obligation.

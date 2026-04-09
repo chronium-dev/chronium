@@ -2,13 +2,14 @@
 
 import type { Organisation } from '$lib/types/organisations';
 import type { OrganisationFormData } from '$lib/validations/organisation';
+import { UTCDate } from '@date-fns/utc';
 
 // Form → DB
 export function mapOrgFormDataToDbValues(data: OrganisationFormData) {
 	return {
 		...data,
-		financialYearEndMonth: new Date(data.financialYearEnd).getMonth(),
-		financialYearEndDay: new Date(data.financialYearEnd).getDate(),
+		financialYearEndMonth: new UTCDate(data.financialYearEnd).getMonth(),
+		financialYearEndDay: new UTCDate(data.financialYearEnd).getDate(),
 		vatRegistered: data.vatRegistered === 'yes',
 		payrollActive: data.payrollActive === 'yes',
 		businessPremises: data.businessPremises === 'yes'
@@ -17,7 +18,7 @@ export function mapOrgFormDataToDbValues(data: OrganisationFormData) {
 
 // DB → Form defaults
 export function toFormDefaults(org: Organisation): Partial<OrganisationFormData> {
-	const dt = new Date(
+	const dt = new UTCDate(
 		new UTCDate().getFullYear(),
 		org.financialYearEndMonth,
 		org.financialYearEndDay

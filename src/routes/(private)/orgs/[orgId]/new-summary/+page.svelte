@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { UTCDate } from '@date-fns/utc';
+
 	type SummaryData = {
 		totalObligations: number;
 		nextObligation?: {
@@ -15,7 +17,7 @@
 	export let data: SummaryData;
 
 	const formatDate = (d: string) =>
-		new Date(d).toLocaleDateString('en-GB', {
+		new UTCDate(d).toLocaleDateString('en-GB', {
 			day: 'numeric',
 			month: 'long',
 			year: 'numeric'

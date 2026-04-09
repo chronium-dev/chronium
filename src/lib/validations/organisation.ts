@@ -73,7 +73,7 @@ export const organisationFormSchema = z
 // Transformed schema — used only on the server when processing the submission
 // export const organisationFormSchemaTransformed = organisationFormSchema.transform((data) => {
 // 	if (data.vatRegistered === 'yes' && data.vatFrequency === 'quarterly' && data.vatStartDate) {
-// 		const startDate = endOfMonth(new Date(data.vatStartDate + '-01'));
+// 		const startDate = endOfMonth(new UTCDate(data.vatStartDate + '-01'));
 // 		const vatQuarterGroup = inferVatQuarterGroup(startDate);
 // 		// const vatQuarterGroup = {};
 // 		return { ...data, vatQuarterGroup };

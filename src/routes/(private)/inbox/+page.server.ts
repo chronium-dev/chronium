@@ -10,6 +10,7 @@ import {
 } from '$lib/types/ratings';
 import { createId } from '$lib/utils/createid';
 import { ratingReplyInputSchema } from '$lib/validations/ratings';
+import { UTCDate } from '@date-fns/utc';
 import { error, fail } from '@sveltejs/kit';
 import { addDays } from 'date-fns';
 import type { AnyColumn } from 'drizzle-orm';
@@ -87,7 +88,7 @@ function safeDecode<S extends SortKey>(
 		if (sortField === 'createdAt') {
 			return {
 				id: parsed.id,
-				value: new Date(parsed.value) as CursorValueForSort<S>
+				value: new UTCDate(parsed.value) as CursorValueForSort<S>
 			};
 		}
 

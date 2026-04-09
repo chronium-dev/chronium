@@ -1,6 +1,7 @@
 // compliance/annualAccounts.ts
 
 import type { Organisation } from '$lib/types/organisations';
+import { UTCDate } from '@date-fns/utc';
 import { addMonths, min, isAfter } from 'date-fns';
 
 // type Organisation = {
@@ -9,21 +10,25 @@ import { addMonths, min, isAfter } from 'date-fns';
 // 	financialYearEndMonth: number;
 // };
 
-export function generateAnnualAccountsObligations(org: Organisation, from: Date, to: Date): Date[] {
+export function generateAnnualAccountsObligations(
+	org: Organisation,
+	from: Date,
+	to: Date
+): Date[] {
 	const results: Date[] = [];
 
 	//
 	// 1. Determine FIRST accounting period end
 	//
 
-	const firstFye = new Date(
-		new Date(org.incorporationDate).getFullYear(),
+	const firstFye = new UTCDate(
+		new UTCDate(org.incorporationDate).getFullYear(),
 		org.financialYearEndMonth - 1,
 		org.financialYearEndDay
 	);
 
 	// If incorporation is AFTER FYE → move to next year
-	if (firstFye <= org.incorporationDate) {
+	if (firstFye <= new UTCDate(org.incorporationDate)) {
 		firstFye.setFullYear(firstFye.getFullYear() + 1);
 	}
 
@@ -52,7 +57,7 @@ export function generateAnnualAccountsObligations(org: Organisation, from: Date,
 	let year = firstPeriodEnd.getFullYear();
 
 	while (true) {
-		const fyEnd = new Date(year, org.financialYearEndMonth - 1, org.financialYearEndDay);
+		const fyEnd = new UTCDate(year, org.financialYearEndMonth - 1, org.financialYearEndDay);
 
 		const dueDate = addMonths(fyEnd, 9);
 

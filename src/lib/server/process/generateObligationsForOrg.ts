@@ -23,7 +23,7 @@ export async function generateObligationsForOrg(
 	const obligations: ObligationInsertSet = [];
 
 	for (const def of definitions) {
-		if (def.source === 'system') {
+		if (def.isSystem) {
 			let dates: Date[] = [];
 
 			switch (def.name) {

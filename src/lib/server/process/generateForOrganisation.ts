@@ -1,5 +1,5 @@
 import { getExecutor, type DBExecutor } from '$lib/server/db';
-import { organisation } from '$lib/server/db/schema';
+import { obligationDefinitions, organisation } from '$lib/server/db/schema';
 import { generateObligationsForOrg } from '$lib/server/process/generateObligationsForOrg';
 import { insertObligationsSafely } from '$lib/server/process/insertObligations';
 import { getGenerationWindow } from '$lib/server/process/utils/getGenerationWindow';
@@ -18,6 +18,7 @@ export async function generateForOrganisation(org: Organisation, userId: string,
 
 	// Fetch the 'obligationDefinitions' and associated 'recurrenceRule' object
 	const definitions = await db.query.obligationDefinitions.findMany({
+		where: eq(obligationDefinitions.id, org.id),
 		with: {
 			recurrenceRule: true
 		}

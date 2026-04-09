@@ -1,7 +1,8 @@
 // recurrence.ts
 
 import type { RecurrenceRule } from '$lib/types/rules';
-import { addMonths, addWeeks, addYears, isAfter, isBefore } from 'date-fns';
+import { UTCDate } from '@date-fns/utc';
+import { addMonths, addWeeks, addYears, isBefore } from 'date-fns';
 
 // type RecurrenceRule = {
 // 	frequency: 'monthly' | 'quarterly' | 'yearly';
@@ -12,10 +13,14 @@ import { addMonths, addWeeks, addYears, isAfter, isBefore } from 'date-fns';
 // 	endOfMonth?: boolean | null;
 // };
 
-export function generateFromRecurrence(rule: RecurrenceRule, from: Date, to: Date): Date[] {
-	const results: Date[] = [];
+export function generateFromRecurrence(
+	rule: RecurrenceRule,
+	from: UTCDate,
+	to: UTCDate
+): UTCDate[] {
+	const results: UTCDate[] = [];
 
-	let current = new Date(rule.anchorDate);
+	let current = new UTCDate(rule.anchorDate);
 
 	while (isBefore(current, to) || current.getTime() === to.getTime()) {
 		if (!isBefore(current, from)) {
@@ -28,12 +33,12 @@ export function generateFromRecurrence(rule: RecurrenceRule, from: Date, to: Dat
 	return results;
 }
 
-function increment(date: Date, rule: RecurrenceRule): Date {
+function increment(date: UTCDate, rule: RecurrenceRule): UTCDate {
 	switch (rule.frequency) {
 		case 'weekly':
 			return addWeeks(date, rule.interval);
 
-			case 'monthly':
+		case 'monthly':
 			return addMonths(date, rule.interval);
 
 		case 'quarterly':
@@ -44,8 +49,8 @@ function increment(date: Date, rule: RecurrenceRule): Date {
 	}
 }
 
-function adjustDate(date: Date, rule: RecurrenceRule): Date {
-	const d = new Date(date);
+function adjustDate(date: UTCDate, rule: RecurrenceRule): UTCDate {
+	const d = new UTCDate(date);
 
 	if (rule.monthOfYear) {
 		d.setMonth(rule.monthOfYear - 1);
