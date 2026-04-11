@@ -1,0 +1,1 @@
+ALTER TABLE "organisation_obligation_settings" ADD COLUMN "key" text NOT NULL;

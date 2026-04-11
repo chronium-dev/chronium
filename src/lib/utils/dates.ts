@@ -22,3 +22,15 @@ export function getCustomDate(year: number, month: number, day: number): Date {
 // Example usage:
 // console.log(getCustomDate(2026, 2, 0).toISOString()); // 2026-02-28...
 // console.log(getCustomDate(2026, 2, 15).toISOString()); // 2026-02-15...
+
+
+// Helper to check if a date string (YYYY-MM-DD) is the last day of its month
+export const isLastDayOfMonth = (dateStr: string): boolean => {
+  const date = new UTCDate(dateStr);
+  if (isNaN(date.getTime())) return false;
+
+  // We check the next day. If the month changes, the current date was the last day.
+  const nextDay = new UTCDate(date);
+  nextDay.setDate(date.getDate() + 1);
+  return nextDay.getMonth() !== date.getMonth();
+};

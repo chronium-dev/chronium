@@ -3,13 +3,22 @@
 // ============================================================================
 
 import { entityTypeUkLtd, jurisdictionUK } from '$lib/config/ukdata';
+import type { ObligationRuntimeContext } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import { createId } from '$lib/utils/createid';
 import type { OrganisationFormData } from '$lib/validations/organisation';
 import { and, count, eq } from 'drizzle-orm';
 import { mapOrgFormDataToDbValues } from '../../mappers/organisation';
 import { db, getExecutor, type DBExecutor } from './index';
-import { member, MemberRole, organisation, user } from './schema';
+import {
+	member,
+	MemberRole,
+	ObligationCategoryType,
+	obligationTemplates,
+	organisation,
+	organisationObligationSettings,
+	user
+} from './schema';
 
 // ============================================================================
 // ORGANISATION QUERIES
@@ -54,6 +63,8 @@ export async function createOrg(
 
 	await db.insert(member).values({ organisationId: org.id, userId, role: MemberRole.Owner });
 
+	await seedOrganisationObligationSettings(org.id, tx);
+
 	return { ok: true, org };
 }
 
@@ -95,8 +106,65 @@ export async function getOrgCount(userId: string) {
 }
 
 // ============================================================================
-// WORKSPACE QUERIES
+// OBLIGATION QUERIES
 // ============================================================================
+
+export async function seedOrganisationObligationSettings(orgId: string, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+
+	const templates = await db.select().from(obligationTemplates);
+
+	await db.insert(organisationObligationSettings).values(
+		templates.map((t) => ({
+			key: t.key,
+			organisationId: orgId,
+			obligationTemplateId: t.id,
+			enabled: t.category === ObligationCategoryType.Statutory // default rule
+		}))
+	);
+}
+
+export async function buildObligationRuntimeContext(
+	orgId: string,
+	tx?: DBExecutor
+): Promise<ObligationRuntimeContext> {
+	const db = getExecutor(tx);
+
+	// const rows = await db
+	// 	.select({
+	// 		key: obligationTemplates.key,
+	// 		id: organisationObligationSettings.id,
+	// 		enabled: organisationObligationSettings.enabled
+	// 	})
+	// 	.from(organisationObligationSettings)
+	// 	.innerJoin(
+	// 		obligationTemplates,
+	// 		eq(organisationObligationSettings.obligationTemplateId, obligationTemplates.id)
+	// 	)
+	// 	.where(eq(organisationObligationSettings.organisationId, orgId));
+
+	const rows = await db
+		.select({
+			key: organisationObligationSettings.key,
+			id: organisationObligationSettings.id,
+			enabled: organisationObligationSettings.enabled
+		})
+		.from(organisationObligationSettings)
+		.where(eq(organisationObligationSettings.organisationId, orgId));
+
+	const enabledKeys = new Set<string>();
+	const definitionMap: Record<string, { id: string; key: string }> = {};
+
+	for (const row of rows) {
+		definitionMap[row.key] = { id: row.id, key: row.key };
+
+		if (row.enabled) {
+			enabledKeys.add(row.key);
+		}
+	}
+
+	return { enabledKeys, definitionMap };
+}
 
 /**
  * Get user templates

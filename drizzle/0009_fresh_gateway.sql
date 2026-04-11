@@ -1,0 +1,1 @@
+ALTER TABLE "organisation_obligation_settings" ALTER COLUMN "anchor_date" DROP NOT NULL;

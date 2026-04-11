@@ -1,22 +1,23 @@
-import type { DBExecutor } from '$lib/server/db';
 import {
 	generateAccountingPeriodObligations,
-	generateIncorporationObligations,
-	generateVATObligations
+	generateIncorporationObligations
 } from '$lib/server/process/compliance';
+import type { ObligationRuntimeContext } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import type { UTCDate } from '@date-fns/utc';
 
 export function generateComplianceObligations(
 	org: Organisation,
-	userId: string,
+	context: ObligationRuntimeContext,
 	from: UTCDate,
-	to: UTCDate,
-	tx?: DBExecutor
+	to: UTCDate
 ) {
-	return [
+	const all = [
 		...generateAccountingPeriodObligations(org, from, to),
-		...generateIncorporationObligations(org, from, to),
-		...generateVATObligations(org, from, to)
+		...generateIncorporationObligations(org, from, to)
+		// ...generateVATObligations(org, from, to)
 	];
+
+	// 🔥 Filter by enabled keys
+	return all.filter((o) => context.enabledKeys.has(o.key));
 }

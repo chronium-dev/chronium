@@ -1,0 +1,2 @@
+ALTER TABLE "organisation_obligation_settings" ADD CONSTRAINT "fk_obligations_definition_organisation" FOREIGN KEY ("organisation_id") REFERENCES "public"."organisation"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "organisation_obligation_settings" ADD CONSTRAINT "fk_obligations_definition_obligation_templates" FOREIGN KEY ("obligation_template_id") REFERENCES "public"."obligation_templates"("id") ON DELETE no action ON UPDATE no action;

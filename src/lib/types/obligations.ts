@@ -1,9 +1,4 @@
-import type {
-	obligationDefinitions,
-	obligations,
-	obligationTemplates,
-	recurrenceRules
-} from '$lib/server/db/schema';
+import type { obligations, obligationTemplates } from '$lib/server/db/schema';
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 
 export type GeneratedObligation = {
@@ -20,11 +15,7 @@ export type ObligationSet = Obligation[];
 export type ObligationTemplate = InferSelectModel<typeof obligationTemplates>;
 export type ObligationTemplateSet = ObligationTemplate[];
 
-export type ObligationDefinition = InferSelectModel<typeof obligationDefinitions>;
-export type ObligationDefinitionSet = ObligationDefinition[];
-
-export type RecurrenceRule = InferSelectModel<typeof recurrenceRules>;
-export type ObligationDefinitionWithRecurrenceRule = ObligationDefinition & {
-	recurrenceRule: RecurrenceRule | null;
+export type ObligationRuntimeContext = {
+	enabledKeys: Set<string>;
+	definitionMap: Record<string, { id: string; key: string }>;
 };
-export type ObligationDefinitionWithRecurrenceRuleSet = ObligationDefinitionWithRecurrenceRule[];

@@ -4,14 +4,12 @@ import {
 	entityTypes,
 	jurisdictions,
 	member,
-	obligationDefinitions,
 	obligations,
 	obligationTemplates,
 	organisation,
-	recurrenceRules,
+	organisationObligationSettings,
 	session,
-	user,
-	verification
+	user
 } from './schema';
 
 // ─── User ────────────────────────────────────────────────────────────────────
@@ -57,8 +55,7 @@ export const organisationRelations = relations(organisation, ({ one, many }) => 
 		references: [entityTypes.id]
 	}),
 	members: many(member),
-	obligationDefinitions: many(obligationDefinitions),
-	recurrenceRules: many(recurrenceRules),
+	obligationSettings: many(organisationObligationSettings),
 	obligations: many(obligations)
 }));
 
@@ -88,31 +85,27 @@ export const entityTypeRelations = relations(entityTypes, ({ many }) => ({
 }));
 
 // ─── ObligationTemplate ───────────────────────────────────────────────────────
-// System-level templates — no FK relations to other tables in this schema.
 
-// ─── RecurrenceRule ───────────────────────────────────────────────────────────
-
-export const recurrenceRuleRelations = relations(recurrenceRules, ({ one, many }) => ({
-	organisation: one(organisation, {
-		fields: [recurrenceRules.organisationId],
-		references: [organisation.id]
-	}),
-	obligationDefinitions: many(obligationDefinitions)
+export const obligationTemplateRelations = relations(obligationTemplates, ({ many }) => ({
+	organisationSettings: many(organisationObligationSettings)
 }));
 
-// ─── ObligationDefinition ─────────────────────────────────────────────────────
+// ─── OrganisationObligationSettings ──────────────────────────────────────────
 
-export const obligationDefinitionRelations = relations(obligationDefinitions, ({ one, many }) => ({
-	organisation: one(organisation, {
-		fields: [obligationDefinitions.organisationId],
-		references: [organisation.id]
-	}),
-	recurrenceRule: one(recurrenceRules, {
-		fields: [obligationDefinitions.recurrenceRuleId],
-		references: [recurrenceRules.id]
-	}),
-	obligations: many(obligations)
-}));
+export const organisationObligationSettingsRelations = relations(
+	organisationObligationSettings,
+	({ one, many }) => ({
+		organisation: one(organisation, {
+			fields: [organisationObligationSettings.organisationId],
+			references: [organisation.id]
+		}),
+		template: one(obligationTemplates, {
+			fields: [organisationObligationSettings.obligationTemplateId],
+			references: [obligationTemplates.id]
+		}),
+		obligations: many(obligations)
+	})
+);
 
 // ─── Obligation ───────────────────────────────────────────────────────────────
 
@@ -121,9 +114,9 @@ export const obligationRelations = relations(obligations, ({ one }) => ({
 		fields: [obligations.organisationId],
 		references: [organisation.id]
 	}),
-	definition: one(obligationDefinitions, {
-		fields: [obligations.obligationDefinitionId],
-		references: [obligationDefinitions.id]
+	setting: one(organisationObligationSettings, {
+		fields: [obligations.organisationObligationSettingId],
+		references: [organisationObligationSettings.id]
 	}),
 	assignedTo: one(user, {
 		fields: [obligations.assignedToUserId],

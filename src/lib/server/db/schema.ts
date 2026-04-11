@@ -239,23 +239,28 @@ export const obligationTemplates = pgTable(
 	(table) => [uniqueIndex('obligation_templates_key_unique').on(table.key)]
 );
 
-//
-// Obligation Definition
-//
-export const obligationDefinitions = pgTable(
-	'obligation_definitions',
+/**
+ * Join table between organisation and onligationTemplates
+ */
+export const organisationObligationSettings = pgTable(
+	'organisation_obligation_settings',
 	{
 		id: text('id')
 			.primaryKey()
 			.$defaultFn(() => createId()),
-		organisationId: text('organisation_id')
-			.references(() => organisation.id)
-			.notNull(),
-		key: text('key').notNull(), // e.g. 'annual_accounts'
-		name: text('name').notNull(), // e.g. 'Annual Accounts'
-		category: obligationCategoryEnum('category').notNull(),
-		isSystem: boolean('is_system').default(true),
-		recurrenceRuleId: text('recurrence_rule_id'),
+		key: text('key').notNull(), // Just for query convenience - e.g. 'annual_accounts' (not really required)
+		organisationId: text('organisation_id').notNull(),
+		obligationTemplateId: text('obligation_template_id').notNull(),
+		enabled: boolean('enabled').notNull().default(true),
+		frequency: recurrenceFrequencyEnum('frequency'),
+		interval: integer('interval').notNull().default(1),
+		anchorDate: date('anchor_date'),
+		dayOfMonth: integer('day_of_month'),
+		monthOfYear: integer('month_of_year'),
+		endOfMonth: boolean('end_of_month').default(false),
+		customName: text('custom_name'),
+		configured: boolean('configured').notNull().default(false),
+		lastGeneratedAt: timestamp('last_generated_at'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()
@@ -264,37 +269,22 @@ export const obligationDefinitions = pgTable(
 	},
 	(table) => [
 		foreignKey({
-			columns: [table.recurrenceRuleId],
-			foreignColumns: [recurrenceRules.id],
-			name: 'fk_obligations_definition_recurrence_rule' // Your custom name
-		}),
-		uniqueIndex('obligation_definitions_key_unique').on(table.key)
+			columns: [table.organisationId],
+			foreignColumns: [organisation.id],
+			name: 'fk_org_obligation_settings_organisation'
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.obligationTemplateId],
+			foreignColumns: [obligationTemplates.id],
+			name: 'fk_org_obligation_settings_template'
+		}).onDelete('cascade'),
+
+		uniqueIndex('org_obligation_settings_unique').on(
+			table.organisationId,
+			table.obligationTemplateId
+		)
 	]
 );
-
-/**
- * Used ONLY for user-defined obligations.
- * Simple date-math config — no domain logic.
- */
-export const recurrenceRules = pgTable('recurrence_rules', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => createId()),
-	organisationId: text('organisation_id')
-		.notNull()
-		.references(() => organisation.id, { onDelete: 'cascade' }),
-	frequency: recurrenceFrequencyEnum('frequency').notNull(),
-	interval: integer('interval').notNull().default(1),
-	anchorDate: date('anchor_date').notNull(),
-	dayOfMonth: integer('day_of_month'),
-	monthOfYear: integer('month_of_year'),
-	endOfMonth: boolean('end_of_month').default(false),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true })
-		.defaultNow()
-		.$onUpdate(() => new UTCDate())
-		.notNull()
-});
 
 /**
  * A concrete, dated occurrence of an obligation.
@@ -306,10 +296,8 @@ export const obligations = pgTable(
 		id: text('id')
 			.primaryKey()
 			.$defaultFn(() => createId()),
-		organisationId: text('organisation_id')
-			.references(() => organisation.id)
-			.notNull(),
-		obligationDefinitionId: text('obligation_definition_id').notNull(),
+		organisationId: text('organisation_id').notNull(),
+		organisationObligationSettingId: text('organisation_obligation_setting_id').notNull(),
 		dueDate: date('due_date').notNull(),
 		status: obligationStatusEnum('status').notNull().default('pending'),
 		assignedToUserId: text('assigned_to_user_id').references(() => user.id),
@@ -322,13 +310,18 @@ export const obligations = pgTable(
 	},
 	(table) => [
 		foreignKey({
-			columns: [table.obligationDefinitionId],
-			foreignColumns: [obligationDefinitions.id],
-			name: 'fk_obligations_definition' // Your custom name
-		}),
+			columns: [table.organisationId],
+			foreignColumns: [organisation.id],
+			name: 'fk_obligations_organisation_fk'
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [table.organisationObligationSettingId],
+			foreignColumns: [organisationObligationSettings.id],
+			name: 'fk_obligations_settings_fk'
+		}).onDelete('cascade'),
 		uniqueIndex('unique_obligation_instance').on(
 			table.organisationId,
-			table.obligationDefinitionId,
+			table.organisationObligationSettingId,
 			table.dueDate
 		)
 	]

@@ -13,17 +13,13 @@ async function clearData(tx: Transaction) {
 		jurisdictions,
 		entityTypes,
 		obligationTemplates
-		// recurrenceRules,
 		// obligations,
-		// obligationDefinitions,
 	} = schema;
 	await tx.delete(obligationTemplates);
 	await tx.delete(organisation);
 	await tx.delete(jurisdictions);
 	await tx.delete(entityTypes);
-	// await tx.delete(recurrenceRules);
 	// await tx.delete(obligations);
-	// await tx.delete(obligationDefinitions);
 }
 
 const load = async () => {

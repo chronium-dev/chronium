@@ -4,6 +4,7 @@ import { createOrg } from '$lib/server/db/queries';
 import { generateAndPersistComplianceObligations } from '$lib/server/process/generateAndPersistComplianceObligations';
 import { inferVatQuarterGroup } from '$lib/server/process/utils/inferVatQuarterGroup';
 import type { FormMessage } from '$lib/types/forms';
+import { isLastDayOfMonth } from '$lib/utils/dates';
 import { organisationFormSchema } from '$lib/validations/organisation';
 import { UTCDate } from '@date-fns/utc';
 import { error, fail } from '@sveltejs/kit';
@@ -19,12 +20,18 @@ export const load: PageServerLoad = async () => {
 };
 
 const organisationFormSchemaTransformed = organisationFormSchema.transform((data) => {
+	const financialYearEndIsLastDay = isLastDayOfMonth(data.financialYearEnd);
 	if (data.vatRegistered === 'yes' && data.vatFrequency === 'quarterly' && data.vatStartDate) {
 		const startDate = endOfMonth(new UTCDate(data.vatStartDate + '-01'));
 		const vatQuarterGroup = inferVatQuarterGroup(startDate);
-		return { ...data, vatQuarterGroup, vatStartDate: endOfMonth(startDate).toISOString() };
+		return {
+			...data,
+			vatQuarterGroup,
+			vatStartDate: endOfMonth(startDate).toISOString(),
+			financialYearEndIsLastDay
+		};
 	}
-	return data;
+	return { ...data, financialYearEndIsLastDay };
 });
 
 export const actions: Actions = {
@@ -45,8 +52,9 @@ export const actions: Actions = {
 		}
 
 		try {
-			// ✅ Apply the transform only here, after superforms has validated
+			// ✅ Apply the transforms only here, after superforms has validated
 			const result = organisationFormSchemaTransformed.parse(form.data);
+
 			await db.transaction(async (tx) => {
 				const createResult = await createOrg(result, userId, tx);
 				if (!createResult.ok) {
