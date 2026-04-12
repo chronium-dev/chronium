@@ -1,0 +1,77 @@
+import { UTCDate } from '@date-fns/utc';
+import { endOfMonth } from 'date-fns';
+import { isLastDayOfMonth } from 'date-fns/isLastDayOfMonth';
+import { db } from '../../index.ts';
+import * as schema from '../../schema.ts';
+// import { entityTypeUkLtd, jurisdictionUK, obligationTemplatesSeeds } from './all-data.ts';
+import {
+	organisationFormSchema,
+	type OrganisationFormData
+} from '../../../../validations/organisation';
+import { generateAndPersistComplianceObligations } from '../../../process/generateAndPersistComplianceObligations.ts';
+import { createOrg } from '../../queries';
+
+// 1. Properly type the transaction object using Drizzle's ExtractTablesWithRelations
+// Or more simply, use the generic Transaction type from your driver
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+// @ts-ignore
+async function clearData(tx: Transaction) {
+	const { organisation } = schema;
+	await tx.delete(organisation);
+}
+
+const organisationFormSchemaTransformed = organisationFormSchema.transform((data) => {
+	const financialYearEndIsLastDay = isLastDayOfMonth(data.financialYearEnd);
+	if (data.vatRegistered === 'yes' && data.vatFrequency === 'quarterly' && data.vatEndDate) {
+		const vatEndDate = endOfMonth(new UTCDate(data.vatEndDate + '-01'));
+		return {
+			...data,
+			vatEndDate: vatEndDate.toISOString(),
+			financialYearEndIsLastDay
+		};
+	}
+	return { ...data, financialYearEndIsLastDay };
+});
+
+const run = async () => {
+	try {
+		console.log('⏳ Starting database seed...');
+
+		const userId = 'rpCuGEts0R9eLPdl1sn8wg5rL2OGGtTH';
+
+		await db.transaction(async (tx) => {
+			await clearData(tx);
+
+			const newOrg: OrganisationFormData = {
+				name: 'ABC Motors Ltd',
+				incorporationDate: '2026-02-12',
+				financialYearEnd: '2027-02-28',
+				vatRegistered: 'yes',
+				vatFrequency: 'quarterly',
+				vatEndDate: '2026-04',
+				payrollActive: 'yes',
+				employeeCount: '6-20',
+				businessPremises: 'no'
+			};
+
+			const result = organisationFormSchemaTransformed.parse(newOrg);
+
+			const createResult = await createOrg(result, userId, tx);
+			if (!createResult.ok) {
+				console.log('Error:', createResult.message);
+				throw new Error(createResult.message);
+			}
+
+			await generateAndPersistComplianceObligations(createResult.org, userId, tx);
+		});
+
+		console.log('✅ Test completed successfully.');
+		process.exit(0); // 2. Explicitly exit success
+	} catch (error) {
+		console.error('❌ Test failed:', error);
+		process.exit(1); // 3. Exit with error code
+	}
+};
+
+run();

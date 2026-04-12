@@ -49,9 +49,8 @@
 	function handleVatRegisteredChange(value: 'yes' | 'no') {
 		$formData.vatRegistered = value;
 		if (value === 'no') {
-			$formData.vatFrequency = undefined;
-			$formData.vatQuarterGroup = undefined;
-			$formData.vatStartDate = undefined;
+			$formData.vatFrequency = null;
+			$formData.vatEndDate = undefined;
 		}
 	}
 
@@ -194,19 +193,19 @@
 			<Form.FieldErrors />
 		</Form.Field>
 
-		<Form.Field form={sf} name="vatStartDate">
+		<Form.Field form={sf} name="vatEndDate">
 			<Form.Control>
 				{#snippet children({ props })}
-					<Form.Label>When is your next VAT period end?</Form.Label>
+					<Form.Label>When does your next VAT period end?</Form.Label>
 					<input
 						{...props}
 						type="month"
-						bind:value={$formData.vatStartDate}
+						bind:value={$formData.vatEndDate}
 						class={cn(
 							'flex h-10 w-fit rounded-md border border-input bg-background px-3 py-2 text-sm',
 							'ring-offset-background',
 							'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
-							$errors.vatStartDate && 'border-destructive'
+							$errors.vatEndDate && 'border-destructive'
 						)}
 						style="color-scheme: {isDark ? 'dark' : 'light'}"
 					/>

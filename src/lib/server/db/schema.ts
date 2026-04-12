@@ -1,8 +1,4 @@
-import {
-	employeeCountEnum,
-	vatFrequencyEnum,
-	vatQuarterGroupEnum
-} from '$lib/validations/organisation';
+import { employeeCountEnum, vatFrequencyEnum } from '$lib/validations/organisation';
 import { UTCDate } from '@date-fns/utc';
 import {
 	boolean,
@@ -18,7 +14,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createId } from '../../../lib/utils/createid';
 
-export { employeeCountEnum, vatFrequencyEnum, vatQuarterGroupEnum };
+export { employeeCountEnum, vatFrequencyEnum };
 
 export const obligationStatusEnum = pgEnum('obligation_status', [
 	'pending',
@@ -176,10 +172,7 @@ export const organisation = pgTable('organisation', {
 	vatFrequency: vatFrequencyEnum('vat_frequency'),
 	// How often do they submit returns? 'quarterly' | 'monthly' | 'annual'
 
-	vatQuarterGroup: vatQuarterGroupEnum('vat_quarter_group'),
-	// If quarterly → which stagger? 'mar' | 'jan' | 'feb' (NULL if not quarterly)
-
-	vatStartDate: date('vat_start_date'),
+	vatEndDate: date('vat_end_date'),
 	// Set initially to the next VAT period end date? Optional but VERY useful for alignment
 
 	payrollActive: boolean('payroll_active').notNull(),

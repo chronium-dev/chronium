@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 export const employeeCountEnum = pgEnum('employee_count_enum', ['0', '1-5', '6-20', '20+']);
 export const vatFrequencyEnum = pgEnum('vat_frequency_enum', ['quarterly', 'monthly', 'annual']);
-export const vatQuarterGroupEnum = pgEnum('vat_quarter_group_enum', ['jan', 'feb', 'mar']);
 
 export const organisationFormSchema = z
 	.object({
@@ -27,10 +26,7 @@ export const organisationFormSchema = z
 		vatFrequency: z.enum(vatFrequencyEnum.enumValues).nullish().default('quarterly'),
 		// How often do they submit returns? 'quarterly' | 'monthly' | 'annual'
 
-		vatQuarterGroup: z.enum(vatQuarterGroupEnum.enumValues).nullish().default('mar'),
-		// If quarterly → which stagger? 'jan' | 'feb' | 'mar' (NULL if not quarterly)
-
-		vatStartDate: z.string().nullish(),
+		vatEndDate: z.string().nullish(),
 
 		payrollActive: z.enum(['yes', 'no'], {
 			error: 'Please select an option'
@@ -60,26 +56,14 @@ export const organisationFormSchema = z
 			});
 		}
 
-		if (data.vatRegistered === 'yes' && !data.vatStartDate) {
+		if (data.vatRegistered === 'yes' && !data.vatEndDate) {
 			ctx.addIssue({
 				code: 'custom',
 				message: 'Please enter your next VAT period end',
-				path: ['vatStartDate']
+				path: ['vatEndDate']
 			});
 		}
 	});
 
-// Transformed schema — used only on the server when processing the submission
-// export const organisationFormSchemaTransformed = organisationFormSchema.transform((data) => {
-// 	if (data.vatRegistered === 'yes' && data.vatFrequency === 'quarterly' && data.vatStartDate) {
-// 		const startDate = endOfMonth(new UTCDate(data.vatStartDate + '-01'));
-// 		const vatQuarterGroup = inferVatQuarterGroup(startDate);
-// 		// const vatQuarterGroup = {};
-// 		return { ...data, vatQuarterGroup };
-// 	}
-// 	return data;
-// });
-
 export type OrganisationSchema = typeof organisationFormSchema;
 export type OrganisationFormData = z.infer<typeof organisationFormSchema>;
-// export type OrganisationFormDataTransformed = z.infer<typeof organisationFormSchemaTransformed>;

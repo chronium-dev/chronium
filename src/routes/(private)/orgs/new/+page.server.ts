@@ -1,14 +1,12 @@
 // +page.server.ts
 import { db } from '$lib/server/db';
 import { createOrg } from '$lib/server/db/queries';
-import { generateAndPersistComplianceObligations } from '$lib/server/process/generateAndPersistComplianceObligations';
-import { inferVatQuarterGroup } from '$lib/server/process/utils/inferVatQuarterGroup';
 import type { FormMessage } from '$lib/types/forms';
 import { isLastDayOfMonth } from '$lib/utils/dates';
 import { organisationFormSchema } from '$lib/validations/organisation';
 import { UTCDate } from '@date-fns/utc';
 import { error, fail } from '@sveltejs/kit';
-import { endOfMonth } from 'date-fns';
+import { endOfMonth, startOfMonth } from 'date-fns';
 import { message, setError, superValidate, type Infer } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
@@ -21,13 +19,11 @@ export const load: PageServerLoad = async () => {
 
 const organisationFormSchemaTransformed = organisationFormSchema.transform((data) => {
 	const financialYearEndIsLastDay = isLastDayOfMonth(data.financialYearEnd);
-	if (data.vatRegistered === 'yes' && data.vatFrequency === 'quarterly' && data.vatStartDate) {
-		const startDate = endOfMonth(new UTCDate(data.vatStartDate + '-01'));
-		const vatQuarterGroup = inferVatQuarterGroup(startDate);
+	if (data.vatRegistered === 'yes' && data.vatFrequency === 'quarterly' && data.vatEndDate) {
+		const vatEndDate = endOfMonth(new UTCDate(data.vatEndDate + '-01'));
 		return {
 			...data,
-			vatQuarterGroup,
-			vatStartDate: endOfMonth(startDate).toISOString(),
+			vatEndDate: vatEndDate.toISOString(),
 			financialYearEndIsLastDay
 		};
 	}
@@ -61,7 +57,7 @@ export const actions: Actions = {
 					return setError(form, 'name', createResult.message);
 				}
 
-				await generateAndPersistComplianceObligations(createResult.org, userId, tx);
+				//await generateAndPersistComplianceObligations(createResult.org, userId, tx);
 
 				return message(form, { status: 200, text: 'Company created successfully!' });
 			});

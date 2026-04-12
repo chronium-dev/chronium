@@ -1,6 +1,6 @@
 import type { Organisation } from '$lib/types/organisations';
 import { UTCDate } from '@date-fns/utc';
-import { addMonths, isAfter, isBefore } from 'date-fns';
+import { isBefore } from 'date-fns';
 
 export function getAccountingPeriodEnds(org: Organisation, from: Date, to: Date): Date[] {
 	const results: Date[] = [];
@@ -20,14 +20,15 @@ export function getAccountingPeriodEnds(org: Organisation, from: Date, to: Date)
 	}
 
 	// If incorporation AFTER FYE in that year → next year
-	if (isAfter(incorporation, firstFye)) {
+	if (incorporation > firstFye) {
 		firstFye.setFullYear(firstFye.getFullYear() + 1);
 	}
 
-	let cursor = firstFye;
+	let cursor = new UTCDate(firstFye);
 
-	while (isBefore(cursor, to)) {
-		if (isAfter(cursor, from)) {
+	while (cursor <= to) {
+		// NOTE: inclusive (>= from)
+		if (!isBefore(cursor, from)) {
 			results.push(new UTCDate(cursor));
 		}
 

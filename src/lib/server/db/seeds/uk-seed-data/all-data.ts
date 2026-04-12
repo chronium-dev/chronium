@@ -48,7 +48,7 @@ export const obligationTemplatesSeeds = [
 	},
 	{
 		key: 'corporation_tax_return',
-		name: 'File Corporation Tax Return (CT600)',
+		name: 'File Company Tax Return (CT600)',
 		description: 'Submit corporation tax return to HMRC.',
 		category: ObligationCategoryType.Statutory
 	},

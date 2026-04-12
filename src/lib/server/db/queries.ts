@@ -51,6 +51,14 @@ export async function createOrg(
 		};
 	}
 
+	const test = {
+		...mapOrgFormDataToDbValues(data),
+		id: createId(),
+		jurisdictionId: jurisdictionUK.id,
+		entityTypeId: entityTypeUkLtd.id
+	};
+	console.log('test:', test);
+
 	const [org] = await db
 		.insert(organisation)
 		.values({

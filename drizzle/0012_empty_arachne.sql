@@ -1,0 +1,1 @@
+ALTER TABLE "organisation" RENAME COLUMN "vat_start_date" TO "vat_end_date";

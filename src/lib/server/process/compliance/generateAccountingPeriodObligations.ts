@@ -1,7 +1,8 @@
 import { getAccountingPeriodEnds } from '$lib/server/process/utils/getAccountingPeriodEnds';
 import type { GeneratedObligation } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
-import { addDays, addMonths } from 'date-fns';
+import { UTCDate } from '@date-fns/utc';
+import { addDays, addMonths, subMonths } from 'date-fns';
 
 export function generateAccountingPeriodObligations(
 	org: Organisation,
@@ -10,28 +11,59 @@ export function generateAccountingPeriodObligations(
 ): GeneratedObligation[] {
 	const obligations: GeneratedObligation[] = [];
 
-	const periodEnds = getAccountingPeriodEnds(org, from, to);
+	const safeFrom = subMonths(from, 12);
+	const periodEnds = getAccountingPeriodEnds(org, safeFrom, to);
+
+	const incorporation = new UTCDate(org.incorporationDate);
+
+	// First accounting period ends at first FYE after incorporation
+	let firstFye = new UTCDate(
+		incorporation.getFullYear(),
+		org.financialYearEndMonth - 1,
+		org.financialYearEndDay
+	);
+
+	if (org.financialYearEndIsLastDay) {
+		firstFye = new UTCDate(incorporation.getFullYear(), org.financialYearEndMonth, 0);
+	}
+
+	if (incorporation > firstFye) {
+		firstFye.setFullYear(firstFye.getFullYear() + 1);
+	}
 
 	for (const periodEnd of periodEnds) {
-		// 1. Annual Accounts (Companies House)
-		obligations.push({
-			key: 'annual_accounts',
-			dueDate: addMonths(periodEnd, 9)
-		});
+		const isFirstPeriod = periodEnd.getTime() === firstFye.getTime();
 
-		// 2. Corporation Tax Payment (HMRC)
-		obligations.push({
-			key: 'corporation_tax_payment',
-			dueDate: addDays(addMonths(periodEnd, 9), 1)
-		});
+		// 🟦 Annual Accounts
+		const accountsDue = isFirstPeriod ? addMonths(incorporation, 21) : addMonths(periodEnd, 9);
 
-		// 3. Corporation Tax Return (CT600)
-		obligations.push({
-			key: 'corporation_tax_return',
-			dueDate: addMonths(periodEnd, 12)
-		});
+		if (accountsDue >= from && accountsDue <= to) {
+			obligations.push({
+				key: 'annual_accounts',
+				dueDate: accountsDue
+			});
+		}
+
+		// 🟩 Corporation Tax Payment
+		const ctPaymentDue = addDays(addMonths(periodEnd, 9), 1);
+
+		if (ctPaymentDue >= from && ctPaymentDue <= to) {
+			obligations.push({
+				key: 'corporation_tax_payment',
+				dueDate: ctPaymentDue
+			});
+		}
+
+		// 🟨 CT600
+		const ctReturnDue = addMonths(periodEnd, 12);
+
+		if (ctReturnDue >= from && ctReturnDue <= to) {
+			obligations.push({
+				key: 'corporation_tax_return',
+				dueDate: ctReturnDue
+			});
+		}
 	}
 
 	return obligations;
 }
-

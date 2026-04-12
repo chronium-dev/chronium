@@ -6,6 +6,7 @@ import { getGenerationWindow } from '$lib/server/process/utils/getGenerationWind
 import { insertObligationsSafely } from '$lib/server/process/utils/insertObligations';
 import type { ObligationInsertSet } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
+import { isLastDayInMonth } from '$lib/utils/dates';
 import { UTCDate } from '@date-fns/utc';
 import { format } from 'date-fns';
 
@@ -23,6 +24,12 @@ export async function generateAndPersistComplianceObligations(
 	userId: string,
 	tx?: DBExecutor
 ) {
+	// Do validation before anything...
+	//
+	// Check VAT is last day of month
+	if (!org.vatEndDate || !isLastDayInMonth(new UTCDate(org.vatEndDate)))
+		throw new Error('Invalid VAT End Date - it must be the last day of the month');
+
 	// Establish the working window in which we will generate obligations
 	const { from, to } = getGenerationWindow(org);
 
@@ -53,7 +60,7 @@ export async function generateAndPersistComplianceObligations(
 
 	const obligations: ObligationInsertSet = generatedObligationDates.map((row) => ({
 		organisationId: org.id,
-		organisationObligationSettingId: obligationRuntimeContext.definitionMap[row.key].id,  // TODO WRONG VALUE!!
+		organisationObligationSettingId: obligationRuntimeContext.definitionMap[row.key].id, // TODO WRONG VALUE!!
 		dueDate: format(row.dueDate, 'yyyy-MM-dd'),
 		status: ObligationStatusType.Pending,
 		assignedToUserId: userId

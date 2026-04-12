@@ -1,4 +1,4 @@
 export * from './generateAccountingPeriodObligations';
 export * from './generateComplianceObligations';
-export * from './generateIncorporationObligations';
+export * from './generateConfirmationStatementObligations';
 export * from './generateVATObligations';
