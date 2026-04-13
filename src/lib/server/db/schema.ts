@@ -275,7 +275,8 @@ export const organisationObligationSettings = pgTable(
 		uniqueIndex('org_obligation_settings_unique').on(
 			table.organisationId,
 			table.obligationTemplateId
-		)
+		),
+		uniqueIndex('org_obligation_settings_key_unique').on(table.organisationId, table.key)
 	]
 );
 
@@ -316,7 +317,8 @@ export const obligations = pgTable(
 			table.organisationId,
 			table.organisationObligationSettingId,
 			table.dueDate
-		)
+		),
+		index('obligations_due_date_idx').on(table.dueDate)
 	]
 );
 

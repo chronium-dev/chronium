@@ -51,13 +51,13 @@ export async function createOrg(
 		};
 	}
 
-	const test = {
-		...mapOrgFormDataToDbValues(data),
-		id: createId(),
-		jurisdictionId: jurisdictionUK.id,
-		entityTypeId: entityTypeUkLtd.id
-	};
-	console.log('test:', test);
+	// const test = {
+	// 	...mapOrgFormDataToDbValues(data),
+	// 	id: createId(),
+	// 	jurisdictionId: jurisdictionUK.id,
+	// 	entityTypeId: entityTypeUkLtd.id
+	// };
+	// console.log('test:', test);
 
 	const [org] = await db
 		.insert(organisation)
@@ -117,6 +117,11 @@ export async function getOrgCount(userId: string) {
 // OBLIGATION QUERIES
 // ============================================================================
 
+/**
+ * 
+ * @param orgId Create links (join) between organisation and obligationTemplates
+ * @param tx 
+ */
 export async function seedOrganisationObligationSettings(orgId: string, tx?: DBExecutor) {
 	const db = getExecutor(tx);
 
@@ -137,20 +142,6 @@ export async function buildObligationRuntimeContext(
 	tx?: DBExecutor
 ): Promise<ObligationRuntimeContext> {
 	const db = getExecutor(tx);
-
-	// const rows = await db
-	// 	.select({
-	// 		key: obligationTemplates.key,
-	// 		id: organisationObligationSettings.id,
-	// 		enabled: organisationObligationSettings.enabled
-	// 	})
-	// 	.from(organisationObligationSettings)
-	// 	.innerJoin(
-	// 		obligationTemplates,
-	// 		eq(organisationObligationSettings.obligationTemplateId, obligationTemplates.id)
-	// 	)
-	// 	.where(eq(organisationObligationSettings.organisationId, orgId));
-
 	const rows = await db
 		.select({
 			key: organisationObligationSettings.key,
@@ -174,38 +165,6 @@ export async function buildObligationRuntimeContext(
 	return { enabledKeys, definitionMap };
 }
 
-/**
- * Get user templates
- */
-// export async function getUserTemplates(userId: string) {
-// 	// First get the user's workspace memberships
-// 	const memberships = await db.query.member.findMany({
-// 		where: eq(member.userId, userId),
-// 		with: {
-// 			workspace: {
-// 				with: {
-// 					templates: true
-// 				}
-// 			}
-// 		}
-// 	});
-
-// 	// Transform to the desired structure
-// 	const result = memberships.map((membership) => ({
-// 		workspaceId: membership.workspace.id,
-// 		workspaceName: membership.workspace.name,
-// 		planType: membership.workspace.planType,
-// 		workspaceCreatedAt: membership.workspace.createdAt,
-// 		memberRole: membership.role,
-// 		templates: membership.workspace.templates.map((template) => ({
-// 			templateId: template.id,
-// 			templateName: template.templateName,
-// 			templateCreatedAt: template.createdAt
-// 		}))
-// 	}));
-
-// 	return result;
-// }
 
 // export async function computeBasicUserContext(userId: string): Promise<BasicUserContext> {
 export async function computeBasicUserContext(userId: string) {

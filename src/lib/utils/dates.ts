@@ -47,3 +47,7 @@ export const isLastDayInMonth = (date: UTCDate): boolean => {
 	// If the next day's date is 1, then the current date must be the last day
 	return nextDay.getDate() === 1;
 };
+
+export function normaliseVatEndDate(date: Date): Date {
+	return new UTCDate(date.getFullYear(), date.getMonth() + 1, 0);
+}

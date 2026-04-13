@@ -32,8 +32,6 @@ export const organisationFormSchema = z
 			error: 'Please select an option'
 		}),
 		// Only required when payrollActive === 'yes' — enforced with superRefine
-		//employeeCount: z.enum(['0', '1-5', '6-20', '20+']).nullish(),
-		// This automatically pulls ['0', '1-5', '6-20', '20+']
 		employeeCount: z.enum(employeeCountEnum.enumValues).nullish(),
 		businessPremises: z.enum(['yes', 'no'], {
 			error: 'Please select an option'

@@ -1,8 +1,9 @@
 import { getAccountingPeriodEnds } from '$lib/server/process/utils/getAccountingPeriodEnds';
+import { getFirstFyeAfterIncorporation } from '$lib/server/process/utils/getFirstFyeAfterIncorporation';
 import type { GeneratedObligation } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import { UTCDate } from '@date-fns/utc';
-import { addDays, addMonths, subMonths } from 'date-fns';
+import { addMonths, subMonths } from 'date-fns';
 
 export function generateAccountingPeriodObligations(
 	org: Organisation,
@@ -16,20 +17,7 @@ export function generateAccountingPeriodObligations(
 
 	const incorporation = new UTCDate(org.incorporationDate);
 
-	// First accounting period ends at first FYE after incorporation
-	let firstFye = new UTCDate(
-		incorporation.getFullYear(),
-		org.financialYearEndMonth - 1,
-		org.financialYearEndDay
-	);
-
-	if (org.financialYearEndIsLastDay) {
-		firstFye = new UTCDate(incorporation.getFullYear(), org.financialYearEndMonth, 0);
-	}
-
-	if (incorporation > firstFye) {
-		firstFye.setFullYear(firstFye.getFullYear() + 1);
-	}
+	let firstFye = getFirstFyeAfterIncorporation(org);
 
 	for (const periodEnd of periodEnds) {
 		const isFirstPeriod = periodEnd.getTime() === firstFye.getTime();
@@ -44,25 +32,25 @@ export function generateAccountingPeriodObligations(
 			});
 		}
 
-		// 🟩 Corporation Tax Payment
-		const ctPaymentDue = addDays(addMonths(periodEnd, 9), 1);
+		// // 🟩 Corporation Tax Payment
+		// const ctPaymentDue = addDays(addMonths(periodEnd, 9), 1);
 
-		if (ctPaymentDue >= from && ctPaymentDue <= to) {
-			obligations.push({
-				key: 'corporation_tax_payment',
-				dueDate: ctPaymentDue
-			});
-		}
+		// if (ctPaymentDue >= from && ctPaymentDue <= to) {
+		// 	obligations.push({
+		// 		key: 'corporation_tax_payment',
+		// 		dueDate: ctPaymentDue
+		// 	});
+		// }
 
-		// 🟨 CT600
-		const ctReturnDue = addMonths(periodEnd, 12);
+		// // 🟨 CT600
+		// const ctReturnDue = addMonths(periodEnd, 12);
 
-		if (ctReturnDue >= from && ctReturnDue <= to) {
-			obligations.push({
-				key: 'corporation_tax_return',
-				dueDate: ctReturnDue
-			});
-		}
+		// if (ctReturnDue >= from && ctReturnDue <= to) {
+		// 	obligations.push({
+		// 		key: 'corporation_tax_return',
+		// 		dueDate: ctReturnDue
+		// 	});
+		// }
 	}
 
 	return obligations;

@@ -6,7 +6,7 @@ import { getGenerationWindow } from '$lib/server/process/utils/getGenerationWind
 import { insertObligationsSafely } from '$lib/server/process/utils/insertObligations';
 import type { ObligationInsertSet } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
-import { isLastDayInMonth } from '$lib/utils/dates';
+import { isLastDayInMonth, normaliseVatEndDate } from '$lib/utils/dates';
 import { UTCDate } from '@date-fns/utc';
 import { format } from 'date-fns';
 
@@ -24,11 +24,26 @@ export async function generateAndPersistComplianceObligations(
 	userId: string,
 	tx?: DBExecutor
 ) {
+	//
 	// Do validation before anything...
 	//
-	// Check VAT is last day of month
-	if (!org.vatEndDate || !isLastDayInMonth(new UTCDate(org.vatEndDate)))
-		throw new Error('Invalid VAT End Date - it must be the last day of the month');
+	if (org.vatRegistered) {
+		if (!org.vatEndDate) {
+			throw new Error(
+				'Invalid VAT End Date - it must provided if the organisation is VAT registered.'
+			);
+		}
+
+		if (!isLastDayInMonth(new UTCDate(org.vatEndDate))) {
+			// Check VAT is last day of month
+			//throw new Error('Invalid VAT End Date - it must be the last day of the month');
+			//
+			// Rather than throwing error, to reduce user friction in case of this
+			// highly unlikely (probably impossible) situation, just force the date
+			// to use last day of the month.
+			org.vatEndDate = normaliseVatEndDate(new UTCDate(org.vatEndDate!)).toISOString();
+		}
+	}
 
 	// Establish the working window in which we will generate obligations
 	const { from, to } = getGenerationWindow(org);
@@ -60,11 +75,11 @@ export async function generateAndPersistComplianceObligations(
 
 	const obligations: ObligationInsertSet = generatedObligationDates.map((row) => ({
 		organisationId: org.id,
-		organisationObligationSettingId: obligationRuntimeContext.definitionMap[row.key].id, // TODO WRONG VALUE!!
+		organisationObligationSettingId: obligationRuntimeContext.definitionMap[row.key].id,
 		dueDate: format(row.dueDate, 'yyyy-MM-dd'),
 		status: ObligationStatusType.Pending,
 		assignedToUserId: userId
 	}));
 
-	await insertObligationsSafely(obligations, userId, tx);
+	await insertObligationsSafely(org.id, obligations, userId, tx);
 }

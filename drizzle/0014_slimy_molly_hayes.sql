@@ -1,0 +1,2 @@
+CREATE INDEX "obligations_due_date_idx" ON "obligations" USING btree ("due_date");--> statement-breakpoint
+CREATE UNIQUE INDEX "org_obligation_settings_key_unique" ON "organisation_obligation_settings" USING btree ("organisation_id","key");

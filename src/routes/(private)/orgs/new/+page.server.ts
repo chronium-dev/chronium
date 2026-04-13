@@ -10,6 +10,7 @@ import { endOfMonth, startOfMonth } from 'date-fns';
 import { message, setError, superValidate, type Infer } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
+import { generateAndPersistComplianceObligations } from '$lib/server/process/generateAndPersistComplianceObligations';
 
 export const load: PageServerLoad = async () => {
 	// Pass no data → superValidate uses schema defaults → blank form
@@ -57,7 +58,7 @@ export const actions: Actions = {
 					return setError(form, 'name', createResult.message);
 				}
 
-				//await generateAndPersistComplianceObligations(createResult.org, userId, tx);
+				await generateAndPersistComplianceObligations(createResult.org, userId, tx);
 
 				return message(form, { status: 200, text: 'Company created successfully!' });
 			});

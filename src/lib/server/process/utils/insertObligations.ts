@@ -2,7 +2,8 @@
 
 import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { obligations } from '$lib/server/db/schema';
-import type { ObligationInsertSet, ObligationSet } from '$lib/types/obligations';
+import { updateOrganisationGenerationWatermark } from '$lib/server/process/utils/updateOrganisationGenerationWatermark';
+import type { ObligationInsertSet } from '$lib/types/obligations';
 
 function dedupe(rows: ObligationInsertSet) {
 	const seen = new Set<string>();
@@ -16,8 +17,16 @@ function dedupe(rows: ObligationInsertSet) {
 	});
 }
 
-export async function insertObligationsSafely(rows: ObligationInsertSet, userId: string, tx?: DBExecutor) {
+export async function insertObligationsSafely(
+	orgId: string,
+	rows: ObligationInsertSet,
+	userId: string,
+	tx?: DBExecutor
+) {
 	if (rows.length === 0) return;
 
-	await getExecutor(tx).insert(obligations).values(dedupe(rows)).onConflictDoNothing();
+	const db = getExecutor(tx);
+
+	await db.insert(obligations).values(dedupe(rows)).onConflictDoNothing();
+	await updateOrganisationGenerationWatermark(orgId, tx);
 }
