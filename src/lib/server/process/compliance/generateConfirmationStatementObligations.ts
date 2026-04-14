@@ -1,7 +1,7 @@
 import type { GeneratedObligation } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import { UTCDate } from '@date-fns/utc';
-import { addYears } from 'date-fns';
+import { addDays, addYears } from 'date-fns';
 
 export function generateConfirmationStatementObligations(
 	org: Organisation,
@@ -12,7 +12,7 @@ export function generateConfirmationStatementObligations(
 
 	const incorporation = new UTCDate(org.incorporationDate);
 
-	let cursor = addYears(incorporation, 1);
+	let cursor = addYears(addDays(incorporation, 14), 1);
 
 	while (cursor <= to) {
 		if (cursor >= from) {

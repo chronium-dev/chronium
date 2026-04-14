@@ -1,7 +1,7 @@
 import type { GeneratedObligation } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
+import { addCalendarMonths, addMonthAndWeek } from '$lib/utils/dates';
 import { UTCDate } from '@date-fns/utc';
-import { addDays, addMonths } from 'date-fns';
 
 export function generateVATObligations(
 	org: Organisation,
@@ -18,23 +18,23 @@ export function generateVATObligations(
 
 	while (cursor <= to) {
 		if (cursor >= from) {
-			const due = addDays(addMonths(cursor, 1), 7);
+			const due = addMonthAndWeek(cursor);
 
-			obligations.push({ key: 'vat_return', dueDate: due }, { key: 'vat_payment', dueDate: due });
+			obligations.push({ key: 'vat_return_and_payment', dueDate: due });
 		}
 
 		// Step forward based on frequency
 		switch (org.vatFrequency) {
 			case 'monthly':
-				cursor = addMonths(cursor, 1);
+				cursor = addCalendarMonths(cursor, 1);
 				break;
 
 			case 'quarterly':
-				cursor = addMonths(cursor, 3);
+				cursor = addCalendarMonths(cursor, 3);
 				break;
 
 			case 'annual':
-				cursor = addMonths(cursor, 12);
+				cursor = addCalendarMonths(cursor, 12);
 				break;
 		}
 	}

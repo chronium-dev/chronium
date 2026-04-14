@@ -3,7 +3,7 @@ import { getFirstFyeAfterIncorporation } from '$lib/server/process/utils/getFirs
 import type { GeneratedObligation } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import { UTCDate } from '@date-fns/utc';
-import { addMonths, subMonths } from 'date-fns';
+import { addDays, addMonths, addYears, endOfMonth, subDays, subMonths } from 'date-fns';
 
 export function generateAccountingPeriodObligations(
 	org: Organisation,
@@ -23,7 +23,9 @@ export function generateAccountingPeriodObligations(
 		const isFirstPeriod = periodEnd.getTime() === firstFye.getTime();
 
 		// 🟦 Annual Accounts
-		const accountsDue = isFirstPeriod ? addMonths(incorporation, 21) : addMonths(periodEnd, 9);
+		const accountsDue = isFirstPeriod
+			? addMonths(incorporation, 21)
+			: endOfMonth(addMonths(periodEnd, 9));
 
 		if (accountsDue >= from && accountsDue <= to) {
 			obligations.push({
@@ -32,25 +34,27 @@ export function generateAccountingPeriodObligations(
 			});
 		}
 
-		// // 🟩 Corporation Tax Payment
-		// const ctPaymentDue = addDays(addMonths(periodEnd, 9), 1);
+		// 🟩 Corporation Tax Payment
+		const ctPaymentDue = addDays(endOfMonth(addMonths(periodEnd, 9)), 1);
 
-		// if (ctPaymentDue >= from && ctPaymentDue <= to) {
-		// 	obligations.push({
-		// 		key: 'corporation_tax_payment',
-		// 		dueDate: ctPaymentDue
-		// 	});
-		// }
+		if (ctPaymentDue >= from && ctPaymentDue <= to) {
+			obligations.push({
+				key: 'corporation_tax_payment',
+				dueDate: ctPaymentDue
+			});
+		}
 
-		// // 🟨 CT600
-		// const ctReturnDue = addMonths(periodEnd, 12);
+		// 🟨 CT600
+		const ctReturnDue = isFirstPeriod
+			? subDays(addMonths(addYears(incorporation, 1), 12), 1)
+			: addMonths(periodEnd, 12);
 
-		// if (ctReturnDue >= from && ctReturnDue <= to) {
-		// 	obligations.push({
-		// 		key: 'corporation_tax_return',
-		// 		dueDate: ctReturnDue
-		// 	});
-		// }
+		if (ctReturnDue >= from && ctReturnDue <= to) {
+			obligations.push({
+				key: 'corporation_tax_return',
+				dueDate: ctReturnDue
+			});
+		}
 	}
 
 	return obligations;

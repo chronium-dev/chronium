@@ -1,5 +1,5 @@
 import { UTCDate } from '@date-fns/utc';
-import { lastDayOfMonth, set } from 'date-fns';
+import { addDays, addMonths, getDaysInMonth, lastDayOfMonth, set } from 'date-fns';
 
 /**
  * Creates a Date object from year, month, and day.
@@ -48,6 +48,39 @@ export const isLastDayInMonth = (date: UTCDate): boolean => {
 	return nextDay.getDate() === 1;
 };
 
-export function normaliseVatEndDate(date: Date): Date {
+export function normaliseMonthEndDate(date: UTCDate): UTCDate {
 	return new UTCDate(date.getFullYear(), date.getMonth() + 1, 0);
+}
+
+export function addMonthAndWeek(startDate: UTCDate) {
+	let result;
+
+	// 1. Check if the input date is the last day of its month
+	if (isLastDayInMonth(startDate)) {
+		// Move to the next month, then find the last day of THAT month
+		const nextMonth = addMonths(startDate, 1);
+		result = lastDayOfMonth(nextMonth);
+	} else {
+		// Otherwise, perform a standard month addition
+		result = addMonths(startDate, 1);
+	}
+
+	// 2. Add the 7 days to the result
+	return addDays(result, 7);
+}
+
+export function addCalendarMonths(date: UTCDate, months: number) {
+	const utcDate = new UTCDate(date);
+
+	// Manual UTC check: Does the current day equal the total days in this month?
+	const isLastDay = utcDate.getUTCDate() === getDaysInMonth(utcDate);
+
+	if (isLastDay) {
+		// 1. Move to next month
+		// 2. Use lastDayOfMonth to snap to the 30th/31st/28th
+		const nextMonth = addMonths(utcDate, months);
+		return lastDayOfMonth(nextMonth);
+	}
+
+	return addMonths(utcDate, 1);
 }

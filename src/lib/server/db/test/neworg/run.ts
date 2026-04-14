@@ -45,11 +45,11 @@ const run = async () => {
 
 			const newOrg: OrganisationFormData = {
 				name: 'ABC Motors Ltd',
-				incorporationDate: '2026-02-12',
+				incorporationDate: '2016-02-12',
 				financialYearEnd: '2027-02-28',
 				vatRegistered: 'yes',
 				vatFrequency: 'quarterly',
-				vatEndDate: '2026-04',
+				vatEndDate: '2026-05',
 				payrollActive: 'yes',
 				employeeCount: '6-20',
 				businessPremises: 'no'

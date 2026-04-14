@@ -13,15 +13,6 @@ export function generateComplianceObligations(
 	from: UTCDate,
 	to: UTCDate
 ) {
-	// const all = [
-	// 	...generateAccountingPeriodObligations(org, from, to),
-	// 	...generateConfirmationStatementObligations(org, from, to),
-	// 	...generateVATObligations(org, from, to)
-	// ];
-
-	// // 🔥 Filter by enabled keys
-	// return all.filter((o) => context.enabledKeys.has(o.key));
-
 	const all = [];
 
 	if (
@@ -32,13 +23,13 @@ export function generateComplianceObligations(
 		all.push(...generateAccountingPeriodObligations(org, from, to));
 	}
 
-	// if (context.enabledKeys.has('confirmation_statement')) {
-	// 	all.push(...generateConfirmationStatementObligations(org, from, to));
-	// }
+	if (context.enabledKeys.has('confirmation_statement')) {
+		all.push(...generateConfirmationStatementObligations(org, from, to));
+	}
 
-	// if (context.enabledKeys.has('vat_return') || context.enabledKeys.has('vat_payment')) {
-	// 	all.push(...generateVATObligations(org, from, to));
-	// }
+	if (context.enabledKeys.has('vat_return_and_payment')) {
+		all.push(...generateVATObligations(org, from, to));
+	}
 
 	return all;
 }

@@ -6,6 +6,9 @@
 	import { cn } from '$lib/utils';
 	import { toProperCase } from '$lib/utils/misc';
 	import { organisationFormSchema, type OrganisationSchema } from '$lib/validations/organisation';
+	import { UTCDate } from '@date-fns/utc';
+	import { addYears, format, isBefore, subYears } from 'date-fns';
+	import { endOfMonth } from 'date-fns/endOfMonth';
 	import { onDestroy, untrack } from 'svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
@@ -37,6 +40,32 @@
 	const submitLabel = $derived(
 		$submitting ? 'Saving...' : mode === 'create' ? 'Create company...' : 'Save Changes'
 	);
+
+	let financialYearEndTouched = $state(false);
+	let prevIncDate = $state<string | null>(null);
+
+	// Calculate the next ARD if the incorporation date is recent...
+	$effect(() => {
+		const incDate = $formData.incorporationDate; // tracked
+
+		untrack(() => {
+			// Guard: only run if the value actually changed
+			if (incDate === prevIncDate) return;
+			prevIncDate = incDate;
+
+			if (!incDate || financialYearEndTouched) return;
+
+			const incorporationDate = new UTCDate(incDate);
+			// Skip if incorporated more than one year ago...
+			if (isBefore(incorporationDate, subYears(new UTCDate(), 1))) return;
+
+			// ...otherwise make next ARD the end of this month plus one year
+			const ard = new UTCDate(addYears(endOfMonth(incorporationDate), 1));
+
+			// Write via the store directly, bypassing the proxy
+			formData.update((f) => ({ ...f, financialYearEnd: format(ard, 'yyyy-MM-dd') }));
+		});
+	});
 
 	// Clear employeeCount when payroll is toggled off
 	function handlePayrollChange(value: 'yes' | 'no') {
@@ -135,6 +164,7 @@
 						$errors.financialYearEnd && 'border-destructive'
 					)}
 					style="color-scheme: {isDark ? 'dark' : 'light'}"
+					onchange={() => (financialYearEndTouched = true)}
 				/>
 				<p class="text-xs text-muted-foreground italic">
 					We'll use this to determine your ongoing reporting deadlines

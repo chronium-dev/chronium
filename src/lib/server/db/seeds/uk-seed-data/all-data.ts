@@ -53,15 +53,9 @@ export const obligationTemplatesSeeds = [
 		category: ObligationCategoryType.Statutory
 	},
 	{
-		key: 'vat_return',
-		name: 'Submit VAT Return',
-		description: 'Submit VAT return to HMRC.',
-		category: ObligationCategoryType.Statutory
-	},
-	{
-		key: 'vat_payment',
-		name: 'Pay VAT',
-		description: 'Pay VAT liability to HMRC.',
+		key: 'vat_return_and_payment',
+		name: 'Submit VAT Return & Payment',
+		description: 'Submit VAT return and payment to HMRC.',
 		category: ObligationCategoryType.Statutory
 	},
 	{

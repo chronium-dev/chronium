@@ -1,12 +1,11 @@
 import { getFirstFyeAfterIncorporation } from '$lib/server/process/utils/getFirstFyeAfterIncorporation';
 import type { Organisation } from '$lib/types/organisations';
+import { normaliseMonthEndDate } from '$lib/utils/dates';
 import { UTCDate } from '@date-fns/utc';
-import { isBefore } from 'date-fns';
+import { addYears, isBefore } from 'date-fns';
 
 export function getAccountingPeriodEnds(org: Organisation, from: Date, to: Date): Date[] {
 	const results: Date[] = [];
-
-	const incorporation = new UTCDate(org.incorporationDate);
 
 	let cursor = getFirstFyeAfterIncorporation(org);
 
@@ -16,8 +15,13 @@ export function getAccountingPeriodEnds(org: Organisation, from: Date, to: Date)
 			results.push(new UTCDate(cursor));
 		}
 
-		cursor = new UTCDate(cursor);
-		cursor.setFullYear(cursor.getFullYear() + 1);
+		if (org.financialYearEndIsLastDay) {
+			// This is to factor in leap years
+			cursor = normaliseMonthEndDate(addYears(cursor, 1));
+		} else {
+			//cursor = new UTCDate(cursor);
+			cursor.setFullYear(cursor.getFullYear() + 1);
+		}
 	}
 
 	return results;

@@ -14,12 +14,12 @@ export const organisationFormSchema = z
 			.default('ABC Motors Ltd'),
 		incorporationDate: z
 			.string({ error: 'Incorporation date is required' })
-			.min(1, 'Incorporation date is required')
-			.default('2025-02-12'),
+			.min(1, 'Incorporation date is required'),
+		// .default('2025-02-12'),
 		financialYearEnd: z
 			.string({ error: 'Next financial year end date is required' })
-			.min(1, 'Next financial year end date is required')
-			.default('2027-02-28'),
+			.min(1, 'Next financial year end date is required'),
+		// .default('2027-02-28'),
 		vatRegistered: z.enum(['yes', 'no'], {
 			error: 'Please select an option'
 		}),

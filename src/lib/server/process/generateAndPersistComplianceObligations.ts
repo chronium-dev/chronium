@@ -6,7 +6,7 @@ import { getGenerationWindow } from '$lib/server/process/utils/getGenerationWind
 import { insertObligationsSafely } from '$lib/server/process/utils/insertObligations';
 import type { ObligationInsertSet } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
-import { isLastDayInMonth, normaliseVatEndDate } from '$lib/utils/dates';
+import { isLastDayInMonth, normaliseMonthEndDate } from '$lib/utils/dates';
 import { UTCDate } from '@date-fns/utc';
 import { format } from 'date-fns';
 
@@ -41,7 +41,7 @@ export async function generateAndPersistComplianceObligations(
 			// Rather than throwing error, to reduce user friction in case of this
 			// highly unlikely (probably impossible) situation, just force the date
 			// to use last day of the month.
-			org.vatEndDate = normaliseVatEndDate(new UTCDate(org.vatEndDate!)).toISOString();
+			org.vatEndDate = normaliseMonthEndDate(new UTCDate(org.vatEndDate!)).toISOString();
 		}
 	}
 
