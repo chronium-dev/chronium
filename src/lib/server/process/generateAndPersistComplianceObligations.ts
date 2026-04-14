@@ -1,7 +1,7 @@
 import { type DBExecutor } from '$lib/server/db';
 import { buildObligationRuntimeContext } from '$lib/server/db/queries';
 import { ObligationStatusType } from '$lib/server/db/schema';
-import { generateComplianceObligations } from '$lib/server/process/compliance/generateComplianceObligations';
+import { generateStatutoryObligations } from '$lib/server/process/statutory/generateStatutoryObligations';
 import { getGenerationWindow } from '$lib/server/process/utils/getGenerationWindow';
 import { insertObligationsSafely } from '$lib/server/process/utils/insertObligations';
 import type { ObligationInsertSet } from '$lib/types/obligations';
@@ -54,7 +54,7 @@ export async function generateAndPersistComplianceObligations(
 	const obligationRuntimeContext = await buildObligationRuntimeContext(org.id, tx);
 
 	// Execute the generations
-	const generatedObligationDates = generateComplianceObligations(
+	const generatedObligationDates = generateStatutoryObligations(
 		org,
 		obligationRuntimeContext,
 		new UTCDate(from),

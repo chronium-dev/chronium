@@ -32,7 +32,7 @@
 	const { form: formData, errors, enhance, submitting, message } = sf;
 
 	// Conditional: only show employee count when payroll is active
-	const showEmployeeCount = $derived($formData.payrollActive === 'yes');
+	const showPayeInputs = $derived($formData.payrollActive === 'yes');
 
 	// Conditional: only show VAT selections when VAT registered is true
 	const showVatInputs = $derived($formData.vatRegistered === 'yes');
@@ -273,8 +273,32 @@
 		<Form.FieldErrors />
 	</Form.Field>
 
-	<!-- 6. Number of Employees (vertical radio, conditional) -->
-	{#if showEmployeeCount}
+	{#if showPayeInputs}
+		<!-- 6. PAYE Frequency (horizontal radio) -->
+		<Form.Field form={sf} name="payeFrequency">
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>PAYE Payment Frequency</Form.Label>
+					<div class="mt-1 flex gap-6">
+						{#each ['monthly', 'quarterly'] as option}
+							<label class="flex cursor-pointer items-center gap-2">
+								<input
+									type="radio"
+									name={props.name}
+									value={option}
+									checked={$formData.payeFrequency === option}
+									class="h-4 w-4 border-input text-primary focus:ring-ring"
+								/>
+								<span class="text-sm">{option === 'monthly' ? 'Monthly' : 'Quarterly'}</span>
+							</label>
+						{/each}
+					</div>
+				{/snippet}
+			</Form.Control>
+			<Form.FieldErrors />
+		</Form.Field>
+
+		<!-- 7. Number of Employees (vertical radio, conditional) -->
 		<Form.Field form={sf} name="employeeCount">
 			<Form.Control>
 				{#snippet children({ props })}
@@ -299,7 +323,7 @@
 		</Form.Field>
 	{/if}
 
-	<!-- 7. Business Premises (horizontal radio) -->
+	<!-- 8. Business Premises (horizontal radio) -->
 	<Form.Field form={sf} name="businessPremises">
 		<Form.Control>
 			{#snippet children({ props })}
@@ -323,7 +347,7 @@
 		<Form.FieldErrors />
 	</Form.Field>
 
-	<!-- 8. Submit -->
+	<!-- 9. Submit -->
 	<Button type="submit" disabled={$submitting} class="w-full sm:w-auto">
 		{#if $submitting}
 			<svg

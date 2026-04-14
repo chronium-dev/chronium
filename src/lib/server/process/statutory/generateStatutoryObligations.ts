@@ -2,12 +2,12 @@ import {
 	generateAccountingPeriodObligations,
 	generateConfirmationStatementObligations,
 	generateVATObligations
-} from '$lib/server/process/compliance';
+} from '$lib/server/process/statutory';
 import type { ObligationRuntimeContext } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import type { UTCDate } from '@date-fns/utc';
 
-export function generateComplianceObligations(
+export function generateStatutoryObligations(
 	org: Organisation,
 	context: ObligationRuntimeContext,
 	from: UTCDate,

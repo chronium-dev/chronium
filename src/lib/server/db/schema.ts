@@ -176,6 +176,7 @@ export const organisation = pgTable('organisation', {
 	// Set initially to the next VAT period end date? Optional but VERY useful for alignment
 
 	payrollActive: boolean('payroll_active').notNull(),
+	payeFrequency: 
 	employeeCount: employeeCountEnum('employee_count'),
 	businessPremises: boolean('business_premises').notNull(),
 	obligationsGeneratedTo: date('obligation_generation_to'),

@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 export const employeeCountEnum = pgEnum('employee_count_enum', ['0', '1-5', '6-20', '20+']);
 export const vatFrequencyEnum = pgEnum('vat_frequency_enum', ['quarterly', 'monthly', 'annual']);
+export const payeFrequencyEnum = pgEnum('paye_frequency_enum', ['quarterly', 'monthly']);
 
 export const organisationFormSchema = z
 	.object({
@@ -33,6 +34,9 @@ export const organisationFormSchema = z
 		}),
 		// Only required when payrollActive === 'yes' — enforced with superRefine
 		employeeCount: z.enum(employeeCountEnum.enumValues).nullish(),
+		payeFrequency: z.enum(payeFrequencyEnum.enumValues).nullish().default('monthly'),
+		// How often do they submit paye returns? 'quarterly' | 'monthly' | 'annual'
+
 		businessPremises: z.enum(['yes', 'no'], {
 			error: 'Please select an option'
 		})
