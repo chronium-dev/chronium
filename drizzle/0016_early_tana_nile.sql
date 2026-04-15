@@ -1,0 +1,1 @@
+CREATE TYPE "public"."paye_frequency_enum" AS ENUM('quarterly', 'monthly');

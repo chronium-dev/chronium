@@ -204,7 +204,7 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>How often do you submit VAT returns?</Form.Label>
-					<div class="mt-1 flex flex-col gap-3">
+					<div class="mt-1 flex flex-row gap-6">
 						{#each ['quarterly', 'monthly', 'annual'] as option}
 							<label class="flex cursor-pointer items-center gap-2">
 								<input
@@ -303,7 +303,7 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Number of Employees</Form.Label>
-					<div class="mt-1 flex flex-col gap-3">
+					<div class="mt-1 flex flex-row gap-6">
 						{#each ['0', '1-5', '6-20', '20+'] as option}
 							<label class="flex cursor-pointer items-center gap-2">
 								<input

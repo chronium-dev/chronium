@@ -1,4 +1,8 @@
-import { employeeCountEnum, vatFrequencyEnum } from '$lib/validations/organisation';
+import {
+	employeeCountEnum,
+	payeFrequencyEnum,
+	vatFrequencyEnum
+} from '$lib/validations/organisation';
 import { UTCDate } from '@date-fns/utc';
 import {
 	boolean,
@@ -14,7 +18,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createId } from '../../../lib/utils/createid';
 
-export { employeeCountEnum, vatFrequencyEnum };
+export { employeeCountEnum, payeFrequencyEnum, vatFrequencyEnum };
 
 export const obligationStatusEnum = pgEnum('obligation_status', [
 	'pending',
@@ -43,14 +47,6 @@ export const RecurrenceFrequencyType = {
 	Quarterly: 'quarterly',
 	Yearly: 'yearly'
 } as const satisfies Record<string, RecurrenceFrequencyType>;
-
-// export const domainEnum = pgEnum('obligation_domain', ['statutory', 'operational', 'governance']);
-// export type DomainType = (typeof domainEnum.enumValues)[number];
-// export const DomainType = {
-// 	Statutory: 'statutory',
-// 	Operational: 'operational',
-// 	Governance: 'governance'
-// } as const satisfies Record<string, DomainType>;
 
 export const obligationCategoryEnum = pgEnum('obligation_category', [
 	'statutory',
@@ -176,7 +172,7 @@ export const organisation = pgTable('organisation', {
 	// Set initially to the next VAT period end date? Optional but VERY useful for alignment
 
 	payrollActive: boolean('payroll_active').notNull(),
-	payeFrequency: 
+	payeFrequency: payeFrequencyEnum('paye_frequency'),
 	employeeCount: employeeCountEnum('employee_count'),
 	businessPremises: boolean('business_premises').notNull(),
 	obligationsGeneratedTo: date('obligation_generation_to'),
@@ -224,6 +220,8 @@ export const obligationTemplates = pgTable(
 		name: text('name').notNull(), // e.g. 'Annual Accounts'
 		category: obligationCategoryEnum('category').notNull(),
 		isSystem: boolean('is_system').default(true),
+		defaultFrequency: recurrenceFrequencyEnum('default_frequency'),
+		defaultValue: integer('default_value'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()
@@ -253,8 +251,7 @@ export const organisationObligationSettings = pgTable(
 		monthOfYear: integer('month_of_year'),
 		endOfMonth: boolean('end_of_month').default(false),
 		customName: text('custom_name'),
-		configured: boolean('configured').notNull().default(false),
-		lastGeneratedAt: timestamp('last_generated_at'),
+		configured: boolean('configured').notNull().default(false), // user has completed recurrence setup
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()

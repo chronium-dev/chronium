@@ -1,16 +1,16 @@
 // +page.server.ts
 import { db } from '$lib/server/db';
 import { createOrg } from '$lib/server/db/queries';
+import { generateStatutoryObligations } from '$lib/server/process/statutory/generateStatutoryObligations';
 import type { FormMessage } from '$lib/types/forms';
 import { isLastDayOfMonth } from '$lib/utils/dates';
 import { organisationFormSchema } from '$lib/validations/organisation';
 import { UTCDate } from '@date-fns/utc';
 import { error, fail } from '@sveltejs/kit';
-import { endOfMonth, startOfMonth } from 'date-fns';
+import { endOfMonth } from 'date-fns';
 import { message, setError, superValidate, type Infer } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
-import { generateAndPersistComplianceObligations } from '$lib/server/process/generateAndPersistComplianceObligations';
 
 export const load: PageServerLoad = async () => {
 	// Pass no data → superValidate uses schema defaults → blank form
@@ -58,7 +58,7 @@ export const actions: Actions = {
 					return setError(form, 'name', createResult.message);
 				}
 
-				await generateAndPersistComplianceObligations(createResult.org, userId, tx);
+				await generateStatutoryObligations(createResult.org, userId, tx);
 
 				return message(form, { status: 200, text: 'Company created successfully!' });
 			});

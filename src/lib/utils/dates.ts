@@ -84,3 +84,89 @@ export function addCalendarMonths(date: UTCDate, months: number) {
 
 	return addMonths(utcDate, 1);
 }
+
+/**
+ * Returns the Fiscal Quarter label based on the UK tax year style:
+ * Q1: Apr 6 – Jul 5
+ * Q2: Jul 6 – Oct 5
+ * Q3: Oct 6 – Jan 5
+ * Q4: Jan 6 – Apr 5
+ */
+export function getFiscalQuarterLabel(date: Date | UTCDate): 'Q1' | 'Q2' | 'Q3' | 'Q4' {
+	const utcDate = new UTCDate(date);
+
+	// Create a numeric representation: (Month 1-12 * 100) + Day (1-31)
+	// e.g., April 6th = 406, January 5th = 105
+	const month = utcDate.getUTCMonth() + 1;
+	const day = utcDate.getUTCDate();
+	const mmdd = month * 100 + day;
+
+	// Q4: Jan 6 (106) to Apr 5 (405)
+	if (mmdd >= 106 && mmdd <= 405) {
+		return 'Q4';
+	}
+
+	// Q1: Apr 6 (406) to Jul 5 (705)
+	if (mmdd >= 406 && mmdd <= 705) {
+		return 'Q1';
+	}
+
+	// Q2: Jul 6 (706) to Oct 5 (1005)
+	if (mmdd >= 706 && mmdd <= 1005) {
+		return 'Q2';
+	}
+
+	// Q3: Oct 6 (1006) to Dec 31 (1231) AND Jan 1 (101) to Jan 5 (105)
+	return 'Q3';
+}
+
+export interface FiscalQuarterInfo {
+	label: 'Q1' | 'Q2' | 'Q3' | 'Q4';
+	startDate: UTCDate;
+	endDate: UTCDate;
+}
+
+export function getFiscalQuarterInfo(date: Date | UTCDate): FiscalQuarterInfo {
+	const utcDate = new UTCDate(date);
+	const year = utcDate.getUTCFullYear();
+	const month = utcDate.getUTCMonth() + 1; // 1-12
+	const day = utcDate.getUTCDate();
+	const mmdd = month * 100 + day;
+
+	// Q4: Jan 6 – Apr 5
+	if (mmdd >= 106 && mmdd <= 405) {
+		return {
+			label: 'Q4',
+			startDate: new UTCDate(year, 0, 6), // Jan 6
+			endDate: new UTCDate(year, 3, 5) // Apr 5
+		};
+	}
+
+	// Q1: Apr 6 – Jul 5
+	if (mmdd >= 406 && mmdd <= 705) {
+		return {
+			label: 'Q1',
+			startDate: new UTCDate(year, 3, 6), // Apr 6
+			endDate: new UTCDate(year, 6, 5) // Jul 5
+		};
+	}
+
+	// Q2: Jul 6 – Oct 5
+	if (mmdd >= 706 && mmdd <= 1005) {
+		return {
+			label: 'Q2',
+			startDate: new UTCDate(year, 6, 6), // Jul 6
+			endDate: new UTCDate(year, 9, 5) // Oct 5
+		};
+	}
+
+	// Q3: Oct 6 – Jan 5
+	// If month is Oct/Nov/Dec (>= 10), start is THIS year, end is NEXT year.
+	// If month is Jan (<= 1), start was LAST year, end is THIS year.
+	const isLateInYear = month >= 10;
+	return {
+		label: 'Q3',
+		startDate: new UTCDate(isLateInYear ? year : year - 1, 9, 6), // Oct 6
+		endDate: new UTCDate(isLateInYear ? year + 1 : year, 0, 5) // Jan 5
+	};
+}

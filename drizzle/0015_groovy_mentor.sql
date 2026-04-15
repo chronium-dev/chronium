@@ -1,0 +1,1 @@
+ALTER TABLE "organisation" ADD COLUMN "paye_frequency" "paye_frequency_enum";

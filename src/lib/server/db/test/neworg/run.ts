@@ -8,7 +8,7 @@ import {
 	organisationFormSchema,
 	type OrganisationFormData
 } from '../../../../validations/organisation';
-import { generateAndPersistComplianceObligations } from '../../../process/generateAndPersistComplianceObligations.ts';
+import { generateStatutoryObligations } from '../../../process/statutory/generateStatutoryObligations.ts';
 import { createOrg } from '../../queries';
 
 // 1. Properly type the transaction object using Drizzle's ExtractTablesWithRelations
@@ -51,6 +51,7 @@ const run = async () => {
 				vatFrequency: 'quarterly',
 				vatEndDate: '2026-05',
 				payrollActive: 'yes',
+				payeFrequency: 'monthly',
 				employeeCount: '6-20',
 				businessPremises: 'no'
 			};
@@ -63,7 +64,7 @@ const run = async () => {
 				throw new Error(createResult.message);
 			}
 
-			await generateAndPersistComplianceObligations(createResult.org, userId, tx);
+			await generateStatutoryObligations(createResult.org, userId, tx);
 		});
 
 		console.log('✅ Test completed successfully.');
