@@ -1,6 +1,6 @@
 {
-  "id": "b8493d71-95d9-4c9e-be5c-517b91e49302",
-  "prevId": "9c0cbcfd-e1fd-457c-8e73-56591319072d",
+  "id": "7797ee70-4311-420f-aa69-17aab0e66b80",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -386,20 +386,14 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.obligation_templates": {
-      "name": "obligation_templates",
+    "public.obligation_definitions": {
+      "name": "obligation_definitions",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
           "type": "text",
           "primaryKey": true,
-          "notNull": true
-        },
-        "key": {
-          "name": "key",
-          "type": "text",
-          "primaryKey": false,
           "notNull": true
         },
         "name": {
@@ -415,34 +409,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "is_system": {
-          "name": "is_system",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "default_frequency": {
-          "name": "default_frequency",
-          "type": "recurrence_frequency",
+        "source": {
+          "name": "source",
+          "type": "obligation_source",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "default_value": {
-          "name": "default_value",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "penalties": {
-          "name": "penalties",
+        "recurrence_rule_id": {
+          "name": "recurrence_rule_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -462,24 +437,22 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "obligation_templates_key_unique": {
-          "name": "obligation_templates_key_unique",
-          "columns": [
-            {
-              "expression": "key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+      "indexes": {},
+      "foreignKeys": {
+        "obligation_definitions_recurrence_rule_id_recurrence_rules_id_fk": {
+          "name": "obligation_definitions_recurrence_rule_id_recurrence_rules_id_fk",
+          "tableFrom": "obligation_definitions",
+          "tableTo": "recurrence_rules",
+          "columnsFrom": [
+            "recurrence_rule_id"
           ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -502,8 +475,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "organisation_obligation_setting_id": {
-          "name": "organisation_obligation_setting_id",
+        "obligation_definition_id": {
+          "name": "obligation_definition_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -549,51 +522,34 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "unique_obligation_instance": {
-          "name": "unique_obligation_instance",
-          "columns": [
-            {
-              "expression": "organisation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "organisation_obligation_setting_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "due_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "obligations_due_date_idx": {
-          "name": "obligations_due_date_idx",
-          "columns": [
-            {
-              "expression": "due_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
+        "obligations_organisation_id_organisation_id_fk": {
+          "name": "obligations_organisation_id_organisation_id_fk",
+          "tableFrom": "obligations",
+          "tableTo": "organisation",
+          "columnsFrom": [
+            "organisation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "obligations_obligation_definition_id_obligation_definitions_id_fk": {
+          "name": "obligations_obligation_definition_id_obligation_definitions_id_fk",
+          "tableFrom": "obligations",
+          "tableTo": "obligation_definitions",
+          "columnsFrom": [
+            "obligation_definition_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "obligations_assigned_to_user_id_user_id_fk": {
           "name": "obligations_assigned_to_user_id_user_id_fk",
           "tableFrom": "obligations",
@@ -605,32 +561,6 @@
             "id"
           ],
           "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "fk_obligations_organisation_fk": {
-          "name": "fk_obligations_organisation_fk",
-          "tableFrom": "obligations",
-          "tableTo": "organisation",
-          "columnsFrom": [
-            "organisation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "fk_obligations_settings_fk": {
-          "name": "fk_obligations_settings_fk",
-          "tableFrom": "obligations",
-          "tableTo": "organisation_obligation_settings",
-          "columnsFrom": [
-            "organisation_obligation_setting_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -704,13 +634,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "financial_year_end_is_last_day": {
-          "name": "financial_year_end_is_last_day",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
         "vat_registered": {
           "name": "vat_registered",
           "type": "boolean",
@@ -724,8 +647,15 @@
           "primaryKey": false,
           "notNull": false
         },
-        "vat_end_date": {
-          "name": "vat_end_date",
+        "vat_quarter_group": {
+          "name": "vat_quarter_group",
+          "type": "vat_quarter_group_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vat_start_date": {
+          "name": "vat_start_date",
           "type": "date",
           "primaryKey": false,
           "notNull": false
@@ -735,13 +665,6 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": true
-        },
-        "paye_frequency": {
-          "name": "paye_frequency",
-          "type": "paye_frequency_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
         },
         "employee_count": {
           "name": "employee_count",
@@ -756,8 +679,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "obligation_generation_to": {
-          "name": "obligation_generation_to",
+        "obligation_generation_horizon": {
+          "name": "obligation_generation_horizon",
           "type": "date",
           "primaryKey": false,
           "notNull": false
@@ -812,8 +735,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.organisation_obligation_settings": {
-      "name": "organisation_obligation_settings",
+    "public.recurrence_rules": {
+      "name": "recurrence_rules",
       "schema": "",
       "columns": {
         "id": {
@@ -822,37 +745,18 @@
           "primaryKey": true,
           "notNull": true
         },
-        "key": {
-          "name": "key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "organisation_id": {
           "name": "organisation_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "obligation_template_id": {
-          "name": "obligation_template_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "enabled": {
-          "name": "enabled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
         "frequency": {
           "name": "frequency",
           "type": "recurrence_frequency",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "interval": {
           "name": "interval",
@@ -865,7 +769,7 @@
           "name": "anchor_date",
           "type": "date",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "day_of_month": {
           "name": "day_of_month",
@@ -886,19 +790,6 @@
           "notNull": false,
           "default": false
         },
-        "custom_name": {
-          "name": "custom_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "configured": {
-          "name": "configured",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -914,70 +805,14 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "org_obligation_settings_unique": {
-          "name": "org_obligation_settings_unique",
-          "columns": [
-            {
-              "expression": "organisation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "obligation_template_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "org_obligation_settings_key_unique": {
-          "name": "org_obligation_settings_key_unique",
-          "columns": [
-            {
-              "expression": "organisation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "fk_org_obligation_settings_organisation": {
-          "name": "fk_org_obligation_settings_organisation",
-          "tableFrom": "organisation_obligation_settings",
+        "recurrence_rules_organisation_id_organisation_id_fk": {
+          "name": "recurrence_rules_organisation_id_organisation_id_fk",
+          "tableFrom": "recurrence_rules",
           "tableTo": "organisation",
           "columnsFrom": [
             "organisation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "fk_org_obligation_settings_template": {
-          "name": "fk_org_obligation_settings_template",
-          "tableFrom": "organisation_obligation_settings",
-          "tableTo": "obligation_templates",
-          "columnsFrom": [
-            "obligation_template_id"
           ],
           "columnsTo": [
             "id"
@@ -1234,6 +1069,15 @@
     }
   },
   "enums": {
+    "public.obligation_domain": {
+      "name": "obligation_domain",
+      "schema": "public",
+      "values": [
+        "statutory",
+        "operational",
+        "governance"
+      ]
+    },
     "public.employee_count_enum": {
       "name": "employee_count_enum",
       "schema": "public",
@@ -1280,21 +1124,13 @@
         "cancelled"
       ]
     },
-    "public.paye_frequency_enum": {
-      "name": "paye_frequency_enum",
-      "schema": "public",
-      "values": [
-        "quarterly",
-        "monthly"
-      ]
-    },
     "public.recurrence_frequency": {
       "name": "recurrence_frequency",
       "schema": "public",
       "values": [
+        "daily",
         "weekly",
         "monthly",
-        "quarterly",
         "yearly"
       ]
     },
@@ -1305,6 +1141,15 @@
         "quarterly",
         "monthly",
         "annual"
+      ]
+    },
+    "public.vat_quarter_group_enum": {
+      "name": "vat_quarter_group_enum",
+      "schema": "public",
+      "values": [
+        "jan",
+        "feb",
+        "mar"
       ]
     }
   },

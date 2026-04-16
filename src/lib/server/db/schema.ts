@@ -222,6 +222,8 @@ export const obligationTemplates = pgTable(
 		isSystem: boolean('is_system').default(true),
 		defaultFrequency: recurrenceFrequencyEnum('default_frequency'),
 		defaultValue: integer('default_value'),
+		description: text('description'),
+		penalties: text('penalties'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()

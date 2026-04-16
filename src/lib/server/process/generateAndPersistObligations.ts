@@ -63,11 +63,12 @@ export async function generateAndPersistObligations(
 	);
 
 	// Execute the Operational and Governance generations
-	const generatedCommonObligationDates = generateCommonObligationsController(
+	const generatedCommonObligationDates = await generateCommonObligationsController(
 		org,
 		obligationRuntimeContext,
 		new UTCDate(from),
-		new UTCDate(to)
+		new UTCDate(to),
+		tx
 	);
 
 	const generatedObligationDates = generatedStatutoryObligationDates.concat(

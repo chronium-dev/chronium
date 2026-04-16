@@ -1,7 +1,7 @@
 // +page.server.ts
 import { db } from '$lib/server/db';
 import { createOrg } from '$lib/server/db/queries';
-import { generateStatutoryObligations } from '$lib/server/process/statutory/generateStatutoryObligations';
+import { generateAndPersistObligations } from '$lib/server/process/generateAndPersistObligations';
 import type { FormMessage } from '$lib/types/forms';
 import { isLastDayOfMonth } from '$lib/utils/dates';
 import { organisationFormSchema } from '$lib/validations/organisation';
@@ -58,7 +58,7 @@ export const actions: Actions = {
 					return setError(form, 'name', createResult.message);
 				}
 
-				await generateStatutoryObligations(createResult.org, userId, tx);
+				await generateAndPersistObligations(createResult.org, userId, tx);
 
 				return message(form, { status: 200, text: 'Company created successfully!' });
 			});

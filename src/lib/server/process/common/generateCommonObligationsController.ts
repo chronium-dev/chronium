@@ -1,18 +1,33 @@
-import type { ObligationRuntimeContext } from '$lib/types/obligations';
+import { getExecutor, type DBExecutor } from '$lib/server/db';
+import { organisationObligationSettings } from '$lib/server/db/schema';
+import { generateCommonObligations } from '$lib/server/process/common/generateCommonObligations';
+import type { GeneratedObligation, ObligationRuntimeContext } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import type { UTCDate } from '@date-fns/utc';
+import { eq } from 'drizzle-orm';
 
-export function generateCommonObligationsController(
+export async function generateCommonObligationsController(
 	org: Organisation,
 	context: ObligationRuntimeContext,
 	from: UTCDate,
-	to: UTCDate
+	to: UTCDate,
+	tx?: DBExecutor
 ) {
-	const all = [];
+	const db = getExecutor(tx);
 
-	// TODO - iterate over all selected organisationObligationSettings and execute generateCommonObligations() for each
+	const settingsForOrg = await db
+		.select()
+		.from(organisationObligationSettings)
+		.where(eq(organisationObligationSettings.organisationId, org.id));
 
-	//const all = generateCommonObligations(org, from, to);
+	// Iterate over all selected organisationObligationSettings and execute
+	// generateCommonObligations() for each setting.
+	const obligations: GeneratedObligation[] = [];
+	settingsForOrg
+		.filter((setting) => setting.configured)
+		.forEach(async (setting) => {
+			obligations.push(...generateCommonObligations(setting, from, to));
+		});
 
-	return all;
+	return obligations;
 }

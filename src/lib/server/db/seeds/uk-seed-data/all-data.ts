@@ -25,60 +25,98 @@ export const entityTypeUkLtd = {
 //   businessPremises: true
 // };
 
-
 export const obligationTemplatesSeeds = [
 	// --- STATUTORY ---
 	{
 		key: 'annual_accounts',
 		name: 'File Annual Accounts',
 		description: 'Submit statutory accounts to Companies House.',
+		penalties: `For late filing: £150 - £3,000`,
 		category: ObligationCategoryType.Statutory
 	},
 	{
 		key: 'confirmation_statement',
 		name: 'File Confirmation Statement',
 		description: 'Submit confirmation statement confirming company details.',
-		category: ObligationCategoryType.Statutory
-	},
-	{
-		key: 'corporation_tax_payment',
-		name: 'Pay Corporation Tax',
-		description: 'Pay corporation tax due to HMRC.',
+		penalties: `Late or failed filing: Criminal offence plus large fines up to £5,000 per offence.`,
 		category: ObligationCategoryType.Statutory
 	},
 	{
 		key: 'corporation_tax_return',
 		name: 'File Company Tax Return (CT600)',
 		description: 'Submit corporation tax return to HMRC.',
+		penalties: `For late filing: £200 - £Large`,
+		category: ObligationCategoryType.Statutory
+	},
+	{
+		key: 'corporation_tax_payment',
+		name: 'Pay Corporation Tax',
+		description: 'Pay corporation tax due to HMRC.',
+		penalties: `For late payment: £200 - £Huge!`,
 		category: ObligationCategoryType.Statutory
 	},
 	{
 		key: 'vat_return_and_payment',
 		name: 'Submit VAT Return & Payment',
 		description: 'Submit VAT return and payment to HMRC.',
+		penalties: `For late filing or late payment: £200 - 6% of VAT owed plus a daily penalty of 10% owed until paid.`,
 		category: ObligationCategoryType.Statutory
 	},
 	{
 		key: 'paye_payment',
 		name: 'Pay PAYE',
 		description: 'Pay PAYE and National Insurance contributions.',
+		penalties: `For late filing: £100 per month plus additional surcharges on amount unpaid.`,
 		category: ObligationCategoryType.Statutory
 	},
 	{
 		key: 'final_fps',
 		name: 'Submit Final FPS',
 		description: 'Final Full Payment Submission due.',
+		penalties: `For late filing: £100, with escalating and aggressive surcharges based on outstanding amounts.`,
 		category: ObligationCategoryType.Statutory
 	},
 
 	// --- OPERATIONAL ---
 	{
-		key: 'insurance_renewal',
-		name: 'Renew Insurance Policy',
-		description: 'Renew company insurance policy.',
+		key: 'employers_libability_insurance_renewal',
+		name: "Renew Employers' Liability Insurance",
+		description:
+			"Employers' Liability (EL) Insurance: Mandatory if you employ at least one person, including part-time, temporary, or casual staff.",
+		penalties: `Legal Minimum: You must have at least £5 million in cover.
+Penalties: You can be fined £2,500 for every day you are not properly insured.
+Exemptions: Generally not required for family-run businesses where all employees are close family members, or for limited companies with only one employee who owns more than 50% of the shares.`,
 		category: ObligationCategoryType.Operational,
 		isSystem: false
 	},
+
+	{
+		key: 'premises_insurance_policies',
+		name: 'Review / Renew Premises Insurance Policies',
+		description: `Review / renew insurance policies:
+Commercial Buildings, Business Contents, Stock, Business Interruption`,
+		category: ObligationCategoryType.Operational,
+		isSystem: false
+	},
+
+	{
+		key: 'liability_insurance_policies',
+		name: 'Review / Renew Liability & Professional Insurance Policies',
+		description: `Review / renew insurance policies:
+Public Liability, Professional Indemnity, Product Liability, Directors' and Officers' (D&O) Liability`,
+		category: ObligationCategoryType.Operational,
+		isSystem: false
+	},
+
+	{
+		key: 'specialised_risk_insurance_policies',
+		name: 'Review / Renew Specialised Risk Insurance Policies',
+		description: `Review / renew insurance policies:
+Cyber Insurance, Legal Expenses, Personal Accident`,
+		category: ObligationCategoryType.Operational,
+		isSystem: false
+	},
+
 	{
 		key: 'insurance_review',
 		name: 'Review Insurance Cover',
@@ -167,22 +205,22 @@ export const obligationTemplatesSeeds = [
 	// --- GOVERNANCE ---
 	{
 		key: 'staff_appraisal',
-		name: 'Annual Staff Appraisal',
-		description: 'Annual employee performance review.',
+		name: 'Annual Staff Appraisals',
+		description: 'Annual employee performance reviews.',
 		category: ObligationCategoryType.Governance,
 		isSystem: false
 	},
 	{
 		key: 'director_review',
 		name: 'Director Performance Review',
-		description: 'Formal review of director performance.',
+		description: "Formal review of directors' performances.",
 		category: ObligationCategoryType.Governance,
 		isSystem: false
 	},
 	{
 		key: 'salary_review',
-		name: 'Salary Review',
-		description: 'Annual review of employee compensation.',
+		name: 'Salary Reviews',
+		description: 'Annual reviews of employee compensation.',
 		category: ObligationCategoryType.Governance,
 		isSystem: false
 	},
