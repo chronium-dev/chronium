@@ -46,9 +46,9 @@
 		</div> -->
 		<h2 class="text-2xl font-bold">Sign In to Chronium</h2>
 		{#if showVerifiedMessage}
-			<p class="text-md my-4 border bg-muted p-2">
-				<CheckIcon class="h-4 w-4 text-brand" />
-				✅ Email verified successfully. You can now sign in to your account.
+			<p class="text-md my-4 border bg-muted p-2 flex text-balance">
+				<CheckIcon class="ml-3 h-8 w-8 text-brand" />
+				Email verified successfully. You can now sign in to your account.
 			</p>
 		{/if}
 		{#if showResetPasswordMessage}

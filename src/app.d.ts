@@ -10,6 +10,7 @@ declare global {
 			session: Session | null;
 			// requireUser: () => User;
 			requireUser: () => User & { context: UserAccessContext };
+			requireActiveOrg: () => string | udefined;
 		}
 
 		interface PageData {

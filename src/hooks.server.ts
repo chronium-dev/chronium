@@ -32,6 +32,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return event.locals.user;
 	};
 
+	event.locals.requireActiveOrg = () => {
+		const user = event.locals.requireUser();
+		const orgId = user.context.defaultOrgId;
+		// if (!orgId) {
+		// 	throw redirect(303, '/orgs/new');
+		// }
+		return orgId;
+	};
+
 	// 4. Global Route Guard: Protect multiple routes automatically
 	// Add any path prefix here that requires a logged-in user.
 	// const protectedPrefixes = ['/dashboard', '/settings', '/org', '/admin'];

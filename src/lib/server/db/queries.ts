@@ -3,11 +3,12 @@
 // ============================================================================
 
 import { entityTypeUkLtd, jurisdictionUK } from '$lib/config/ukdata';
+import { invalidateUserAccessContext, invalidateUserAccessContexts } from '$lib/server/cache/userAccessContextCache';
 import type { ObligationRuntimeContext } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import { createId } from '$lib/utils/createid';
 import type { OrganisationFormData } from '$lib/validations/organisation';
-import { and, count, eq } from 'drizzle-orm';
+import { and, count, eq, isNull } from 'drizzle-orm';
 import { mapOrgFormDataToDbValues } from '../../mappers/organisation';
 import { db, getExecutor, type DBExecutor } from './index';
 import {
@@ -51,14 +52,6 @@ export async function createOrg(
 		};
 	}
 
-	// const test = {
-	// 	...mapOrgFormDataToDbValues(data),
-	// 	id: createId(),
-	// 	jurisdictionId: jurisdictionUK.id,
-	// 	entityTypeId: entityTypeUkLtd.id
-	// };
-	// console.log('test:', test);
-
 	const [org] = await db
 		.insert(organisation)
 		.values({
@@ -71,12 +64,23 @@ export async function createOrg(
 
 	await db.insert(member).values({ organisationId: org.id, userId, role: MemberRole.Owner });
 
+	// Set default org if none exists. 
+	// Prevents overwriting when users create additional orgs later.
+	await db
+		.update(user)
+		.set({ defaultOrgId: org.id })
+		.where(and(eq(user.id, userId), isNull(user.defaultOrgId)));
+
 	await seedOrganisationObligationSettings(org.id, tx);
+
+	await invalidateUserAccessContext(userId);
 
 	return { ok: true, org };
 }
 
-export async function updateOrg(data: OrganisationFormData) {
+export async function updateOrg(data: OrganisationFormData, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+
 	const [company] = await db
 		.update(organisation)
 		.set(mapOrgFormDataToDbValues(data))
@@ -85,7 +89,9 @@ export async function updateOrg(data: OrganisationFormData) {
 	return company;
 }
 
-export async function getOrgs(userId: string): Promise<OrgListContextType[]> {
+export async function getOrgs(userId: string, tx?: DBExecutor): Promise<OrgListContextType[]> {
+	const db = getExecutor(tx);
+
 	const orgs = await db
 		.select({
 			id: organisation.id,
@@ -100,12 +106,14 @@ export async function getOrgs(userId: string): Promise<OrgListContextType[]> {
 	return orgs;
 }
 
-export async function getOrg(orgId: string) {
+export async function getOrg(orgId: string, tx?: DBExecutor) {
+	const db = getExecutor(tx);
 	const [org] = await db.select().from(organisation).where(eq(organisation.id, orgId));
 	return org;
 }
 
-export async function getOrgCount(userId: string) {
+export async function getOrgCount(userId: string, tx?: DBExecutor) {
+	const db = getExecutor(tx);
 	const [result] = await db
 		.select({ value: count() })
 		.from(member)
@@ -113,14 +121,90 @@ export async function getOrgCount(userId: string) {
 	return result;
 }
 
+export async function deleteOrg(orgId: string, userId: string) {
+	await db.transaction(async (tx) => {
+		const orgMembers = await getOrganisationMembers(orgId, tx);
+		const [org] = await tx.delete(organisation).where(eq(organisation.id, orgId));
+		// Invalidate cache for all members of this orgId
+		await invalidateUserAccessContexts(orgMembers.map(m => m.member.userId));
+		return org;
+	});
+}
+
+/**
+ * Check if user is member of organisation
+ */
+export async function isUserMemberOfOrganisation(userId: string, orgId: string) {
+	const membership = await db.query.member.findFirst({
+		where: and(eq(member.userId, userId), eq(member.organisationId, orgId))
+	});
+	return !!membership;
+}
+
+/**
+ * Get user's role in organisation
+ */
+export async function getUserOrganisationRole(userId: string, orgId: string) {
+	const membership = await db.query.member.findFirst({
+		where: and(eq(member.userId, userId), eq(member.organisationId, orgId))
+	});
+	return membership?.role;
+}
+
+/**
+ * Get all members of a organisation
+ */
+export async function getOrganisationMembers(orgId: string, tx?: DBExecutor) {
+	const db = getExecutor(tx);
+
+	return await db
+		.select({
+			user,
+			member
+		})
+		.from(member)
+		.innerJoin(user, eq(user.id, member.userId))
+		.where(eq(member.organisationId, orgId));
+}
+
+/**
+ * Check if a user is an owner of a organisation
+ */
+export async function isUserOrganisationOwner(userId: string, orgId: string): Promise<boolean> {
+	const result = await db
+		.select()
+		.from(member)
+		.where(
+			and(eq(member.userId, userId), eq(member.organisationId, orgId), eq(member.role, 'owner'))
+		)
+		.limit(1);
+
+	return result.length > 0;
+}
+
+export async function setActiveOrg(userId: string, orgId: string) {
+	// validate membership first
+	const membership = await db.query.member.findFirst({
+		where: and(eq(member.userId, userId), eq(member.organisationId, orgId))
+	});
+
+	if (!membership) {
+		throw new Error('Unauthorized');
+	}
+
+	await db.update(user).set({ defaultOrgId: orgId }).where(eq(user.id, userId));
+
+	await invalidateUserAccessContext(userId);
+}
+
 // ============================================================================
 // OBLIGATION QUERIES
 // ============================================================================
 
 /**
- * 
+ *
  * @param orgId Create links (join) between organisation and obligationTemplates
- * @param tx 
+ * @param tx
  */
 export async function seedOrganisationObligationSettings(orgId: string, tx?: DBExecutor) {
 	const db = getExecutor(tx);
@@ -165,7 +249,6 @@ export async function buildObligationRuntimeContext(
 	return { enabledKeys, definitionMap };
 }
 
-
 // export async function computeBasicUserContext(userId: string): Promise<BasicUserContext> {
 export async function computeBasicUserContext(userId: string) {
 	// TODO - update this!
@@ -207,106 +290,3 @@ export async function computeBasicUserContext(userId: string) {
 // 		}
 // 	});
 // }
-
-/**
- * Get all workspaces for a user
- */
-// export async function getUserWorkspaces(userId: string) {
-// 	return await db.query.member.findMany({
-// 		where: eq(member.userId, userId),
-// 		with: {
-// 			workspace: {
-// 				with: {
-// 					planType: true
-// 				}
-// 			}
-// 		}
-// 	});
-// }
-
-/**
- * Check if user is member of workspace
- */
-export async function isUserMemberOfWorkspace(userId: string, workspaceId: string) {
-	const membership = await db.query.member.findFirst({
-		where: and(eq(member.userId, userId), eq(member.organisationId, workspaceId))
-	});
-	return !!membership;
-}
-
-/**
- * Get user's role in workspace
- */
-export async function getUserWorkspaceRole(userId: string, workspaceId: string) {
-	const membership = await db.query.member.findFirst({
-		where: and(eq(member.userId, userId), eq(member.organisationId, workspaceId))
-	});
-	return membership?.role;
-}
-
-/**
- * Get workspace quota usage for current period
- */
-// export async function getWorkspaceQuotaUsage(workspaceId: string, startDate: Date, endDate: Date) {
-// 	const [ratingsCount] = await db
-// 		.select({ count: sql<number>`count(*)` })
-// 		.from(rating)
-// 		.where(
-// 			and(
-// 				eq(rating.workspaceId, workspaceId),
-// 				gte(rating.createdAt, startDate),
-// 				lte(rating.createdAt, endDate)
-// 			)
-// 		);
-
-// 	const [emailsCount] = await db
-// 		.select({ count: sql<number>`count(*)` })
-// 		.from(ratingReply)
-// 		.innerJoin(rating, eq(ratingReply.ratingId, rating.id))
-// 		.where(
-// 			and(
-// 				eq(rating.workspaceId, workspaceId),
-// 				isNotNull(ratingReply.linkEmail),
-// 				gte(ratingReply.createdAt, startDate),
-// 				lte(ratingReply.createdAt, endDate)
-// 			)
-// 		);
-
-// 	return {
-// 		ratingsUsed: Number(ratingsCount.count),
-// 		emailsUsed: Number(emailsCount.count)
-// 	};
-// }
-
-/**
- * Get all members of a workspace
- */
-export async function getWorkspaceMembers(workspaceId: string) {
-	return await db
-		.select({
-			user,
-			member
-		})
-		.from(member)
-		.innerJoin(user, eq(user.id, member.userId))
-		.where(eq(member.organisationId, workspaceId));
-}
-
-/**
- * Check if a user is an owner of a workspace
- */
-export async function isUserWorkspaceOwner(userId: string, workspaceId: string): Promise<boolean> {
-	const result = await db
-		.select()
-		.from(member)
-		.where(
-			and(
-				eq(member.userId, userId),
-				eq(member.organisationId, workspaceId),
-				eq(member.role, 'owner')
-			)
-		)
-		.limit(1);
-
-	return result.length > 0;
-}

@@ -16,8 +16,8 @@ export type SummaryData = {
 // 	return {};
 // }) satisfies PageServerLoad;
 
-export const load = async ({ locals }) => {
-	const orgId = locals.org.id;
+export const load = async ({ locals, params }) => {
+	const orgId = params.orgId;
 
 	// pseudo code — adapt to your schema
 	const obligations = await getUpcomingObligations(orgId);

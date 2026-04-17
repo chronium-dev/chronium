@@ -1,4 +1,5 @@
 <script>
+	import { UTCDate } from '@date-fns/utc';
 	import ThemeDropdownMainMenu from './ThemeDropdownMainMenu.svelte';
 
 	const currentYear = new UTCDate().getFullYear();

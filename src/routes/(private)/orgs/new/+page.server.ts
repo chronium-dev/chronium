@@ -60,7 +60,8 @@ export const actions: Actions = {
 
 				await generateAndPersistObligations(createResult.org, userId, tx);
 
-				return message(form, { status: 200, text: 'Company created successfully!' });
+				//return message(form, { status: 200, text: 'Company created successfully!' });
+				//redirect(303, `/orgs/${createResult.org.id}/new-summary`)
 			});
 		} catch (err) {
 			// Unexpected errors

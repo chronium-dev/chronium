@@ -69,6 +69,7 @@ export const user = pgTable('user', {
 	emailVerified: boolean('email_verified').default(false).notNull(),
 	image: text('image'),
 	onboarded: boolean('onboarded'),
+	defaultOrgId: text('default_org_id'),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true })
 		.defaultNow()

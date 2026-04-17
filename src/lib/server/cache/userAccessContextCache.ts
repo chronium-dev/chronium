@@ -10,8 +10,13 @@ function key(userId: string) {
 
 export async function getUserAccessContext(userId: string) {
 	const cached = await redisCache.get<UserAccessContext>(key(userId));
-	if (cached) return cached;
+	if (cached) {
+		console.log('[CACHE HIT]', userId);
+		return cached;
+	}
 
+	console.log('[CACHE MISS]', userId);
+	
 	const computed = await computeUserAccessContext(userId);
 
 	await redisCache.set(key(userId), computed, 300); // 5 mins
@@ -20,4 +25,8 @@ export async function getUserAccessContext(userId: string) {
 
 export async function invalidateUserAccessContext(userId: string) {
 	await redisCache.del(key(userId));
+}
+
+export async function invalidateUserAccessContexts(userIds: string[]) {
+	await Promise.all(userIds.map((id) => redisCache.del(key(id))));
 }

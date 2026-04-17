@@ -15,6 +15,13 @@
       "when": 1776344769056,
       "tag": "0001_lyrical_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776416840281,
+      "tag": "0002_tan_starhawk",
+      "breakpoints": true
     }
   ]
 }

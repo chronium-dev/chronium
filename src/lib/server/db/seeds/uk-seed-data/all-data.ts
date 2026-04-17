@@ -1,4 +1,4 @@
-import { ObligationCategoryType } from '$lib/server/db/schema';
+import { ObligationCategoryType, RecurrenceFrequencyType } from '$lib/server/db/schema';
 
 export const jurisdictionUK = {
 	id: 'jur_uk',
@@ -84,37 +84,45 @@ export const obligationTemplatesSeeds = [
 		description:
 			"Employers' Liability (EL) Insurance: Mandatory if you employ at least one person, including part-time, temporary, or casual staff.",
 		penalties: `Legal Minimum: You must have at least £5 million in cover.
-Penalties: You can be fined £2,500 for every day you are not properly insured.
-Exemptions: Generally not required for family-run businesses where all employees are close family members, or for limited companies with only one employee who owns more than 50% of the shares.`,
+	Penalties: You can be fined £2,500 for every day you are not properly insured.
+	Exemptions: Generally not required for family-run businesses where all employees are close family members, or for limited companies with only one employee who owns more than 50% of the shares.`,
 		category: ObligationCategoryType.Operational,
-		isSystem: false
+		isSystem: false,
+		defaultFrequency: RecurrenceFrequencyType.Yearly,
+		defaultValue: 1
 	},
 
 	{
 		key: 'premises_insurance_policies',
 		name: 'Review / Renew Premises Insurance Policies',
 		description: `Review / renew insurance policies:
-Commercial Buildings, Business Contents, Stock, Business Interruption`,
+	Commercial Buildings, Business Contents, Stock, Business Interruption`,
 		category: ObligationCategoryType.Operational,
-		isSystem: false
+		isSystem: false,
+		defaultFrequency: RecurrenceFrequencyType.Yearly,
+		defaultValue: 1
 	},
 
 	{
 		key: 'liability_insurance_policies',
 		name: 'Review / Renew Liability & Professional Insurance Policies',
 		description: `Review / renew insurance policies:
-Public Liability, Professional Indemnity, Product Liability, Directors' and Officers' (D&O) Liability`,
+	Public Liability, Professional Indemnity, Product Liability, Directors' and Officers' (D&O) Liability`,
 		category: ObligationCategoryType.Operational,
-		isSystem: false
+		isSystem: false,
+		defaultFrequency: RecurrenceFrequencyType.Yearly,
+		defaultValue: 1
 	},
 
 	{
 		key: 'specialised_risk_insurance_policies',
 		name: 'Review / Renew Specialised Risk Insurance Policies',
 		description: `Review / renew insurance policies:
-Cyber Insurance, Legal Expenses, Personal Accident`,
+	Cyber Insurance, Legal Expenses, Personal Accident`,
 		category: ObligationCategoryType.Operational,
-		isSystem: false
+		isSystem: false,
+		defaultFrequency: RecurrenceFrequencyType.Yearly,
+		defaultValue: 1
 	},
 
 	{
@@ -122,32 +130,32 @@ Cyber Insurance, Legal Expenses, Personal Accident`,
 		name: 'Review Insurance Cover',
 		description: 'Ensure insurance coverage remains adequate.',
 		category: ObligationCategoryType.Operational,
-		isSystem: false
+		isSystem: false,
+		defaultFrequency: RecurrenceFrequencyType.Yearly,
+		defaultValue: 1
 	},
 	{
 		key: 'pat_testing',
 		name: 'PAT Testing',
 		description: 'Portable appliance electrical safety testing.',
+		penalties: `Fines are issued for failing to maintain safe equipment, not specifically for missing a PAT test. However, without PAT records, it is very difficult to prove you have met your legal duty of care.
+	Fines of up to £5,000 and/or 6 month imprisonment for standard breaches, but for serious neglect, longer prison sentence and fines up to £10 million.`,
 		category: ObligationCategoryType.Operational,
 		isSystem: false
 	},
 	{
 		key: 'fire_safety_inspection',
 		name: 'Fire Safety Inspection',
-		description: 'Inspection of fire safety measures.',
+		description: 'Inspection of fire safety measures. Best Practice: Every 12 months.',
+		penalties: `Minor breaches up to £5,000, for major breaches unlimited fines and up to 2 years in prison.`,
 		category: ObligationCategoryType.Operational,
-		isSystem: false
-	},
-	{
-		key: 'vehicle_mot',
-		name: 'Vehicle MOT Due',
-		description: 'Annual vehicle MOT test.',
-		category: ObligationCategoryType.Operational,
-		isSystem: false
+		isSystem: false,
+		defaultFrequency: RecurrenceFrequencyType.Yearly,
+		defaultValue: 1
 	},
 	{
 		key: 'domain_renewal',
-		name: 'Renew Domain',
+		name: 'Renew Domain Name(s)',
 		description: 'Renew internet domain registration.',
 		category: ObligationCategoryType.Operational,
 		isSystem: false
@@ -161,7 +169,7 @@ Cyber Insurance, Legal Expenses, Personal Accident`,
 	},
 	{
 		key: 'software_subscription_renewal',
-		name: 'Renew Software Subscription',
+		name: 'Renew Software Subscriptions',
 		description: 'Renew SaaS or software licence.',
 		category: ObligationCategoryType.Operational,
 		isSystem: false

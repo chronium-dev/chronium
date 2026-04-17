@@ -1,9 +1,9 @@
 // src/lib/server/cache/redisCache.ts
-import { VALKEY_URL } from '$env/static/private';
+// import { VALKEY_URL } from '$env/static/private';
 import Redis from 'ioredis';
 import type { Cache } from './cache';
 
-const redis = new Redis(VALKEY_URL);
+const redis = new Redis(process.env.VALKEY_URL!);
 
 export const redisCache: Cache = {
 	async get<T>(key: string): Promise<T | null> {
