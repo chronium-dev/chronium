@@ -9,7 +9,7 @@ import {
 	type OrganisationFormData
 } from '../../../../validations/organisation';
 import { generateStatutoryObligations } from '../../../process/statutory/generateStatutoryObligations.ts';
-import { createOrg } from '../../queries';
+import { createOrg } from '../../q1.ts';
 
 // 1. Properly type the transaction object using Drizzle's ExtractTablesWithRelations
 // Or more simply, use the generic Transaction type from your driver

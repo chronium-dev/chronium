@@ -1,5 +1,3 @@
-import { updateOrg } from '$lib/server/db/queries';
-import { organisationFormSchema, type OrganisationFormData } from '$lib/validations/organisation';
 import { fail } from '@sveltejs/kit';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -11,19 +9,19 @@ export const load: PageServerLoad = async ({ params }) => {
 	// if (!company) throw error(404, 'Company not found');
 
 	// Mock — replace with real data:
-	const company: OrganisationFormData = {
-		name: 'Acme Ltd',
-		incorporationDate: '2020-01-15',
-		financialYearEnd: '2024-12-31',
-		vatRegistered: 'yes' as const,
-		payrollActive: 'yes' as const,
-		employeeCount: '1-5' as const,
-		businessPremises: 'yes' as const
-	};
+	// const company: OrganisationFormData = {
+	// 	name: 'Acme Ltd',
+	// 	incorporationDate: '2020-01-15',
+	// 	financialYearEnd: '2024-12-31',
+	// 	vatRegistered: 'yes' as const,
+	// 	payrollActive: 'yes' as const,
+	// 	employeeCount: '1-5' as const,
+	// 	businessPremises: 'yes' as const
+	// };
 
-	// Passing existing data pre-populates the form
-	const form = await superValidate(company, zod4(organisationFormSchema));
-	return { form };
+	// // Passing existing data pre-populates the form
+	// const form = await superValidate(company, zod4(organisationFormSchema));
+	// return { form };
 };
 
 export const actions: Actions = {

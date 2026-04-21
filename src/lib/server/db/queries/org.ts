@@ -1,25 +1,16 @@
-// ============================================================================
-// QUERY FUNCTIONS
-// ============================================================================
-
 import { entityTypeUkLtd, jurisdictionUK } from '$lib/config/ukdata';
-import { invalidateUserAccessContext, invalidateUserAccessContexts } from '$lib/server/cache/userAccessContextCache';
-import type { ObligationRuntimeContext } from '$lib/types/obligations';
+import {
+	invalidateUserAccessContext,
+	invalidateUserAccessContexts
+} from '$lib/server/cache/userAccessContextCache';
 import type { Organisation } from '$lib/types/organisations';
 import { createId } from '$lib/utils/createid';
 import type { OrganisationFormData } from '$lib/validations/organisation';
 import { and, count, eq, isNull } from 'drizzle-orm';
-import { mapOrgFormDataToDbValues } from '../../mappers/organisation';
-import { db, getExecutor, type DBExecutor } from './index';
-import {
-	member,
-	MemberRole,
-	ObligationCategoryType,
-	obligationTemplates,
-	organisation,
-	organisationObligationSettings,
-	user
-} from './schema';
+import { mapOrgFormDataToDbValues } from '../../../mappers/organisation';
+import { db, getExecutor, type DBExecutor } from '../index';
+import { member, MemberRole, organisation, user } from '../schema';
+import { seedOrganisationObligationSettings } from '$lib/server/db/queries/obligations';
 
 // ============================================================================
 // ORGANISATION QUERIES
@@ -64,7 +55,7 @@ export async function createOrg(
 
 	await db.insert(member).values({ organisationId: org.id, userId, role: MemberRole.Owner });
 
-	// Set default org if none exists. 
+	// Set default org if none exists.
 	// Prevents overwriting when users create additional orgs later.
 	await db
 		.update(user)
@@ -126,7 +117,7 @@ export async function deleteOrg(orgId: string, userId: string) {
 		const orgMembers = await getOrganisationMembers(orgId, tx);
 		const [org] = await tx.delete(organisation).where(eq(organisation.id, orgId));
 		// Invalidate cache for all members of this orgId
-		await invalidateUserAccessContexts(orgMembers.map(m => m.member.userId));
+		await invalidateUserAccessContexts(orgMembers.map((m) => m.member.userId));
 		return org;
 	});
 }
@@ -196,97 +187,3 @@ export async function setActiveOrg(userId: string, orgId: string) {
 
 	await invalidateUserAccessContext(userId);
 }
-
-// ============================================================================
-// OBLIGATION QUERIES
-// ============================================================================
-
-/**
- *
- * @param orgId Create links (join) between organisation and obligationTemplates
- * @param tx
- */
-export async function seedOrganisationObligationSettings(orgId: string, tx?: DBExecutor) {
-	const db = getExecutor(tx);
-
-	const templates = await db.select().from(obligationTemplates);
-
-	await db.insert(organisationObligationSettings).values(
-		templates.map((t) => ({
-			key: t.key,
-			organisationId: orgId,
-			obligationTemplateId: t.id,
-			enabled: t.category === ObligationCategoryType.Statutory // default rule
-		}))
-	);
-}
-
-export async function buildObligationRuntimeContext(
-	orgId: string,
-	tx?: DBExecutor
-): Promise<ObligationRuntimeContext> {
-	const db = getExecutor(tx);
-	const rows = await db
-		.select({
-			key: organisationObligationSettings.key,
-			id: organisationObligationSettings.id,
-			enabled: organisationObligationSettings.enabled
-		})
-		.from(organisationObligationSettings)
-		.where(eq(organisationObligationSettings.organisationId, orgId));
-
-	const enabledKeys = new Set<string>();
-	const definitionMap: Record<string, { id: string; key: string }> = {};
-
-	for (const row of rows) {
-		definitionMap[row.key] = { id: row.id, key: row.key };
-
-		if (row.enabled) {
-			enabledKeys.add(row.key);
-		}
-	}
-
-	return { enabledKeys, definitionMap };
-}
-
-// export async function computeBasicUserContext(userId: string): Promise<BasicUserContext> {
-export async function computeBasicUserContext(userId: string) {
-	// TODO - update this!
-	return null;
-}
-
-// const workspaceMembership = await getUserTemplates(userId);
-
-// if (workspaceMembership.length !== 1 || workspaceMembership[0].planType !== PlanTypes.Free) {
-// 	return { isBasicUser: false };
-// }
-
-// const templates = workspaceMembership[0].templates;
-
-// if (templates.length !== 1) {
-// 	return { isBasicUser: false };
-// }
-
-// return {
-// 	isBasicUser: true,
-// 	workspaceId: workspaceMembership[0].workspaceId,
-// 	templateId: templates[0].templateId
-// };
-// }
-
-/**
- * Get workspace with all members and their user info
- */
-// export async function getWorkspaceWithMembers(workspaceId: string) {
-// 	return await db.query.workspace.findFirst({
-// 		where: eq(organization.id, workspaceId),
-// 		with: {
-// 			members: {
-// 				with: {
-// 					user: true
-// 				}
-// 			},
-// 			planType: true
-// 		}
-// 	});
-// }

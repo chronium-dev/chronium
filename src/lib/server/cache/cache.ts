@@ -1,4 +1,4 @@
-import type { OrgListContextType } from '$lib/server/db/queries';
+import type { OrgListContextType } from '$lib/server/db/queries/org';
 
 export type UserAccessContext = {
 	orgCount: number;

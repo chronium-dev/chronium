@@ -1,6 +1,6 @@
 import type { UserAccessContext } from '$lib/server/cache/cache';
 import { db } from '$lib/server/db';
-import { getOrgs } from '$lib/server/db/queries';
+import { getOrgs } from '$lib/server/db/queries/org';
 
 export async function computeUserAccessContext(userId: string): Promise<UserAccessContext> {
 	const orgs = await getOrgs(userId);

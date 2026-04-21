@@ -1,5 +1,5 @@
 import { type DBExecutor } from '$lib/server/db';
-import { buildObligationRuntimeContext } from '$lib/server/db/queries';
+import { buildObligationRuntimeContext } from '$lib/server/db/queries/obligations';
 import { ObligationStatusType } from '$lib/server/db/schema';
 import { generateCommonObligationsController } from '$lib/server/process/common/generateCommonObligationsController';
 import { generateStatutoryObligationsController } from '$lib/server/process/statutory';
