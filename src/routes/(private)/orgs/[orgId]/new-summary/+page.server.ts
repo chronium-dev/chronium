@@ -16,6 +16,8 @@ import { getStats } from '$lib/server/db/queries/obligations.js';
 
 export const load = async ({ locals, params }) => {
 	const orgId = params.orgId;
+	const org = locals.requireActiveOrg();
+	const horizonMonths = Number.parseInt(process.env.HORIZON_MONTHS!);
 
 	const obligations = await getStats(orgId);
 
@@ -38,5 +40,5 @@ export const load = async ({ locals, params }) => {
 	// 	}
 	// };
 
-	return {obligations};
+	return {obligations, org, horizonMonths};
 };

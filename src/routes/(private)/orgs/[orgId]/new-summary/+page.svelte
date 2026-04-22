@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { StatsList } from '$lib/server/db/queries/obligations';
+	import CompactHeader from '$lib/components/CompactHeader.svelte';
+	import * as Accordion from '$lib/components/ui/accordion/index.js';
 	import { UTCDate } from '@date-fns/utc';
 
 	// type SummaryData = {
@@ -19,7 +20,7 @@
 	//const {obligations} = $derived(data);
 
 	// let data: StatsList[];
-debugger
+	// debugger
 	const formatDate = (d: string) =>
 		new UTCDate(d).toLocaleDateString('en-GB', {
 			day: 'numeric',
@@ -28,28 +29,28 @@ debugger
 		});
 </script>
 
-<div class="mx-auto max-w-4xl space-y-10">
+<div class="mx-auto max-w-4xl space-y-10 border border-red-300">
 	<!-- 🎉 Header -->
-	<section class="space-y-2">
-		<h1 class="text-2xl font-semibold">Organisation created successfully 🎉</h1>
-		<p class="text-muted-foreground">
-			Your statutory compliance schedule has been set up. These are obligations which have been
-			created based on the company data you have just provided
+	<section class="mt-2 space-y-2 text-center">
+		<h1 class="text-2xl font-semibold">{`${data.org?.name} has been setup successfully!`}</h1>
+		<p class="text-balance text-muted-foreground">
+			{`Chronium has mapped out your upcoming statutory obligations for the next ${data.horizonMonths} months.`}
 		</p>
 		<p class="text-muted-foreground">
-			We have prepared these based on statutory events which arise over the next 24 months.
+			These obligations were generated using: your incorporation date financial year end VAT
+			settings payroll configuration
 		</p>
 	</section>
 
 	<!-- 📊 Stats -->
-	<section class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-		<div class="rounded-2xl border p-4">
+	<section class="space-y-2 p-5">
+		<!-- <div class="rounded-2xl border p-4">
 			<p class="text-sm text-muted-foreground">Upcoming obligations</p>
 			<p class="text-2xl font-semibold">{data.obligations.length}</p>
-		</div>
+		</div> -->
 
 		<div class="divide-y rounded-2xl border">
-			{#each data.obligations as item}
+			<!-- {#each data.obligations as item}
 				<div class="flex items-center justify-between p-4">
 					<div class="text-sm">
 						{item.name}
@@ -58,7 +59,24 @@ debugger
 						{item.count}
 					</div>
 				</div>
-			{/each}
+			{/each} -->
+
+			<Accordion.Root type="single" class="w-full sm:max-w-full" value="item-1">
+				{#each data.obligations as item}
+					<Accordion.Item value="item-1" class="px-3">
+						<Accordion.Trigger>
+							<div class="flex flex-col">
+								<CompactHeader title={item.name}>
+									<p>{`${item.count} upcoming deadlines`}</p>
+								</CompactHeader>
+							</div>
+						</Accordion.Trigger>
+						<Accordion.Content class="flex flex-col gap-4 text-balance">
+							<p>20 Dec 2027, 20 Dec 2028, 20 Dec 2029</p>
+						</Accordion.Content>
+					</Accordion.Item>
+				{/each}
+			</Accordion.Root>
 		</div>
 
 		<!-- <div class="rounded-2xl border p-4">

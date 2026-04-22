@@ -1,10 +1,18 @@
 import type { OrgListContextType } from '$lib/server/db/queries/org';
+import type { Organisation } from '$lib/types/organisations';
+
+// export type DefaultOrg = {
+// 	orgId: string;
+// 	name: string;
+// 	logo?: string;
+// };
 
 export type UserAccessContext = {
 	orgCount: number;
 	orgs: OrgListContextType[];
 	orgIds: string[]; // For convenience
-	defaultOrgId?: string;
+	//defaultOrgId?: string;
+	defaultOrg?: Organisation;
 };
 
 export type CacheEntry = {

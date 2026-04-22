@@ -1,3 +1,4 @@
+import type { Organisation } from '$lib/types/organisations';
 import type { Session, User } from 'better-auth/types';
 import type { UserAccessContext } from './lib/server/cache/cache';
 
@@ -10,7 +11,7 @@ declare global {
 			session: Session | null;
 			// requireUser: () => User;
 			requireUser: () => User & { context: UserAccessContext };
-			requireActiveOrg: () => string | udefined;
+			requireActiveOrg: () => Organisation | undefined;
 		}
 
 		interface PageData {

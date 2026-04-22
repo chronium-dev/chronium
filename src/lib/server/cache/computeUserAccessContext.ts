@@ -1,6 +1,6 @@
 import type { UserAccessContext } from '$lib/server/cache/cache';
 import { db } from '$lib/server/db';
-import { getOrgs } from '$lib/server/db/queries/org';
+import { getOrg, getOrgs } from '$lib/server/db/queries/org';
 
 export async function computeUserAccessContext(userId: string): Promise<UserAccessContext> {
 	const orgs = await getOrgs(userId);
@@ -21,10 +21,16 @@ export async function computeUserAccessContext(userId: string): Promise<UserAcce
 		defaultOrgId = orgIds[0] ?? undefined;
 	}
 
+	// const org = await db.query.organisation.findFirst({
+	// 	where: (o, { eq }) => eq(o.id, defaultOrgId)
+	// });
+
+	const org = await getOrg(defaultOrgId);
+
 	return {
 		orgCount: orgs.length,
 		orgs,
 		orgIds,
-		defaultOrgId
+		defaultOrg: org
 	};
 }

@@ -34,11 +34,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	event.locals.requireActiveOrg = () => {
 		const user = event.locals.requireUser();
-		const orgId = user.context.defaultOrgId;
+		const org = user.context.defaultOrg;
 		// if (!orgId) {
 		// 	throw redirect(303, '/orgs/new');
 		// }
-		return orgId;
+		return org;
 	};
 
 	// 4. Global Route Guard: Protect multiple routes automatically
