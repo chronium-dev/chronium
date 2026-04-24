@@ -30,7 +30,8 @@ export function generateAccountingPeriodObligations(
 		if (accountsDue >= from && accountsDue <= to) {
 			obligations.push({
 				key: 'annual_accounts',
-				dueDate: accountsDue
+				dueDate: accountsDue,
+				eventDate: periodEnd,
 			});
 		}
 
@@ -40,7 +41,8 @@ export function generateAccountingPeriodObligations(
 		if (ctPaymentDue >= from && ctPaymentDue <= to) {
 			obligations.push({
 				key: 'corporation_tax_payment',
-				dueDate: ctPaymentDue
+				dueDate: ctPaymentDue,
+				eventDate: periodEnd
 			});
 		}
 
@@ -52,7 +54,8 @@ export function generateAccountingPeriodObligations(
 		if (ctReturnDue >= from && ctReturnDue <= to) {
 			obligations.push({
 				key: 'corporation_tax_return',
-				dueDate: ctReturnDue
+				dueDate: ctReturnDue,
+				eventDate: periodEnd
 			});
 		}
 	}

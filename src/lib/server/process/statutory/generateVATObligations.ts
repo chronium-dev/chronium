@@ -20,7 +20,11 @@ export function generateVATObligations(
 		if (cursor >= from) {
 			const due = addMonthAndWeek(cursor);
 
-			obligations.push({ key: 'vat_return_and_payment', dueDate: due });
+			obligations.push({
+				key: 'vat_return_and_payment',
+				dueDate: due,
+				eventDate: cursor
+			});
 		}
 
 		// Step forward based on frequency

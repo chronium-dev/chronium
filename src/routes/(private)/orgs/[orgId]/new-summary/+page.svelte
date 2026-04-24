@@ -1,6 +1,7 @@
 <script lang="ts">
-	import CompactHeader from '$lib/components/CompactHeader.svelte';
+	import SectionHeader from '$lib/components/SectionHeader.svelte';
 	import * as Accordion from '$lib/components/ui/accordion/index.js';
+	import { interpolate } from '$lib/utils/interpolate';
 	import { UTCDate } from '@date-fns/utc';
 
 	// type SummaryData = {
@@ -43,7 +44,7 @@
 	</section>
 
 	<!-- 📊 Stats -->
-	<section class="space-y-2 p-5">
+	<section class="mx-auto space-y-2 px-5 sm:max-w-[75%]">
 		<!-- <div class="rounded-2xl border p-4">
 			<p class="text-sm text-muted-foreground">Upcoming obligations</p>
 			<p class="text-2xl font-semibold">{data.obligations.length}</p>
@@ -61,18 +62,29 @@
 				</div>
 			{/each} -->
 
-			<Accordion.Root type="single" class="w-full sm:max-w-full" value="item-1">
+			<Accordion.Root type="multiple" class="w-full sm:max-w-full">
 				{#each data.obligations as item}
-					<Accordion.Item value="item-1" class="px-3">
-						<Accordion.Trigger>
-							<div class="flex flex-col">
-								<CompactHeader title={item.name}>
-									<p>{`${item.count} upcoming deadlines`}</p>
-								</CompactHeader>
-							</div>
+					<Accordion.Item value={item.key} class="px-4">
+						<Accordion.Trigger class="p-0 pt-2">
+							<SectionHeader
+								title={item.name}
+								description={`${item.dates.length} upcoming deadlines`}
+								class="m-0 p-0"
+							/>
 						</Accordion.Trigger>
-						<Accordion.Content class="flex flex-col gap-4 text-balance">
-							<p>20 Dec 2027, 20 Dec 2028, 20 Dec 2029</p>
+						<Accordion.Content class="flex flex-col text-balance">
+							{#each item.dates as dateItem}
+								<div class="my-0 flex flex-row gap-8 p-0">
+									<dt class="font-medium">
+										Due: {dateItem.due_date}
+									</dt>
+									{#if item.event_label && dateItem.event_date}
+										<dd class="mt-0 text-muted-foreground">
+											{interpolate(item.event_label, { eventDate: dateItem.event_date })}
+										</dd>
+									{/if}
+								</div>
+							{/each}
 						</Accordion.Content>
 					</Accordion.Item>
 				{/each}

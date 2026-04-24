@@ -225,6 +225,7 @@ export const obligationTemplates = pgTable(
 		defaultValue: integer('default_value'),
 		description: text('description'),
 		penalties: text('penalties'),
+		eventLabel: text('event_label'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.defaultNow()
@@ -294,6 +295,7 @@ export const obligations = pgTable(
 		organisationId: text('organisation_id').notNull(),
 		organisationObligationSettingId: text('organisation_obligation_setting_id').notNull(),
 		dueDate: date('due_date').notNull(),
+		eventDate: date('event_date'),
 		status: obligationStatusEnum('status').notNull().default('pending'),
 		assignedToUserId: text('assigned_to_user_id').references(() => user.id),
 		notes: text('notes'),

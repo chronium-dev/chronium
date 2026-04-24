@@ -1,6 +1,7 @@
 import type { GeneratedObligation } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import { UTCDate } from '@date-fns/utc';
+import { setDate } from 'date-fns';
 
 export function generateFinalFPSObligations(
 	org: Organisation,
@@ -16,13 +17,15 @@ export function generateFinalFPSObligations(
 	while (true) {
 		// Tax year ends 5 April
 		const taxYearEnd = new UTCDate(year, 3, 5); // April = 3
+		const dueDate = setDate(taxYearEnd, 22);
 
 		if (taxYearEnd > to) break;
 
 		if (taxYearEnd >= from) {
 			obligations.push({
 				key: 'final_fps',
-				dueDate: taxYearEnd
+				dueDate: dueDate,
+				eventDate: taxYearEnd
 			});
 		}
 

@@ -22,6 +22,13 @@
       "when": 1776416840281,
       "tag": "0002_tan_starhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777016834335,
+      "tag": "0003_talented_triathlon",
+      "breakpoints": true
     }
   ]
 }

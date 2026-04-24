@@ -1,4 +1,4 @@
-import type { ObligationRuntimeContext } from '$lib/types/obligations';
+import type { Obligation, ObligationRuntimeContext } from '$lib/types/obligations';
 import { eq, sql } from 'drizzle-orm';
 import { getExecutor, type DBExecutor } from '../index';
 import {
@@ -6,6 +6,7 @@ import {
 	obligationTemplates,
 	organisationObligationSettings
 } from '../schema';
+import z from 'zod';
 
 // ============================================================================
 // OBLIGATION QUERIES
@@ -59,26 +60,51 @@ export async function buildObligationRuntimeContext(
 	return { enabledKeys, definitionMap };
 }
 
-export type StatsList = {
-	key: string;
-	name: string;
-	category: string;
-	count: number;
-};
+// export type StatsList = {
+// 	key: string;
+// 	name: string;
+// 	category: string;
+// 	eventLabel: string;
+// 	count: number;
+// };
+const ObligationDateSchema = z.object({
+	event_date: z.string().nullable(),
+	due_date: z.string().nullable()
+});
 
-export async function getStats(orgId: string, tx?: DBExecutor): Promise<StatsList[]> {
+const ObligationSummarySchema = z.object({
+	key: z.string(),
+	name: z.string(),
+	category: z.string(),
+	event_label: z.string().nullable(),
+	dates: z.array(ObligationDateSchema)
+});
+
+export type ObligationSummary = z.infer<typeof ObligationSummarySchema>;
+
+export async function getObligationsList(orgId: string, tx?: DBExecutor): Promise<ObligationSummary[]> {
 	const db = getExecutor(tx);
 
-	const result = await db.execute<StatsList>(sql`
-      SELECT ot.key, ot.name, ot.category, COUNT(*)::int as count
-      FROM obligations o
-              JOIN public.organisation o2 ON o2.id = o.organisation_id
-              JOIN public.organisation_obligation_settings oos ON oos.id = o.organisation_obligation_setting_id
-              JOIN public.obligation_templates ot ON ot.id = oos.obligation_template_id
-      WHERE o2.id = ${orgId}
-      GROUP BY 1, 2, 3
-      ORDER BY 2;
+	const result = await db.execute(sql`
+      SELECT
+					ot.key,
+					ot.name,
+					ot.category,
+					ot.event_label,
+					json_agg(
+									json_build_object(
+													'event_date', o.event_date,
+													'due_date', o.due_date
+									) ORDER BY o.event_date
+					) AS dates
+			FROM obligations o
+							JOIN public.organisation o2 ON o2.id = o.organisation_id
+							JOIN public.organisation_obligation_settings oos ON oos.id = o.organisation_obligation_setting_id
+							JOIN public.obligation_templates ot ON ot.id = oos.obligation_template_id
+			WHERE o2.id = ${orgId}
+			GROUP BY ot.key, ot.name, ot.category, ot.event_label
+			ORDER BY ot.name;
     `);
 
-	return result;
+	return z.array(ObligationSummarySchema).parse(result);
 }

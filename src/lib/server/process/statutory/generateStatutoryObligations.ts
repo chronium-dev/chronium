@@ -82,6 +82,7 @@ export async function generateStatutoryObligations(
 			organisationId: org.id,
 			organisationObligationSettingId: obligationRuntimeContext.definitionMap[row.key].id,
 			dueDate: format(row.dueDate, 'yyyy-MM-dd'),
+			eventDate: row.eventDate ? format(row.eventDate, 'yyyy-MM-dd') : null,
 			status: ObligationStatusType.Pending,
 			assignedToUserId: userId
 		}));

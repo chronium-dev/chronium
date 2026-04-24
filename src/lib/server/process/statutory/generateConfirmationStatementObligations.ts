@@ -1,7 +1,7 @@
 import type { GeneratedObligation } from '$lib/types/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import { UTCDate } from '@date-fns/utc';
-import { addDays, addYears } from 'date-fns';
+import { addDays, addYears, subDays } from 'date-fns';
 
 export function generateConfirmationStatementObligations(
 	org: Organisation,
@@ -18,7 +18,8 @@ export function generateConfirmationStatementObligations(
 		if (cursor >= from) {
 			obligations.push({
 				key: 'confirmation_statement',
-				dueDate: cursor
+				dueDate: cursor,
+				eventDate: subDays(cursor, 14)
 			});
 		}
 

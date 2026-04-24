@@ -4,6 +4,7 @@ import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 export type GeneratedObligation = {
 	key: string;
 	dueDate: Date;
+	eventDate?: Date;
 };
 
 export type ObligationInsert = InferInsertModel<typeof obligations>;

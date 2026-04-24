@@ -59,7 +59,8 @@ export function generatePAYEObligations(
 		if (due >= from && due <= to) {
 			obligations.push({
 				key: 'paye_payment',
-				dueDate: due
+				dueDate: due,
+				eventDate: cursor
 			});
 		}
 

@@ -1,4 +1,3 @@
-import { getStats } from '$lib/server/db/queries/obligations.js';
 
 // TODO: Props (what the load function should return)
 // export type SummaryData = {
@@ -14,12 +13,14 @@ import { getStats } from '$lib/server/db/queries/obligations.js';
 // 	categories: string[]; // e.g. ['VAT', 'Accounts']
 // };
 
+import { getObligationsList } from '$lib/server/db/queries/obligations';
+
 export const load = async ({ locals, params }) => {
 	const orgId = params.orgId;
 	const org = locals.requireActiveOrg();
 	const horizonMonths = Number.parseInt(process.env.HORIZON_MONTHS!);
 
-	const obligations = await getStats(orgId);
+	const obligations = await getObligationsList(orgId);
 
 	//const next = obligations[0];
 

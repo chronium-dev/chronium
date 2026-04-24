@@ -32,49 +32,56 @@ export const obligationTemplatesSeeds = [
 		name: 'File Annual Accounts',
 		description: 'Submit statutory accounts to Companies House.',
 		penalties: `For late filing: £150 - £3,000`,
-		category: ObligationCategoryType.Statutory
+		category: ObligationCategoryType.Statutory,
+		eventLabel: 'For accounting period ending {{eventDate}}'
 	},
 	{
 		key: 'confirmation_statement',
 		name: 'File Confirmation Statement',
 		description: 'Submit confirmation statement confirming company details.',
 		penalties: `Late or failed filing: Criminal offence plus large fines up to £5,000 per offence.`,
-		category: ObligationCategoryType.Statutory
+		category: ObligationCategoryType.Statutory,
+		eventLabel: 'Annual requirement for period ending {{eventDate}}'
 	},
 	{
 		key: 'corporation_tax_return',
 		name: 'File Company Tax Return (CT600)',
 		description: 'Submit corporation tax return to HMRC.',
 		penalties: `For late filing: £200 - £Large`,
-		category: ObligationCategoryType.Statutory
+		category: ObligationCategoryType.Statutory,
+		eventLabel: 'For accounting period ending {{eventDate}}'
 	},
 	{
 		key: 'corporation_tax_payment',
 		name: 'Pay Corporation Tax',
 		description: 'Pay corporation tax due to HMRC.',
 		penalties: `For late payment: £200 - £Huge!`,
-		category: ObligationCategoryType.Statutory
+		category: ObligationCategoryType.Statutory,
+		eventLabel: 'For accounting period ending {{eventDate}}'
 	},
 	{
 		key: 'vat_return_and_payment',
 		name: 'Submit VAT Return & Payment',
 		description: 'Submit VAT return and payment to HMRC.',
 		penalties: `For late filing or late payment: £200 - 6% of VAT owed plus a daily penalty of 10% owed until paid.`,
-		category: ObligationCategoryType.Statutory
+		category: ObligationCategoryType.Statutory,
+		eventLabel: 'For period ending {{eventDate}}'
 	},
 	{
 		key: 'paye_payment',
 		name: 'Pay PAYE',
 		description: 'Pay PAYE and National Insurance contributions.',
 		penalties: `For late filing: £100 per month plus additional surcharges on amount unpaid.`,
-		category: ObligationCategoryType.Statutory
+		category: ObligationCategoryType.Statutory,
+		eventLabel: 'For period ending {{eventDate}}'
 	},
 	{
 		key: 'final_fps',
 		name: 'Submit Final FPS',
 		description: 'Final Full Payment Submission due.',
 		penalties: `For late filing: £100, with escalating and aggressive surcharges based on outstanding amounts.`,
-		category: ObligationCategoryType.Statutory
+		category: ObligationCategoryType.Statutory,
+		eventLabel: 'For tax year ending {{eventDate}}'
 	},
 
 	// --- OPERATIONAL ---
