@@ -48,6 +48,13 @@ export const RecurrenceFrequencyType = {
 	Yearly: 'yearly'
 } as const satisfies Record<string, RecurrenceFrequencyType>;
 
+export const recurrenceTypeEnum = pgEnum('recurrence_type', ['day_of_month', 'last_day_of_month']);
+export type RecurrenceTypeType = (typeof recurrenceTypeEnum.enumValues)[number];
+export const RecurrenceTypeType = {
+	DayOfMonth: 'day_of_month',
+	LastDayOfMonth: 'last_day_of_month'
+} as const satisfies Record<string, RecurrenceTypeType>;
+
 export const obligationCategoryEnum = pgEnum('obligation_category', [
 	'statutory',
 	'operational',
@@ -217,8 +224,8 @@ export const obligationTemplates = pgTable(
 		id: text('id')
 			.primaryKey()
 			.$defaultFn(() => createId()),
-		key: text('key').notNull(), // e.g. 'annual_accounts'
-		name: text('name').notNull(), // e.g. 'Annual Accounts'
+		key: text('key').notNull(), // e.g. 'file_annual_accounts'
+		name: text('name').notNull(), // e.g. 'File Annual Accounts'
 		category: obligationCategoryEnum('category').notNull(),
 		isSystem: boolean('is_system').default(true),
 		defaultFrequency: recurrenceFrequencyEnum('default_frequency'),
@@ -244,16 +251,17 @@ export const organisationObligationSettings = pgTable(
 		id: text('id')
 			.primaryKey()
 			.$defaultFn(() => createId()),
-		key: text('key').notNull(), // Just for query convenience - e.g. 'annual_accounts' (not really required)
+		key: text('key').notNull(), // Just for query convenience - e.g. 'file_annual_accounts' (not really required)
 		organisationId: text('organisation_id').notNull(),
 		obligationTemplateId: text('obligation_template_id').notNull(),
 		enabled: boolean('enabled').notNull().default(true),
 		frequency: recurrenceFrequencyEnum('frequency'),
 		interval: integer('interval').notNull().default(1),
 		anchorDate: date('anchor_date'),
+		dayOfWeek: integer('day_of_week'),
 		dayOfMonth: integer('day_of_month'),
 		monthOfYear: integer('month_of_year'),
-		endOfMonth: boolean('end_of_month').default(false),
+		recurrenceType: recurrenceTypeEnum('recurrenceType'),
 		customName: text('custom_name'),
 		configured: boolean('configured').notNull().default(false), // user has completed recurrence setup
 		createdAt: timestamp('created_at').defaultNow().notNull(),

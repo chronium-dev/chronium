@@ -23,11 +23,9 @@ export async function generateCommonObligationsController(
 	// Iterate over all selected organisationObligationSettings and execute
 	// generateCommonObligations() for each setting.
 	const obligations: GeneratedObligation[] = [];
-	settingsForOrg
-		.filter((setting) => setting.configured)
-		.forEach(async (setting) => {
-			obligations.push(...generateCommonObligations(setting, from, to));
-		});
+	for (const setting of settingsForOrg.filter((s) => s.configured)) {
+		obligations.push(...generateCommonObligations(setting, from, to));
+	}
 
 	return obligations;
 }

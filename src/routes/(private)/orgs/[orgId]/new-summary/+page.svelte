@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SectionHeader from '$lib/components/SectionHeader.svelte';
 	import * as Accordion from '$lib/components/ui/accordion/index.js';
+	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { interpolate } from '$lib/utils/interpolate';
 	import { UTCDate } from '@date-fns/utc';
 
@@ -30,38 +31,40 @@
 		});
 </script>
 
-<div class="mx-auto max-w-4xl space-y-10 border border-red-300">
+<div class="mx-auto max-w-4xl space-y-10">
 	<!-- 🎉 Header -->
-	<section class="mt-2 space-y-2 text-center">
-		<h1 class="text-2xl font-semibold">{`${data.org?.name} has been setup successfully!`}</h1>
-		<p class="text-balance text-muted-foreground">
-			{`Chronium has mapped out your upcoming statutory obligations for the next ${data.horizonMonths} months.`}
-		</p>
-		<p class="text-muted-foreground">
-			These obligations were generated using: your incorporation date financial year end VAT
-			settings payroll configuration
-		</p>
+	<section class="mt-2 space-y-1 text-center">
+		<div class="mx-auto space-y-2 rounded-2xl border py-2 sm:max-w-[75%]">
+			<h1 class="text-2xl font-semibold">{`${data.org?.name} is ready!`}</h1>
+			<p class="my-4 text-balance text-muted-foreground">
+				{`We've generated your statutory compliance obligations for the next  ${data.horizonMonths} months based on the company information you provided.`}
+			</p>
+			<div>
+				<p class="my-3 text-muted-foreground">This includes obligations related to:</p>
+				<ul
+					class="mx-auto w-fit list-disc space-y-2 pl-5 text-left text-muted-foreground marker:text-brand"
+				>
+					<li>Companies House filings</li>
+					<li>Corporation Tax</li>
+					<li>VAT</li>
+					<li>Payroll / PAYE</li>
+				</ul>
+				<p class="mt-5 px-20 text-balance text-muted-foreground">
+					These deadlines have been calculated using your incorporation date, financial year end,
+					VAT and payroll settings.
+				</p>
+			</div>
+		</div>
 	</section>
 
 	<!-- 📊 Stats -->
-	<section class="mx-auto space-y-2 px-5 sm:max-w-[75%]">
+	<section class="mx-auto space-y-2 sm:max-w-[75%]">
 		<!-- <div class="rounded-2xl border p-4">
 			<p class="text-sm text-muted-foreground">Upcoming obligations</p>
 			<p class="text-2xl font-semibold">{data.obligations.length}</p>
 		</div> -->
 
 		<div class="divide-y rounded-2xl border">
-			<!-- {#each data.obligations as item}
-				<div class="flex items-center justify-between p-4">
-					<div class="text-sm">
-						{item.name}
-					</div>
-					<div class="text-sm text-muted-foreground">
-						{item.count}
-					</div>
-				</div>
-			{/each} -->
-
 			<Accordion.Root type="multiple" class="w-full sm:max-w-full">
 				{#each data.obligations as item}
 					<Accordion.Item value={item.key} class="px-4">
@@ -72,18 +75,19 @@
 								class="m-0 p-0"
 							/>
 						</Accordion.Trigger>
-						<Accordion.Content class="flex flex-col text-balance">
+						<Accordion.Content class="grid grid-cols-[max-content_1fr] gap-x-8 gap-y-1">
 							{#each item.dates as dateItem}
-								<div class="my-0 flex flex-row gap-8 p-0">
-									<dt class="font-medium">
-										Due: {dateItem.due_date}
-									</dt>
-									{#if item.event_label && dateItem.event_date}
-										<dd class="mt-0 text-muted-foreground">
-											{interpolate(item.event_label, { eventDate: dateItem.event_date })}
-										</dd>
-									{/if}
-								</div>
+								<dt class="font-medium whitespace-nowrap">
+									Due: {dateItem.due_date}
+								</dt>
+
+								{#if item.event_label && dateItem.event_date}
+									<dd class="text-muted-foreground">
+										{interpolate(item.event_label, { eventDate: dateItem.event_date })}
+									</dd>
+								{:else}
+									<div></div>
+								{/if}
 							{/each}
 						</Accordion.Content>
 					</Accordion.Item>
@@ -142,15 +146,17 @@
 		</ul>
 	</section> -->
 
+	<p class="mt-5 px-20 text-balance text-muted-foreground">
+					These deadlines have been calculated using your incorporation date, financial year end,
+					VAT and payroll settings.
+				</p>
+
 	<!-- 🚀 CTA -->
-	<section class="flex items-center justify-between pt-4">
-		<a
-			href="/onboarding/next-step"
-			class="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-		>
+	<section class="mb-2 flex justify-center gap-5">
+		<a href="/onboarding/next-step" class={buttonVariants({ variant: 'default' })}>
 			Continue setup →
 		</a>
 
-		<a href="/dashboard" class="text-sm text-muted-foreground hover:underline"> Go to dashboard </a>
+		<a href="/dashboard" class={buttonVariants({ variant: 'outline' })}> Go to dashboard </a>
 	</section>
 </div>

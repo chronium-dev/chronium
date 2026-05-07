@@ -65,7 +65,7 @@ export async function generateStatutoryObligations(
 
 	// Validate that the obligation template keys are present
 	for (const { key } of generatedObligationDates) {
-		if (!obligationRuntimeContext.definitionMap[key])
+		if (!obligationRuntimeContext.orgObligationSettingsMap[key])
 			throw new Error(`Unable to lookup generatedObligationDates key "${key}"`);
 	}
 
@@ -80,7 +80,8 @@ export async function generateStatutoryObligations(
 		.filter((row) => row.dueDate >= cutoffDate)
 		.map((row) => ({
 			organisationId: org.id,
-			organisationObligationSettingId: obligationRuntimeContext.definitionMap[row.key].id,
+			organisationObligationSettingId:
+				obligationRuntimeContext.orgObligationSettingsMap[row.key].id,
 			dueDate: format(row.dueDate, 'yyyy-MM-dd'),
 			eventDate: row.eventDate ? format(row.eventDate, 'yyyy-MM-dd') : null,
 			status: ObligationStatusType.Pending,

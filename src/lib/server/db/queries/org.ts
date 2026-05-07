@@ -3,6 +3,7 @@ import {
 	invalidateUserAccessContext,
 	invalidateUserAccessContexts
 } from '$lib/server/cache/userAccessContextCache';
+import { seedOrganisationObligationSettings } from '$lib/server/db/queries/obligations';
 import type { Organisation } from '$lib/types/organisations';
 import { createId } from '$lib/utils/createid';
 import type { OrganisationFormData } from '$lib/validations/organisation';
@@ -10,7 +11,6 @@ import { and, count, eq, isNull } from 'drizzle-orm';
 import { mapOrgFormDataToDbValues } from '../../../mappers/organisation';
 import { db, getExecutor, type DBExecutor } from '../index';
 import { member, MemberRole, organisation, user } from '../schema';
-import { seedOrganisationObligationSettings } from '$lib/server/db/queries/obligations';
 
 // ============================================================================
 // ORGANISATION QUERIES
@@ -77,6 +77,9 @@ export async function updateOrg(data: OrganisationFormData, tx?: DBExecutor) {
 		.set(mapOrgFormDataToDbValues(data))
 		.where(eq(organisation.id, data.id!))
 		.returning();
+
+	await invalidateUserAccessContext(userId);
+
 	return company;
 }
 

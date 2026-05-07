@@ -1,12 +1,12 @@
-import type { Obligation, ObligationRuntimeContext } from '$lib/types/obligations';
+import type { ObligationRuntimeContext } from '$lib/types/obligations';
 import { eq, sql } from 'drizzle-orm';
+import z from 'zod';
 import { getExecutor, type DBExecutor } from '../index';
 import {
 	ObligationCategoryType,
 	obligationTemplates,
 	organisationObligationSettings
 } from '../schema';
-import z from 'zod';
 
 // ============================================================================
 // OBLIGATION QUERIES
@@ -47,17 +47,17 @@ export async function buildObligationRuntimeContext(
 		.where(eq(organisationObligationSettings.organisationId, orgId));
 
 	const enabledKeys = new Set<string>();
-	const definitionMap: Record<string, { id: string; key: string }> = {};
+	const orgObligationSettingsMap: Record<string, { id: string; key: string }> = {};
 
 	for (const row of rows) {
-		definitionMap[row.key] = { id: row.id, key: row.key };
+		orgObligationSettingsMap[row.key] = { id: row.id, key: row.key };
 
 		if (row.enabled) {
 			enabledKeys.add(row.key);
 		}
 	}
 
-	return { enabledKeys, definitionMap };
+	return { enabledKeys, orgObligationSettingsMap };
 }
 
 // export type StatsList = {
@@ -82,7 +82,10 @@ const ObligationSummarySchema = z.object({
 
 export type ObligationSummary = z.infer<typeof ObligationSummarySchema>;
 
-export async function getObligationsList(orgId: string, tx?: DBExecutor): Promise<ObligationSummary[]> {
+export async function getObligationsList(
+	orgId: string,
+	tx?: DBExecutor
+): Promise<ObligationSummary[]> {
 	const db = getExecutor(tx);
 
 	const result = await db.execute(sql`

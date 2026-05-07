@@ -28,7 +28,7 @@ export const entityTypeUkLtd = {
 export const obligationTemplatesSeeds = [
 	// --- STATUTORY ---
 	{
-		key: 'annual_accounts',
+		key: 'file_annual_accounts',
 		name: 'File Annual Accounts',
 		description: 'Submit statutory accounts to Companies House.',
 		penalties: `For late filing: £150 - £3,000`,

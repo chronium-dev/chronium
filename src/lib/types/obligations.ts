@@ -18,5 +18,5 @@ export type ObligationTemplateSet = ObligationTemplate[];
 
 export type ObligationRuntimeContext = {
 	enabledKeys: Set<string>;
-	definitionMap: Record<string, { id: string; key: string }>;
+	orgObligationSettingsMap: Record<string, { id: string; key: string }>;
 };

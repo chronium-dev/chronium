@@ -18,7 +18,7 @@ export function generateStatutoryObligationsController(
 	const all = [];
 
 	if (
-		context.enabledKeys.has('annual_accounts') ||
+		context.enabledKeys.has('file_annual_accounts') ||
 		context.enabledKeys.has('corporation_tax_payment') ||
 		context.enabledKeys.has('corporation_tax_return')
 	) {

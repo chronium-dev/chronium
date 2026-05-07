@@ -29,7 +29,7 @@ export function generateAccountingPeriodObligations(
 
 		if (accountsDue >= from && accountsDue <= to) {
 			obligations.push({
-				key: 'annual_accounts',
+				key: 'file_annual_accounts',
 				dueDate: accountsDue,
 				eventDate: periodEnd,
 			});
