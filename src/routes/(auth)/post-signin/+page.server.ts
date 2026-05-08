@@ -35,14 +35,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	// go there, otherwise redirect to dashboard.
 	//const redirectTo = redirectUrl ? redirectUrl : '/dashboard';
 	//throw redirect(303, redirectTo);
-	const { orgCount, defaultOrgId } = locals.user.context;
+	const { orgCount, defaultOrg } = locals.user.context;
 
 	if (orgCount === 0) {
 		throw redirect(302, '/orgs/new');
 	}
 
 	if (orgCount === 1) {
-		throw redirect(302, `/orgs/${defaultOrgId}/timeline`);
+		throw redirect(302, `/orgs/${defaultOrg!.id}/timeline`);
 	}
 
 	throw redirect(302, '/orgs');
