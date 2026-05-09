@@ -3,10 +3,6 @@ import { z } from 'zod';
 export const obligationSettingSchema = z.object({
 	id: z.string(),
 	key: z.string(),
-	template: z.object({
-		name: z.string(),
-		category: z.enum(['statutory', 'operational', 'governance'])
-	}),
 	enabled: z.boolean(),
 	configured: z.boolean(),
 	frequency: z.enum(['weekly', 'monthly', 'quarterly', 'yearly']).nullable(),
@@ -15,7 +11,9 @@ export const obligationSettingSchema = z.object({
 	dayOfWeek: z.number().nullable(),
 	dayOfMonth: z.number().nullable(),
 	monthOfYear: z.number().nullable(),
-	recurrenceType: z.enum(['day_of_month', 'last_day_of_month']).nullable()
+	recurrenceType: z.enum(['day_of_month', 'last_day_of_month']).nullable(),
+	obligationTemplateName: z.string(),
+	category: z.enum(['statutory', 'operational', 'governance']),
 });
 
 export const obligationSettingsFormSchema = z.object({

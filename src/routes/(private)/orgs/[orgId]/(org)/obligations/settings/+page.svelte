@@ -16,19 +16,16 @@
 	const form = untrack(() =>
 		superForm<Infer<typeof obligationSettingsFormSchema>, FormMessage>(data, {
 			validators: zod4Client(obligationSettingsFormSchema),
-			validationMethod: 'oninput'
+			validationMethod: 'oninput',
+			dataType: 'json'
 		})
 	);
 
 	const { form: formData, enhance, submitting } = form;
 
-	const operational = $derived(
-		$formData.settings.filter((s) => s.template.category === 'operational')
-	);
+	const operational = $derived($formData.settings.filter((s) => s.category === 'operational'));
 
-	const governance = $derived(
-		$formData.settings.filter((s) => s.template.category === 'governance')
-	);
+	const governance = $derived($formData.settings.filter((s) => s.category === 'governance'));
 </script>
 
 <form method="POST" action="?/save" use:enhance class="space-y-8">
