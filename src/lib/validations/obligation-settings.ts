@@ -13,7 +13,8 @@ export const obligationSettingSchema = z.object({
 	monthOfYear: z.number().nullable(),
 	recurrenceType: z.enum(['day_of_month', 'last_day_of_month']).nullable(),
 	obligationTemplateName: z.string(),
-	category: z.enum(['statutory', 'operational', 'governance']),
+	obligationTemplateDescription: z.string().nullable(),
+	category: z.enum(['statutory', 'operational', 'governance'])
 });
 
 export const obligationSettingsFormSchema = z.object({

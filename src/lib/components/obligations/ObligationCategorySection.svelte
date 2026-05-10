@@ -1,6 +1,6 @@
 <script lang="ts">
+	import ObligationSettingCard from '$lib/components/obligations/ObligationSettingCard.svelte';
 	import { type ObligationSetting } from '$lib/validations/obligation-settings';
-	import ObligationSettingCard from './ObligationSettingCard.svelte';
 
 	type Props = {
 		title: string;
@@ -17,7 +17,8 @@
 
 	<div class="space-y-4">
 		{#each settings as _, i}
-			<ObligationSettingCard bind:setting={settings[i]} />
+			<ObligationSettingCard setting={settings[i]} />
 		{/each}
 	</div>
 </section>
+

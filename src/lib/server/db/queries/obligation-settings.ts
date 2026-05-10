@@ -2,7 +2,7 @@
 
 import { getExecutor, type DBExecutor } from '$lib/server/db';
 import { obligationTemplates, organisationObligationSettings } from '$lib/server/db/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 
 export async function getOrganisationObligationSettings(orgId: string, tx?: DBExecutor) {
 	const db = getExecutor(tx);
@@ -48,6 +48,7 @@ export async function getOrganisationObligationSettings(orgId: string, tx?: DBEx
 			recurrenceType: organisationObligationSettings.recurrenceType,
 			configured: organisationObligationSettings.configured,
 			obligationTemplateName: obligationTemplates.name,
+			obligationTemplateDescription: obligationTemplates.description,
 			category: obligationTemplates.category
 		})
 		.from(organisationObligationSettings)
@@ -60,7 +61,8 @@ export async function getOrganisationObligationSettings(orgId: string, tx?: DBEx
 				eq(organisationObligationSettings.organisationId, orgId), // Note: Make sure this is orgId, not id
 				inArray(obligationTemplates.category, ['operational', 'governance'])
 			)
-		);
+		)
+		.orderBy(asc(obligationTemplates.name));
 
 	return settings;
 }

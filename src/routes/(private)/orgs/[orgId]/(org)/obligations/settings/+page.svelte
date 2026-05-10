@@ -7,31 +7,44 @@
 	import { untrack } from 'svelte';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 
-	let {
-		data
-	}: {
-		data: SuperValidated<Infer<typeof obligationSettingsFormSchema>>;
-	} = $props();
+	// let {
+	// 	data
+	// }: {
+	// 	data: SuperValidated<Infer<typeof obligationSettingsFormSchema>>;
+	// } = $props();
 
-	const form = untrack(() =>
-		superForm<Infer<typeof obligationSettingsFormSchema>, FormMessage>(data, {
-			validators: zod4Client(obligationSettingsFormSchema),
-			validationMethod: 'oninput',
-			dataType: 'json'
-		})
-	);
+	// const form = untrack(() =>
+	// 	superForm<Infer<typeof obligationSettingsFormSchema>, FormMessage>(data, {
+	// 		validators: zod4Client(obligationSettingsFormSchema),
+	// 		validationMethod: 'oninput',
+	// 		dataType: 'json'
+	// 	})
+	// );
+
+	// 1. Destructure 'form' out of data
+let { data } = $props();
+
+const form = untrack(() =>
+    // 2. Pass data.form, NOT data
+    superForm<Infer<typeof obligationSettingsFormSchema>, FormMessage>(data.form, {
+        validators: zod4Client(obligationSettingsFormSchema),
+        validationMethod: 'oninput',
+        dataType: 'json'
+    })
+);
 
 	const { form: formData, enhance, submitting } = form;
 
+	console.log({ settings: $formData.settings });
 	const operational = $derived($formData.settings.filter((s) => s.category === 'operational'));
 
-	const governance = $derived($formData.settings.filter((s) => s.category === 'governance'));
+	// const governance = $derived($formData.settings.filter((s) => s.category === 'governance'));
 </script>
 
 <form method="POST" action="?/save" use:enhance class="space-y-8">
 	<ObligationCategorySection title="Operational Obligations" settings={operational} />
 
-	<ObligationCategorySection title="Governance Obligations" settings={governance} />
+	<!-- <ObligationCategorySection title="Governance Obligations" settings={governance} /> -->
 
 	<div class="flex justify-end">
 		<button
